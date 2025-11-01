@@ -13,22 +13,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File must be an image" }, { status: 400 });
     }
 
+    // Validate file size (max 10MB for jeet cards)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: "Image must be less than 10MB" }, { status: 400 });
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const dir = path.join(process.cwd(), "public", "jeet-cards");
-    await fs.mkdir(dir, { recursive: true });
-    const ext = file.type === "image/jpeg" ? ".jpg" : ".png";
-    const filename = `card-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-    const filepath = path.join(dir, filename);
-    await fs.writeFile(filepath, buffer);
+    // Try to write to file system (works in development)
+    try {
+      const dir = path.join(process.cwd(), "public", "jeet-cards");
+      await fs.mkdir(dir, { recursive: true });
+      const ext = file.type === "image/jpeg" ? ".jpg" : ".png";
+      const filename = `card-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+      const filepath = path.join(dir, filename);
+      await fs.writeFile(filepath, buffer);
 
-    const publicPath = `/jeet-cards/${filename}`;
-    const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-    const origin = configured || new URL(request.url).origin;
-    const absoluteUrl = `${origin}${publicPath}`;
-    return NextResponse.json({ url: absoluteUrl, path: publicPath });
+      const publicPath = `/jeet-cards/${filename}`;
+      const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+      const origin = configured || new URL(request.url).origin;
+      const absoluteUrl = `${origin}${publicPath}`;
+      return NextResponse.json({ url: absoluteUrl, path: publicPath });
+    } catch (fsError) {
+      // If file system write fails (e.g., Vercel serverless), return base64 data URL instead
+      console.warn("File system write failed, using base64 fallback:", fsError);
+      const base64 = buffer.toString("base64");
+      const dataUrl = `data:${file.type};base64,${base64}`;
+      return NextResponse.json({ url: dataUrl, path: null });
+    }
   } catch (e: any) {
+    console.error("Jeet card upload error:", e);
     return NextResponse.json({ error: "Failed to save image", detail: e?.message }, { status: 500 });
   }
 }
