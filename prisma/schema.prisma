@@ -44,6 +44,8 @@ model User {
   notificationsSent     Notification[] @relation("NotificationActor")
   channelPosts          ChannelPost[]
 
+  @@index([username])
+  @@index([walletAddress])
   @@map("users")
 }
 
@@ -68,6 +70,9 @@ model Post {
   tips          Tip[]
   notifications Notification[]
 
+  @@index([userId])
+  @@index([createdAt])
+  @@index([createdAt, likesCount])
   @@map("posts")
 }
 
@@ -96,6 +101,8 @@ model Like {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
   @@map("likes")
 }
 
@@ -110,6 +117,8 @@ model Downvote {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
   @@map("downvotes")
 }
 
@@ -124,6 +133,8 @@ model Repost {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
   @@map("reposts")
 }
 
@@ -138,6 +149,8 @@ model Follow {
   following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
   @@map("follows")
 }
 
@@ -187,6 +200,8 @@ model Conversation {
   participantB User @relation("ConversationB", fields: [participantBId], references: [id], onDelete: Cascade)
 
   @@unique([participantAId, participantBId])
+  @@index([participantAId])
+  @@index([participantBId])
   @@map("conversations")
 }
 
@@ -287,5 +302,7 @@ model Notification {
   comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   message Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
+  @@index([userId, read])
+  @@index([userId, createdAt])
   @@map("notifications")
 }

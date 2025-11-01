@@ -49,9 +49,13 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // For hashtag filtering, fetch more posts to ensure we get enough after filtering
+    // But cap at 200 to avoid huge queries
+    const fetchLimit = hashtag ? Math.min(200, limit * 10) : limit;
+    
     const posts = await prisma.post.findMany({
-      skip,
-      take: hashtag ? 500 : limit, // Fetch more if filtering by hashtag
+      skip: 0, // Always start from 0 for hashtag searches due to in-memory filtering
+      take: fetchLimit,
       orderBy: { createdAt: "desc" },
       where: whereClause,
       include: {
