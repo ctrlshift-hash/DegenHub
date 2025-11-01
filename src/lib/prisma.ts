@@ -7,11 +7,25 @@ const globalForPrisma = globalThis as unknown as {
 
 let prisma: PrismaClient;
 
+const prismaOptions: any = {
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+};
+
+// Add connection pooling for better performance in production
 if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
+  // Connection pooling optimizations for better performance
+  prismaOptions.datasources = {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  };
+}
+
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient(prismaOptions);
 } else {
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient();
+    globalForPrisma.prisma = new PrismaClient(prismaOptions);
   }
   prisma = globalForPrisma.prisma;
 }
