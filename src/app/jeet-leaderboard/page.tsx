@@ -60,6 +60,7 @@ export default function JeetLeaderboardPage() {
   const [nomGenerated, setNomGenerated] = useState<{ dataUrl: string; shareUrl?: string } | null>(null);
   const [nomVotes, setNomVotes] = useState<Record<string, 1 | -1 | 0>>({});
   const [copied, setCopied] = useState(false);
+  const [nomCopied, setNomCopied] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -302,7 +303,7 @@ export default function JeetLeaderboardPage() {
     const absolute = url?.startsWith("http") ? url : `${site}${url}`;
     
     // Store the share URL for display
-    setGenerated({ ...generated!, shareUrl: absolute });
+    setGenerated({ dataUrl, previewUrl: generated?.previewUrl || dataUrl, shareUrl: absolute });
     
     // Copy to clipboard
     try {
@@ -447,7 +448,7 @@ export default function JeetLeaderboardPage() {
                 <button className="px-3 py-2 rounded bg-degen-purple/70 hover:bg-degen-purple focus:outline-none focus:ring-2 focus:ring-degen-purple/50 transition" onClick={addNomination}>Nominate</button>
                 <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition" onClick={async()=>{ const temp: Nomination = { id: 'temp', name: nomForm.name || nomForm.xUrl || nomForm.wallet || 'Nomination', wallet: nomForm.wallet || undefined, xUrl: nomForm.xUrl || undefined, reason: nomForm.reason || undefined, links: nomForm.links.split(/\s+/).filter(Boolean), createdAt: Date.now(), votesUp: 0, votesDown: 0 }; const url=await renderNomCard(temp); if(url){ setNomGenerated({ dataUrl: url }); } }}>Generate card</button>
                 <button className="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition" onClick={async()=>{ if(!nomGenerated) { const temp: Nomination = { id: 'temp', name: nomForm.name || nomForm.xUrl || nomForm.wallet || 'Nomination', wallet: nomForm.wallet || undefined, xUrl: nomForm.xUrl || undefined, reason: nomForm.reason || undefined, links: nomForm.links.split(/\s+/).filter(Boolean), createdAt: Date.now(), votesUp: 0, votesDown: 0 }; const url=await renderNomCard(temp); if(url){ setNomGenerated({ dataUrl: url }); const a=document.createElement('a'); a.href=url; a.download='nomination.png'; a.click(); return; } } else { const dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl; if(!dataUrl) return; const a=document.createElement('a'); a.href=dataUrl; a.download='nomination.png'; a.click(); } }}>Download</button>
-                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition" onClick={async()=>{ let dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated?.dataUrl; if(!dataUrl) { const temp: Nomination = { id: 'temp', name: nomForm.name || nomForm.xUrl || nomForm.wallet || 'Nomination', wallet: nomForm.wallet || undefined, xUrl: nomForm.xUrl || undefined, reason: nomForm.reason || undefined, links: nomForm.links.split(/\s+/).filter(Boolean), createdAt: Date.now(), votesUp: 0, votesDown: 0 }; const url=await renderNomCard(temp); if(!url) return; dataUrl=url; setNomGenerated({ dataUrl: url }); } const res=await fetch(dataUrl); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; setNomGenerated({ dataUrl, shareUrl: absolute }); try{ await navigator.clipboard.writeText(absolute); setCopied(true); setTimeout(()=>setCopied(false), 2000); }catch(e){console.error('Failed to copy:', e);} } }}>Share</button>
+                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition" onClick={async()=>{ let dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated?.dataUrl; if(!dataUrl) { const temp: Nomination = { id: 'temp', name: nomForm.name || nomForm.xUrl || nomForm.wallet || 'Nomination', wallet: nomForm.wallet || undefined, xUrl: nomForm.xUrl || undefined, reason: nomForm.reason || undefined, links: nomForm.links.split(/\s+/).filter(Boolean), createdAt: Date.now(), votesUp: 0, votesDown: 0 }; const url=await renderNomCard(temp); if(!url) return; dataUrl=url; setNomGenerated({ dataUrl: url }); } const res=await fetch(dataUrl); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; setNomGenerated({ dataUrl, shareUrl: absolute }); try{ await navigator.clipboard.writeText(absolute); setNomCopied(true); setTimeout(()=>setNomCopied(false), 2000); }catch(e){console.error('Failed to copy:', e);} } }}>Share</button>
               </div>
               {nomGenerated && (
                 <div className="md:col-span-2">
@@ -458,8 +459,8 @@ export default function JeetLeaderboardPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-gray-400">Share link:</span>
                         <span className="text-blue-300 truncate">{nomGenerated.shareUrl}</span>
-                        <button onClick={()=>{ navigator.clipboard.writeText(nomGenerated.shareUrl!); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs">
-                          {copied ? '✓' : 'Copy'}
+                        <button onClick={()=>{ navigator.clipboard.writeText(nomGenerated.shareUrl!); setNomCopied(true); setTimeout(()=>setNomCopied(false), 2000); }} className="px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs">
+                          {nomCopied ? '✓' : 'Copy'}
                         </button>
                       </div>
                     </div>
@@ -569,7 +570,7 @@ export default function JeetLeaderboardPage() {
               <div className="flex gap-2">
                 <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600" onClick={async()=>{ const url = await renderNomCard(nomModal); if(url) setNomGenerated({ dataUrl: url }); }} aria-label="Generate nomination card">Generate</button>
                 <button className="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500" onClick={async()=>{ if(!nomGenerated){ const url = await renderNomCard(nomModal); if(url){ setNomGenerated({ dataUrl: url }); const a=document.createElement('a'); a.href=url; a.download=`${nomModal.name}-nomination.png`; a.click(); return; } } else { const dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl; if(!dataUrl) return; const a=document.createElement('a'); a.href=dataUrl; a.download=`${nomModal.name}-nomination.png`; a.click(); } }} aria-label="Download nomination card">Download</button>
-                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500" onClick={async()=>{ let dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated?.dataUrl; if(!dataUrl){ const url = await renderNomCard(nomModal); if(!url) return; dataUrl=url; setNomGenerated({ dataUrl: url }); } const res=await fetch(dataUrl); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; setNomGenerated({ dataUrl, shareUrl: absolute }); try{ await navigator.clipboard.writeText(absolute); setCopied(true); setTimeout(()=>setCopied(false), 2000); }catch(e){console.error('Failed to copy:', e);} } }} aria-label="Share nomination card">Share</button>
+                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500" onClick={async()=>{ let dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated?.dataUrl; if(!dataUrl){ const url = await renderNomCard(nomModal); if(!url) return; dataUrl=url; setNomGenerated({ dataUrl: url }); } const res=await fetch(dataUrl); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; setNomGenerated({ dataUrl, shareUrl: absolute }); try{ await navigator.clipboard.writeText(absolute); setNomCopied(true); setTimeout(()=>setNomCopied(false), 2000); }catch(e){console.error('Failed to copy:', e);} } }} aria-label="Share nomination card">Share</button>
               </div>
               {nomGenerated && (
                 <div className="mt-3">
@@ -580,8 +581,8 @@ export default function JeetLeaderboardPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-gray-400">Share link:</span>
                         <span className="text-blue-300 truncate">{nomGenerated.shareUrl}</span>
-                        <button onClick={()=>{ navigator.clipboard.writeText(nomGenerated.shareUrl!); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs">
-                          {copied ? '✓' : 'Copy'}
+                        <button onClick={()=>{ navigator.clipboard.writeText(nomGenerated.shareUrl!); setNomCopied(true); setTimeout(()=>setNomCopied(false), 2000); }} className="px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs">
+                          {nomCopied ? '✓' : 'Copy'}
                         </button>
                       </div>
                     </div>
