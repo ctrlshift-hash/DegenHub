@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         participantB: { select: { id: true, username: true } },
       },
       orderBy: { createdAt: "desc" },
+      take: 100, // Limit conversations for performance
     });
 
     const formatted = conversations.map(c => {
