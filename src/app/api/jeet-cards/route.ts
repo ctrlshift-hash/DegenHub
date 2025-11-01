@@ -37,39 +37,11 @@ export async function POST(request: NextRequest) {
       const absoluteUrl = `${origin}${publicPath}`;
       return NextResponse.json({ url: absoluteUrl, path: publicPath });
     } catch (fsError) {
-      // If file system write fails (e.g., Vercel serverless), upload to Imgur
-      console.warn("File system write failed, using Imgur fallback:", fsError);
-      
-      try {
-        const base64 = buffer.toString("base64");
-        
-        console.log("Attempting Imgur upload, base64 length:", base64.length);
-        
-        const imgurResponse = await fetch('https://api.imgur.com/3/image', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Client-ID 546c25a59c58ad7',
-          },
-          body: JSON.stringify({ image: base64 }),
-        });
-
-        console.log("Imgur response status:", imgurResponse.status);
-        const imgurData = await imgurResponse.json();
-        console.log("Imgur response:", JSON.stringify(imgurData).substring(0, 500));
-        
-        if (imgurResponse.ok && imgurData.success && imgurData.data?.link) {
-          const imgurUrl = imgurData.data.link;
-          console.log("Successfully uploaded to Imgur:", imgurUrl);
-          return NextResponse.json({ url: imgurUrl, path: null });
-        }
-      } catch (imgurError) {
-        console.error("Imgur upload failed:", imgurError);
-      }
-
-      // Final fallback: base64 data URL (long but works)
-      const base64 = buffer.toString("base64");
-      const dataUrl = `data:${file.type};base64,${base64}`;
-      return NextResponse.json({ url: dataUrl, path: null });
+      // File system write failed - return error instead of base64
+      console.error("File system write failed on Vercel:", fsError);
+      return NextResponse.json({ 
+        error: "Image upload not supported on serverless platform. Please use Download instead." 
+      }, { status: 400 });
     }
   } catch (e: any) {
     console.error("Jeet card upload error:", e);
