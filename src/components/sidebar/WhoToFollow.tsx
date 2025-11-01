@@ -153,7 +153,18 @@ export default function WhoToFollow() {
           return (
             <div key={user.id} className="flex items-start gap-3">
               {/* Avatar */}
-              <UserHoverCard userId={user.id} username={user.username}>
+              <UserHoverCard 
+                userId={user.id} 
+                username={user.username}
+                prefetchedData={{
+                  profileImage: user.profileImage,
+                  bio: user.bio,
+                  isVerified: user.isVerified,
+                  walletAddress: user.walletAddress,
+                  followersCount: user.followersCount,
+                  email: (user as any).email,
+                }}
+              >
               <Link href={`/profile/${user.id}`} className="flex-shrink-0">
                 {user.profileImage ? (
                   <img
@@ -171,7 +182,18 @@ export default function WhoToFollow() {
 
               {/* User Info */}
               <div className="flex-1 min-w-0">
-                <UserHoverCard userId={user.id} username={user.username}>
+                <UserHoverCard 
+                  userId={user.id} 
+                  username={user.username}
+                  prefetchedData={{
+                    profileImage: user.profileImage,
+                    bio: user.bio,
+                    isVerified: user.isVerified,
+                    walletAddress: user.walletAddress,
+                    followersCount: user.followersCount,
+                    email: (user as any).email,
+                  }}
+                >
                 <Link href={`/profile/${user.id}`} className="block hover:underline">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className="font-semibold text-sm truncate">{user.username}</span>

@@ -23,12 +23,25 @@ interface UserHoverCardProps {
   userId: string;
   username?: string;
   children: React.ReactNode;
+  prefetchedData?: Partial<HoverUser>; // Optional prefetched data
 }
 
-export default function UserHoverCard({ userId, username, children }: UserHoverCardProps) {
+export default function UserHoverCard({ userId, username, children, prefetchedData }: UserHoverCardProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<HoverUser | null>(null);
+  const [user, setUser] = useState<HoverUser | null>(
+    prefetchedData ? { 
+      id: userId,
+      username: username || "",
+      bio: prefetchedData.bio,
+      profileImage: prefetchedData.profileImage,
+      isVerified: prefetchedData.isVerified || false,
+      walletAddress: prefetchedData.walletAddress,
+      followersCount: prefetchedData.followersCount,
+      followingCount: prefetchedData.followingCount,
+      email: prefetchedData.email,
+    } as HoverUser : null
+  );
   const [following, setFollowing] = useState(false);
   const anchorRef = useRef<HTMLSpanElement | null>(null);
   const [coords, setCoords] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
