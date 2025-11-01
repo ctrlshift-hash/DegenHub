@@ -41,20 +41,25 @@ export async function POST(request: NextRequest) {
       console.warn("File system write failed, using Imgur fallback:", fsError);
       
       try {
-        const formData = new FormData();
-        formData.append('image', new Blob([buffer], { type: file.type }));
+        const base64 = buffer.toString("base64");
+        
+        console.log("Attempting Imgur upload, base64 length:", base64.length);
         
         const imgurResponse = await fetch('https://api.imgur.com/3/image', {
           method: 'POST',
           headers: {
-            'Authorization': 'Client-ID 546c25a59c58ad7', // Imgur anonymous client ID
+            'Authorization': 'Client-ID 546c25a59c58ad7',
           },
-          body: formData,
+          body: JSON.stringify({ image: base64 }),
         });
 
-        if (imgurResponse.ok) {
-          const imgurData = await imgurResponse.json();
+        console.log("Imgur response status:", imgurResponse.status);
+        const imgurData = await imgurResponse.json();
+        console.log("Imgur response:", JSON.stringify(imgurData).substring(0, 500));
+        
+        if (imgurResponse.ok && imgurData.success && imgurData.data?.link) {
           const imgurUrl = imgurData.data.link;
+          console.log("Successfully uploaded to Imgur:", imgurUrl);
           return NextResponse.json({ url: imgurUrl, path: null });
         }
       } catch (imgurError) {
