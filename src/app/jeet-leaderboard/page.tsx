@@ -50,15 +50,16 @@ export default function JeetLeaderboardPage() {
   const [watchlist, setWatchlist] = useState<string[]>([]);
   const [voteTally, setVoteTally] = useState<Record<string, number>>({});
   const [myCard, setMyCard] = useState({ name: "", wallet: "", coin: "", note: "", bgUrl: "", bgDataUrl: "" });
-  const [generated, setGenerated] = useState<{ dataUrl: string; previewUrl: string } | null>(null);
+  const [generated, setGenerated] = useState<{ dataUrl: string; previewUrl: string; shareUrl?: string } | null>(null);
   const [myPreset, setMyPreset] = useState<string | null>(null);
   const [noms, setNoms] = useState<Nomination[]>([]);
   const [nomForm, setNomForm] = useState({ name: "", wallet: "", xUrl: "", reason: "", links: "" });
   const [nomSort, setNomSort] = useState<"top" | "new">("top");
   const [nomModal, setNomModal] = useState<Nomination | null>(null);
   const [nomBg, setNomBg] = useState<{ url: string; dataUrl: string; preset: string | null }>({ url: "", dataUrl: "", preset: null });
-  const [nomGenerated, setNomGenerated] = useState<string | null>(null);
+  const [nomGenerated, setNomGenerated] = useState<{ dataUrl: string; shareUrl?: string } | null>(null);
   const [nomVotes, setNomVotes] = useState<Record<string, 1 | -1 | 0>>({});
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -299,8 +300,18 @@ export default function JeetLeaderboardPage() {
     const { url } = await upload.json();
     const site = (process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin;
     const absolute = url?.startsWith("http") ? url : `${site}${url}`;
-    const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent("My Jeet Card from DegenHub")}&url=${encodeURIComponent(absolute)}`;
-    window.open(intent, "_blank");
+    
+    // Store the share URL for display
+    setGenerated({ ...generated!, shareUrl: absolute });
+    
+    // Copy to clipboard
+    try {
+      await navigator.clipboard.writeText(absolute);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      console.error("Failed to copy to clipboard:", e);
+    }
   };
 
   function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
@@ -434,14 +445,25 @@ export default function JeetLeaderboardPage() {
               <input type="file" accept="image/*" className="bg-gray-800 rounded px-3 py-2 outline-none md:col-span-2" onChange={(e)=>{ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=()=>setNomBg(prev=>({ ...prev, dataUrl: String(r.result||"") })); r.readAsDataURL(f); }} />
               <div className="md:col-span-2 flex flex-wrap gap-2">
                 <button className="px-3 py-2 rounded bg-degen-purple/70 hover:bg-degen-purple focus:outline-none focus:ring-2 focus:ring-degen-purple/50 transition" onClick={addNomination}>Nominate</button>
-                <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition" onClick={async()=>{ const temp: Nomination = { id: 'temp', name: nomForm.name || nomForm.xUrl || nomForm.wallet || 'Nomination', wallet: nomForm.wallet || undefined, xUrl: nomForm.xUrl || undefined, reason: nomForm.reason || undefined, links: nomForm.links.split(/\s+/).filter(Boolean), createdAt: Date.now(), votesUp: 0, votesDown: 0 }; const url=await renderNomCard(temp); if(url){ setNomGenerated(url); } }}>Generate card</button>
-                <button className="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition" disabled={!nomGenerated} onClick={()=>{ if(!nomGenerated) return; const a=document.createElement('a'); a.href=nomGenerated; a.download='nomination.png'; a.click(); }}>Download</button>
-                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition" disabled={!nomGenerated} onClick={async()=>{ if(!nomGenerated) return; const res=await fetch(nomGenerated); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; const intent=`https://twitter.com/intent/tweet?text=${encodeURIComponent('Nomination for the Jeet Leaderboard')}&url=${encodeURIComponent(absolute)}`; window.open(intent,'_blank'); } }}>Share</button>
+                <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transition" onClick={async()=>{ const temp: Nomination = { id: 'temp', name: nomForm.name || nomForm.xUrl || nomForm.wallet || 'Nomination', wallet: nomForm.wallet || undefined, xUrl: nomForm.xUrl || undefined, reason: nomForm.reason || undefined, links: nomForm.links.split(/\s+/).filter(Boolean), createdAt: Date.now(), votesUp: 0, votesDown: 0 }; const url=await renderNomCard(temp); if(url){ setNomGenerated({ dataUrl: url }); } }}>Generate card</button>
+                <button className="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition" disabled={!nomGenerated} onClick={()=>{ if(!nomGenerated) return; const dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl; if(!dataUrl) return; const a=document.createElement('a'); a.href=dataUrl; a.download='nomination.png'; a.click(); }}>Download</button>
+                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition" disabled={!nomGenerated} onClick={async()=>{ if(!nomGenerated) return; const dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl; if(!dataUrl) return; const res=await fetch(dataUrl); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; setNomGenerated({ dataUrl, shareUrl: absolute }); try{ await navigator.clipboard.writeText(absolute); setCopied(true); setTimeout(()=>setCopied(false), 2000); }catch(e){console.error('Failed to copy:', e);} } }}>Share</button>
               </div>
               {nomGenerated && (
                 <div className="md:col-span-2">
                   <div className="text-xs text-gray-400 mb-1">Nomination card preview</div>
-                  <img src={nomGenerated} alt="Nomination card preview" className="rounded-lg border border-gray-800 max-h-48" />
+                  <img src={typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl} alt="Nomination card preview" className="rounded-lg border border-gray-800 max-h-48" />
+                  {(typeof nomGenerated !== 'string' && nomGenerated.shareUrl) && (
+                    <div className="mt-2 p-2 bg-gray-800 rounded text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400">Share link:</span>
+                        <span className="text-blue-300 truncate">{nomGenerated.shareUrl}</span>
+                        <button onClick={()=>{ navigator.clipboard.writeText(nomGenerated.shareUrl!); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs">
+                          {copied ? '✓' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -477,6 +499,17 @@ export default function JeetLeaderboardPage() {
                 <div className="mt-3">
                   <div className="text-xs text-gray-400 mb-1">Preview</div>
                   <img src={generated.previewUrl} alt="Jeet card preview" className="rounded-lg border border-gray-800 max-h-48" />
+                  {generated.shareUrl && (
+                    <div className="mt-2 p-2 bg-gray-800 rounded text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400">Share link:</span>
+                        <span className="text-blue-300 truncate">{generated.shareUrl}</span>
+                        <button onClick={()=>{ navigator.clipboard.writeText(generated.shareUrl!); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs">
+                          {copied ? '✓' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -534,14 +567,25 @@ export default function JeetLeaderboardPage() {
               <label className="text-xs text-gray-400">Or upload background image</label>
               <input type="file" accept="image/*" className="bg-gray-800 rounded px-3 py-2 outline-none" onChange={(e)=>{ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=()=>setNomBg(prev=>({ ...prev, dataUrl: String(r.result||"") })); r.readAsDataURL(f); }} aria-label="Upload background" />
               <div className="flex gap-2">
-                <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600" onClick={async()=>{ const url = await renderNomCard(nomModal); setNomGenerated(url); }} aria-label="Generate nomination card">Generate</button>
-                <button className="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50" disabled={!nomGenerated} onClick={()=>{ if(!nomGenerated) return; const a=document.createElement('a'); a.href=nomGenerated; a.download=`${nomModal.name}-nomination.png`; a.click(); }} aria-label="Download nomination card">Download</button>
-                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50" disabled={!nomGenerated} onClick={async()=>{ if(!nomGenerated) return; const res=await fetch(nomGenerated); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; const intent=`https://twitter.com/intent/tweet?text=${encodeURIComponent('Nomination for the Jeet Leaderboard')}&url=${encodeURIComponent(absolute)}`; window.open(intent,'_blank'); } }} aria-label="Share nomination card">Share</button>
+                <button className="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600" onClick={async()=>{ const url = await renderNomCard(nomModal); if(url) setNomGenerated({ dataUrl: url }); }} aria-label="Generate nomination card">Generate</button>
+                <button className="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50" disabled={!nomGenerated} onClick={()=>{ if(!nomGenerated) return; const dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl; if(!dataUrl) return; const a=document.createElement('a'); a.href=dataUrl; a.download=`${nomModal.name}-nomination.png`; a.click(); }} aria-label="Download nomination card">Download</button>
+                <button className="px-3 py-2 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50" disabled={!nomGenerated} onClick={async()=>{ if(!nomGenerated) return; const dataUrl = typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl; if(!dataUrl) return; const res=await fetch(dataUrl); const blob=await res.blob(); const file=new File([blob], 'nomination.png', {type:'image/png'}); const fd=new FormData(); fd.append('file', file); const up=await fetch('/api/jeet-cards',{method:'POST', body: fd}); if(up.ok){ const { url } = await up.json(); const site=(process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin; const absolute = url?.startsWith('http')?url:`${site}${url}`; setNomGenerated({ dataUrl, shareUrl: absolute }); try{ await navigator.clipboard.writeText(absolute); setCopied(true); setTimeout(()=>setCopied(false), 2000); }catch(e){console.error('Failed to copy:', e);} } }} aria-label="Share nomination card">Share</button>
               </div>
               {nomGenerated && (
                 <div className="mt-3">
                   <div className="text-xs text-gray-400 mb-1">Preview</div>
-                  <img src={nomGenerated} alt="Nomination card preview" className="rounded-lg border border-gray-800 max-h-48" />
+                  <img src={typeof nomGenerated === 'string' ? nomGenerated : nomGenerated.dataUrl} alt="Nomination card preview" className="rounded-lg border border-gray-800 max-h-48" />
+                  {(typeof nomGenerated !== 'string' && nomGenerated.shareUrl) && (
+                    <div className="mt-2 p-2 bg-gray-800 rounded text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400">Share link:</span>
+                        <span className="text-blue-300 truncate">{nomGenerated.shareUrl}</span>
+                        <button onClick={()=>{ navigator.clipboard.writeText(nomGenerated.shareUrl!); setCopied(true); setTimeout(()=>setCopied(false), 2000); }} className="px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs">
+                          {copied ? '✓' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
