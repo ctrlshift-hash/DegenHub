@@ -306,3 +306,11 @@ model Notification {
   @@index([userId, createdAt])
   @@map("notifications")
 }
+
+model JeetCard {
+  id        String   @id @default(cuid())
+  imageUrl  String   // base64 or URL
+  createdAt DateTime @default(now())
+
+  @@map("jeet_cards")
+}
