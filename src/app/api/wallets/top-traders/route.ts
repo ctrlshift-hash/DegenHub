@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { FEATURED_WALLETS } from "@/lib/featured-wallets";
 
+// In-memory cache for top traders
+const topTradersCache = new Map<string, { data: any, timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
+
 // USDT on Solana (mint address)
 const USDT_MINT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
 // Popular memecoins on Solana (add more as needed)
@@ -97,6 +101,22 @@ async function getSOLBalance(connection: Connection, walletAddress: string, retr
 
 export async function GET(request: NextRequest) {
   try {
+    // Check cache first
+    const { searchParams } = new URL(request.url);
+    const forceRefresh = searchParams.get("refresh") === "true";
+    
+    if (!forceRefresh) {
+      const cached = topTradersCache.get("topTraders");
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        console.log(`[Top Traders] Returning cached data (age: ${Math.floor((Date.now() - cached.timestamp) / 1000)}s)`);
+        return NextResponse.json({
+          ...cached.data,
+          cached: true,
+          cacheAge: Math.floor((Date.now() - cached.timestamp) / 1000),
+        });
+      }
+    }
+    
     // Log which RPC we're using for debugging
     console.log(`[Top Traders] Using RPC: ${SOLANA_RPC.includes('helius') ? 'HELIUS ✅' : 'PUBLIC RPC ⚠️'} (${SOLANA_RPC.substring(0, 50)}...)`);
     
@@ -217,10 +237,17 @@ export async function GET(request: NextRequest) {
     // Sort by total value (descending)
     walletBalances.sort((a, b) => b.totalValue - a.totalValue);
 
-    // Return top 50
-    return NextResponse.json({
+    // Cache the results
+    const result = {
       traders: walletBalances.slice(0, 50),
+    };
+    topTradersCache.set("topTraders", {
+      data: result,
+      timestamp: Date.now()
     });
+
+    // Return top 50
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Top traders error:", error);
     return NextResponse.json(
