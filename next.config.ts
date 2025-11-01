@@ -6,6 +6,25 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  
+  // Performance optimizations
+  compress: true, // Enable gzip compression
+  
+  // Experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['lucide-react'], // Optimize icon imports
+  },
+  
+  // Image optimization
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
