@@ -88,9 +88,13 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
             return (
               <div key={c.id} className="flex items-start space-x-3">
                 {/* Avatar */}
-                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-degen-purple to-degen-pink flex items-center justify-center text-white text-xs flex-shrink-0">
-                  {initial}
-                </div>
+                {c.user.profileImage ? (
+                  <img src={c.user.profileImage} alt={c.user.username} className="h-8 w-8 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-degen-purple to-degen-pink flex items-center justify-center text-white text-xs flex-shrink-0">
+                    {initial}
+                  </div>
+                )}
                 {/* Bubble */}
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">

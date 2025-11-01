@@ -39,11 +39,15 @@ export default function CommentCard({ comment, onLike, onReply }: CommentCardPro
   return (
     <div className="flex space-x-3 py-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
       {/* Avatar */}
-      <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center flex-shrink-0">
-        <span className="text-white font-medium text-xs">
-          {comment.user.username?.charAt(0).toUpperCase() || "?"}
-        </span>
-      </div>
+      {comment.user.profileImage ? (
+        <img src={comment.user.profileImage} alt={comment.user.username} className="h-8 w-8 rounded-full object-cover flex-shrink-0" />
+      ) : (
+        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center flex-shrink-0">
+          <span className="text-white font-medium text-xs">
+            {comment.user.username?.charAt(0).toUpperCase() || "?"}
+          </span>
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
