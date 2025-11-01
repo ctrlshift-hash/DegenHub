@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
     // 1. Users not followed by current user
     // 2. Exclude current user and guest/anonymous users
     // 3. Order by activity (most posts) and recent activity
-    const allSuggestions = await prisma.user.findMany({
+    // LIMIT: Only fetch 30 candidates (enough for random selection of 3)
+    const candidateSuggestions = await prisma.user.findMany({
       where: {
         AND: [
           { id: { notIn: [...followingIds, userId].filter(Boolean) as string[] } },
@@ -64,42 +65,44 @@ export async function GET(request: NextRequest) {
         { posts: { _count: "desc" } },
         { createdAt: "desc" },
       ],
+      take: 30, // Only fetch 30 candidates for performance
     });
 
-    // Randomly select 3 users from the suggestions (or all if less than 3)
-    const shuffled = allSuggestions.sort(() => 0.5 - Math.random());
-    let suggestions = shuffled.slice(0, 3);
+    // Randomly select 3 users from the candidates
+    const shuffled = candidateSuggestions.sort(() => 0.5 - Math.random());
+    const suggestions = shuffled.slice(0, 3);
 
-    // Get follow status for each suggestion
-    let suggestionsWithFollowStatus = await Promise.all(
-      suggestions.map(async (user) => {
-        let isFollowing = false;
-        if (userId) {
-          const follow = await prisma.follow.findUnique({
-            where: {
-              followerId_followingId: {
-                followerId: userId,
-                followingId: user.id,
-              },
-            },
-          });
-          isFollowing = !!follow;
-        }
+    // Batch get follow status for all suggestions (much faster than N queries)
+    let followingMap: Record<string, boolean> = {};
+    if (userId && suggestions.length > 0) {
+      const suggestionIds = suggestions.map(u => u.id);
+      const followRecords = await prisma.follow.findMany({
+        where: {
+          followerId: userId,
+          followingId: { in: suggestionIds },
+        },
+        select: { followingId: true },
+      });
+      followRecords.forEach(f => followingMap[f.followingId] = true);
+    }
 
-        return {
-          id: user.id,
-          username: user.username,
-          bio: user.bio,
-          profileImage: user.profileImage,
-          isVerified: user.isVerified,
-          email: user.email,
-          walletAddress: user.walletAddress,
-          followersCount: user._count.followers,
-          postsCount: user._count.posts,
-          isFollowing,
-        };
-      })
-    );
+    // Map suggestions with follow status
+    let suggestionsWithFollowStatus = suggestions.map((user) => {
+      const isFollowing = followingMap[user.id] || false;
+
+      return {
+        id: user.id,
+        username: user.username,
+        bio: user.bio,
+        profileImage: user.profileImage,
+        isVerified: user.isVerified,
+        email: user.email,
+        walletAddress: user.walletAddress,
+        followersCount: user._count.followers,
+        postsCount: user._count.posts,
+        isFollowing,
+      };
+    });
 
     // Prepend featured suggestions (e.g., gold-verified accounts) if not duplicates
     for (const featured of FEATURED_SUGGESTIONS) {

@@ -102,7 +102,8 @@ export async function GET(request: NextRequest) {
     
     const connection = new Connection(SOLANA_RPC, "confirmed");
     
-    // Get ALL users with wallet addresses (no filters except not null)
+    // Get users with wallet addresses, but limit to 200 for performance
+    // With 500+ users, fetching ALL and checking their balances would be too slow
     const usersWithWallets = await prisma.user.findMany({
       where: {
         walletAddress: {
@@ -115,7 +116,10 @@ export async function GET(request: NextRequest) {
         walletAddress: true,
         profileImage: true,
       },
-      // Get all users, not just 100
+      orderBy: {
+        createdAt: "desc", // Most recent users first
+      },
+      take: 200, // Limit to 200 wallets for performance
     });
 
     // Merge in featured wallets not present in DB
