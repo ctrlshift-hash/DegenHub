@@ -42,7 +42,7 @@ export default function TopCoal() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("/api/coal/top?period=today");
+        const res = await fetch("/api/coal/top?period=week"); // Changed from today to week
         if (res.ok) {
           const data = await res.json();
           const newPosts = data.posts || [];
