@@ -69,9 +69,13 @@ export default function SearchPage() {
               {results.map(u => (
                 <div key={u.id} className="flex items-center justify-between px-2 py-2 rounded-md hover:bg-muted/50">
                   <div className="flex items-center space-x-3">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white flex items-center justify-center text-sm">
-                      {u.username.charAt(0).toUpperCase()}
-                    </div>
+                    {u.profileImage ? (
+                      <img src={u.profileImage} alt={u.username} className="h-8 w-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white flex items-center justify-center text-sm">
+                        {u.username.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="font-medium">@{u.username}</div>
                     <button
                       className="text-xs px-2 py-0.5 rounded bg-muted hover:bg-muted/80 transition-colors"
