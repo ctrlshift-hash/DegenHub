@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Try to write to file system (works in development/local)
+    // Try to write to file system (works on Railway, not on Vercel)
     try {
       const dir = path.join(process.cwd(), "public", "jeet-cards");
       await fs.mkdir(dir, { recursive: true });
@@ -37,10 +37,33 @@ export async function POST(request: NextRequest) {
       const absoluteUrl = `${origin}${publicPath}`;
       return NextResponse.json({ url: absoluteUrl, path: publicPath });
     } catch (fsError) {
-      // File system write failed - return error instead of base64
-      console.error("File system write failed on Vercel:", fsError);
+      // File system write failed (Vercel) - upload to Imgur for short link
+      console.log("Filesystem write failed, trying Imgur upload");
+      
+      try {
+        const base64 = buffer.toString("base64");
+        const imgurResponse = await fetch('https://api.imgur.com/3/image', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Client-ID 546c25a59c58ad7',
+          },
+          body: JSON.stringify({ image: base64 }),
+        });
+
+        if (imgurResponse.ok) {
+          const imgurData = await imgurResponse.json();
+          if (imgurData.success && imgurData.data?.link) {
+            return NextResponse.json({ url: imgurData.data.link, path: null });
+          }
+        }
+        console.error("Imgur upload failed:", await imgurResponse.text());
+      } catch (imgurError) {
+        console.error("Imgur error:", imgurError);
+      }
+
+      // Final fallback: return error
       return NextResponse.json({ 
-        error: "Image upload not supported on serverless platform. Please use Download instead." 
+        error: "Share not supported on this platform. Please use Download instead." 
       }, { status: 400 });
     }
   } catch (e: any) {
