@@ -367,13 +367,14 @@ export default function VoiceChatRoom({
       });
 
       // Use Daily.co's speaking-detected event (skip local user)
-      daily.on("speaking-started", (event: any) => {
+      // Note: "speaking-started" and "speaking-stopped" may not be in Daily.co's types but work at runtime
+      (daily.on as any)("speaking-started", (event: any) => {
         if (event.participant && !event.participant.local) {
           setSpeakingParticipants(prev => new Set(prev).add(event.participant.session_id));
         }
       });
 
-      daily.on("speaking-stopped", (event: any) => {
+      (daily.on as any)("speaking-stopped", (event: any) => {
         if (event.participant && !event.participant.local) {
           setSpeakingParticipants(prev => {
             const updated = new Set(prev);
