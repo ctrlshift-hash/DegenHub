@@ -43,6 +43,14 @@ async function cleanupGlobalDailyInstance() {
   }
 }
 
+interface Participant {
+  session_id: string;
+  user_name?: string;
+  user_id?: string;
+  local?: boolean;
+  audioTrack?: MediaStreamTrack;
+}
+
 interface VoiceChatRoomProps {
   roomUrl: string;
   token: string | null;
