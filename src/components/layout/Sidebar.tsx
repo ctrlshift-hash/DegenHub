@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
@@ -34,6 +35,17 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCA = async () => {
+    try {
+      await navigator.clipboard.writeText("TBA");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
 
   return (
     <aside className="hidden lg:block w-64 h-screen border-r border-border bg-card">
@@ -59,25 +71,17 @@ export default function Sidebar() {
           })}
         </div>
 
-        {/* Quick Stats */}
+        {/* CA */}
         <div className="mt-8 p-4 bg-muted/50 rounded-lg">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">
-            Quick Stats
-          </h3>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span>Active Users</span>
-              <span className="text-degen-green">1,234</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Posts Today</span>
-              <span className="text-degen-blue">567</span>
-            </div>
-            <div className="flex justify-between">
-              <span>SOL Tipped</span>
-              <span className="text-degen-purple">12.5</span>
-            </div>
-          </div>
+          <button
+            onClick={handleCopyCA}
+            className="w-full text-left cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <span className="text-sm font-medium text-muted-foreground">CA: </span>
+            <span className="text-sm font-medium text-foreground">
+              {copied ? "Copied!" : "TBA"}
+            </span>
+          </button>
         </div>
       </div>
     </aside>

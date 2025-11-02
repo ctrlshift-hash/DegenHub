@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useWallet as useAdapterWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Button } from "@/components/ui/Button";
 import { X, Send, Loader2 } from "lucide-react";
@@ -28,8 +29,11 @@ export default function TipModal({
   const [amount, setAmount] = useState("0.1");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleTip = async () => {
     if (!publicKey) {
@@ -129,93 +133,100 @@ export default function TipModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Tip @{recipientUsername}</h2>
+  if (!isOpen || !mounted) return null;
+
+  const modalContent = (
+    <div className="fixed inset-0 bg-black z-[9999] overflow-y-auto p-4">
+      <div className="min-h-full flex items-center justify-center py-8">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-gray-700 rounded-xl w-full max-w-md shadow-2xl flex flex-col my-auto">
+        <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
+          <h2 className="text-xl font-bold text-white">Tip @{recipientUsername}</h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-gray-700/50 rounded-full"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-500 text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Amount (SOL)
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              min="0.01"
-              max="10"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-degen-purple"
-              placeholder="0.1"
-              disabled={isSending}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Minimum: 0.01 SOL | Maximum: 10 SOL
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Recipient:</span>
-            <span className="font-mono text-xs">{recipientAddress.slice(0, 8)}...{recipientAddress.slice(-8)}</span>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button
-              onClick={handleTip}
-              disabled={isSending || !publicKey}
-              className="flex-1"
-            >
-              {isSending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Send Tip
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={onClose}
-              variant="outline"
-              disabled={isSending}
-            >
-              Cancel
-            </Button>
-          </div>
-
-          {!publicKey && (
-            <div className="text-xs text-muted-foreground text-center space-y-2">
-              <p>Connect your wallet to send a tip</p>
-              <p className="text-degen-purple">💡 Make sure your wallet extension is installed and connected</p>
+        <div className="px-6 overflow-y-auto flex-1" style={{ minHeight: 0 }}>
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-500 text-sm">
+              {error}
             </div>
           )}
-          
-          {publicKey && !sendTransaction && (
-            <p className="text-xs text-yellow-500 text-center">
-              Wallet connected but transaction function unavailable. Try reconnecting.
-            </p>
-          )}
+
+          <div className="space-y-4 pb-2">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-100">
+                Amount (SOL)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                min="0.01"
+                max="10"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="0.1"
+                disabled={isSending}
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Minimum: 0.01 SOL | Maximum: 10 SOL
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-300">Recipient:</span>
+              <span className="font-mono text-xs text-white">{recipientAddress.slice(0, 8)}...{recipientAddress.slice(-8)}</span>
+            </div>
+
+            {!publicKey && (
+              <div className="text-xs text-gray-400 text-center space-y-2">
+                <p>Connect your wallet to send a tip</p>
+                <p className="text-degen-purple">💡 Make sure your wallet extension is installed and connected</p>
+              </div>
+            )}
+            
+            {publicKey && !sendTransaction && (
+              <p className="text-xs text-yellow-500 text-center">
+                Wallet connected but transaction function unavailable. Try reconnecting.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="p-6 pt-4 flex gap-2 flex-shrink-0 border-t border-gray-700">
+          <Button
+            onClick={handleTip}
+            disabled={isSending || !publicKey}
+            className="flex-1"
+          >
+            {isSending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Send Tip
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={onClose}
+            variant="outline"
+            disabled={isSending}
+          >
+            Cancel
+          </Button>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 

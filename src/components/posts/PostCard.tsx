@@ -383,31 +383,21 @@ export default function PostCard({
               </span>
             </button>
 
-            {(connected && publicKey) && (
-              <button
-                onClick={() => {
-                  if (post.user.walletAddress) {
-                    setShowTipModal(true);
-                  } else {
-                    // Show message encouraging wallet connection
-                    alert("💎 This user hasn't connected their wallet yet. Only users with connected wallets can receive tips! Connect your wallet to enable tipping.");
-                  }
-                }}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                  post.user.walletAddress
-                    ? "text-muted-foreground hover:text-degen-purple hover:bg-degen-purple/10"
-                    : "text-muted-foreground/50 cursor-not-allowed opacity-60"
-                }`}
-                title={post.user.walletAddress ? "Send a tip" : "This user needs to connect their wallet to receive tips"}
-                disabled={!post.user.walletAddress}
-              >
-                <img src="https://static.wixstatic.com/media/e2da02_a2f337f44f9b4fea9f3284c060b7d197~mv2.png" alt="" className="w-4 h-4" />
-                <span className="text-sm font-medium">Tip</span>
-                {!post.user.walletAddress && (
-                  <span className="text-[10px] text-muted-foreground">(Wallet required)</span>
-                )}
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (post.user.walletAddress) {
+                  setShowTipModal(true);
+                } else {
+                  // Show message encouraging wallet connection
+                  alert("💎 This user hasn't connected their wallet yet. Only users with connected wallets can receive tips! Connect your wallet to enable tipping.");
+                }
+              }}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-muted-foreground hover:text-degen-purple hover:bg-degen-purple/10"
+              title={post.user.walletAddress ? "Send a tip" : "This user needs to connect their wallet to receive tips"}
+            >
+              <img src="https://static.wixstatic.com/media/e2da02_a2f337f44f9b4fea9f3284c060b7d197~mv2.png" alt="" className="w-4 h-4" />
+              <span className="text-sm font-medium">Tip</span>
+            </button>
 
             <button
               onClick={async () => {
