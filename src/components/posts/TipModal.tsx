@@ -225,8 +225,8 @@ export default function TipModal({
         </div>
       </div>
     </div>
+    </div>
   );
 
   return createPortal(modalContent, document.body);
 }
-
