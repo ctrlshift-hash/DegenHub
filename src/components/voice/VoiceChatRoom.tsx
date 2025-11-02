@@ -132,7 +132,7 @@ export default function VoiceChatRoom({
             border: "none",
             opacity: "0",
             position: "absolute",
-          } as React.CSSProperties,
+          } as Partial<CSSStyleDeclaration>,
           // Audio-only configuration
           videoSource: false,
           audioSource: true,
