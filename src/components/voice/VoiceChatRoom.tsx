@@ -225,8 +225,6 @@ export default function VoiceChatRoom({
                   userName: userName,
                   videoSource: false, // Explicitly disable video
                   audioSource: true, // Explicitly enable audio only
-                  userVideoInput: null, // Explicitly set to null to avoid camera
-                  userAudioInput: true, // Enable microphone
                 }).then(() => {
                   retryDaily.setLocalVideo(false);
                   retryDaily.setLocalAudio(true);
@@ -419,11 +417,6 @@ export default function VoiceChatRoom({
           userName: userName,
           videoSource: false, // Explicitly disable video
           audioSource: true, // Explicitly enable audio only
-          userVideoInput: null, // Explicitly set to null to avoid camera
-          userAudioInput: true, // Enable microphone
-          // Try to disable local audio playback using Daily.co's config
-          activeSpeakerMode: false,
-          subscribeToTracksAutomatically: false, // Don't auto-subscribe to avoid local playback
         })
         .then(() => {
           console.log("Join promise resolved");
