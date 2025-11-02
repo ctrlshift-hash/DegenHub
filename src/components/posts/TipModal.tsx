@@ -130,80 +130,64 @@ export default function TipModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-degen-purple/20 rounded-2xl p-8 w-full max-w-md shadow-2xl shadow-degen-purple/20 mt-auto mb-auto">
-        {/* Header with gradient accent */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-degen-purple/20">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-degen-purple to-degen-pink flex items-center justify-center">
-              <img src="https://static.wixstatic.com/media/e2da02_a2f337f44f9b4fea9f3284c060b7d197~mv2.png" alt="" className="w-6 h-6" />
-            </div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-degen-purple to-degen-pink bg-clip-text text-transparent">
-              Tip @{recipientUsername}
-            </h2>
-          </div>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Tip @{recipientUsername}</h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-gray-700 rounded-lg"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm backdrop-blur-sm">
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-500 text-sm">
             {error}
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold mb-3 text-gray-300">
+            <label className="block text-sm font-medium mb-2">
               Amount (SOL)
             </label>
-            <div className="relative">
-              <input
-                type="number"
-                step="0.1"
-                min="0.01"
-                max="10"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl focus:outline-none focus:border-degen-purple transition-colors text-white placeholder-gray-500"
-                placeholder="0.1"
-                disabled={isSending}
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-degen-purple font-semibold">
-                SOL
-              </div>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">
+            <input
+              type="number"
+              step="0.1"
+              min="0.01"
+              max="10"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-degen-purple"
+              placeholder="0.1"
+              disabled={isSending}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
               Minimum: 0.01 SOL | Maximum: 10 SOL
             </p>
           </div>
 
-          <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-400 font-medium">Recipient:</span>
-              <span className="font-mono text-sm text-degen-purple font-semibold">{recipientAddress.slice(0, 8)}...{recipientAddress.slice(-8)}</span>
-            </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Recipient:</span>
+            <span className="font-mono text-xs">{recipientAddress.slice(0, 8)}...{recipientAddress.slice(-8)}</span>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-2 pt-2">
             <Button
               onClick={handleTip}
               disabled={isSending || !publicKey}
-              variant="glow"
-              className="flex-1 h-12 text-base font-semibold"
+              className="flex-1"
             >
               {isSending ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   Sending...
                 </>
               ) : (
                 <>
-                  <Send className="h-5 w-5 mr-2" />
+                  <Send className="h-4 w-4 mr-2" />
                   Send Tip
                 </>
               )}
@@ -212,25 +196,22 @@ export default function TipModal({
               onClick={onClose}
               variant="outline"
               disabled={isSending}
-              className="flex-1 h-12 text-base font-semibold border-gray-700 hover:bg-gray-800"
             >
               Cancel
             </Button>
           </div>
 
           {!publicKey && (
-            <div className="bg-degen-purple/10 border border-degen-purple/30 rounded-xl p-4 text-center">
-              <p className="text-sm text-gray-300 mb-2">Connect your wallet to send a tip</p>
-              <p className="text-xs text-degen-purple font-medium">💡 Make sure your wallet extension is installed and connected</p>
+            <div className="text-xs text-muted-foreground text-center space-y-2">
+              <p>Connect your wallet to send a tip</p>
+              <p className="text-degen-purple">💡 Make sure your wallet extension is installed and connected</p>
             </div>
           )}
           
           {publicKey && !sendTransaction && (
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
-              <p className="text-xs text-yellow-400 text-center">
-                Wallet connected but transaction function unavailable. Try reconnecting.
-              </p>
-            </div>
+            <p className="text-xs text-yellow-500 text-center">
+              Wallet connected but transaction function unavailable. Try reconnecting.
+            </p>
           )}
         </div>
       </div>
