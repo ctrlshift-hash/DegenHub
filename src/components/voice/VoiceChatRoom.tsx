@@ -126,14 +126,13 @@ export default function VoiceChatRoom({
           showFullscreenButton: false,
           showLocalVideo: false,
           showParticipantsBar: false,
-          showPrejoin: false, // Hide pre-join UI
           iframeStyle: {
             width: "1px",
             height: "1px",
             border: "none",
             opacity: "0",
             position: "absolute",
-          },
+          } as React.CSSProperties,
           // Audio-only configuration
           videoSource: false,
           audioSource: true,
