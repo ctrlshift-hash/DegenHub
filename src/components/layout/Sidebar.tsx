@@ -72,16 +72,56 @@ export default function Sidebar() {
         </div>
 
         {/* CA */}
-        <div className="mt-8 p-4 bg-muted/50 rounded-lg">
+        <div className="mt-8 space-y-3">
           <button
             onClick={handleCopyCA}
-            className="w-full text-left cursor-pointer hover:opacity-80 transition-opacity"
+            className="w-full px-4 py-3 bg-degen-purple hover:bg-degen-purple/90 text-white font-semibold rounded-lg transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-degen-purple/30 active:scale-[0.98] flex items-center justify-center gap-2"
           >
-            <span className="text-sm font-medium text-muted-foreground">CA: </span>
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-sm">CA: </span>
+            <span className="text-sm">
               {copied ? "Copied!" : "TBA"}
             </span>
           </button>
+
+          {/* Social Icons */}
+          <div className="flex items-center justify-center gap-3">
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-all hover:scale-110 hover:brightness-110 active:scale-95"
+            >
+              <img
+                src="https://static.wixstatic.com/media/e2da02_75efd7a093fd4113a9662b914a541af9~mv2.jpg"
+                alt="Twitter"
+                className="w-8 h-8 rounded-lg object-contain"
+              />
+            </a>
+            <a
+              href="https://pump.fun"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-all hover:scale-110 hover:brightness-110 active:scale-95"
+            >
+              <img
+                src="https://static.wixstatic.com/media/e2da02_248e6293fa024f6e9dd4130271bb14c3~mv2.png"
+                alt="Pump.fun"
+                className="w-8 h-8 rounded-lg object-contain"
+              />
+            </a>
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-all hover:scale-110 hover:brightness-110 active:scale-95"
+            >
+              <img
+                src="https://static.wixstatic.com/media/e2da02_54130f69a18e424cb3f9e81f6d12aaab~mv2.png"
+                alt="GitHub"
+                className="w-8 h-8 rounded-lg object-contain"
+              />
+            </a>
+          </div>
         </div>
       </div>
     </aside>
