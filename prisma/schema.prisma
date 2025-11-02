@@ -43,6 +43,8 @@ model User {
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsSent     Notification[] @relation("NotificationActor")
   channelPosts          ChannelPost[]
+  ownedVoiceRooms      VoiceRoom[]    @relation("RoomHost")
+  roomParticipants      RoomParticipant[]
 
   @@index([username])
   @@index([walletAddress])
@@ -313,4 +315,42 @@ model JeetCard {
   createdAt DateTime @default(now())
 
   @@map("jeet_cards")
+}
+
+model VoiceRoom {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  dailyRoomUrl    String?  // Daily.co room URL/token
+  dailyRoomToken  String?  // Daily.co meeting token
+  isPublic        Boolean  @default(true)
+  maxParticipants Int      @default(50)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  hostId          String
+
+  // Relations
+  host        User              @relation("RoomHost", fields: [hostId], references: [id], onDelete: Cascade)
+  participants RoomParticipant[]
+
+  @@index([hostId])
+  @@index([isPublic, createdAt])
+  @@map("voice_rooms")
+}
+
+model RoomParticipant {
+  id        String   @id @default(cuid())
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+  roomId    String
+  userId    String
+
+  // Relations
+  room VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("room_participants")
 }

@@ -199,7 +199,7 @@ export default function PostCard({
             {(post.user.walletAddress || (post.user as any).email) && (
               <span className="flex items-center gap-1">
                 <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full ${isGoldVerified(post.user) ? "bg-yellow-400 text-black" : "bg-blue-500 text-white"}`}>
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.004 7.004a1 1 0 01-1.414 0L3.293 9.714a1 1 0 111.414-1.414l3.004 3.004 6.297-6.297a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.004 7.004a1 1 0 01-1.414 0L3.293 9.714a1 1 0 111.414-1.414l3.004 3.004 6.297-6.297a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                 </span>
                 {isGoldVerified(post.user) && post.user.username === "Alon" && (
                   <img src="https://static.wixstatic.com/media/e2da02_248e6293fa024f6e9dd4130271bb14c3~mv2.png" alt="pill" className="w-3.5 h-3.5" />
