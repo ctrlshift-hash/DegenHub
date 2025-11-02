@@ -183,7 +183,7 @@ export default function VoiceChatRoom({
                     width: "1px",
                     height: "1px",
                     border: "none",
-                    opacity: 0,
+                    opacity: "0",
                     position: "absolute",
                   },
                   videoSource: false,
