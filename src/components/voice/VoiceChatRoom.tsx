@@ -426,25 +426,8 @@ export default function VoiceChatRoom({
           // Enable only audio
           daily!.setLocalAudio(true);
           
-          // CRITICAL: Unsubscribe from local participant's audio to prevent hearing yourself
-          // Only subscribe to remote participants
-          setTimeout(() => {
-            try {
-              const participants = daily!.participants();
-              Object.values(participants).forEach((p: any) => {
-                if (p.local && p.audioTrack) {
-                  // Unsubscribe from local participant's audio track
-                  daily!.unsubscribeFromTracks({
-                    sessionId: p.session_id,
-                    trackId: p.audioTrack.id,
-                  });
-                  console.log("Unsubscribed from local participant audio");
-                }
-              });
-            } catch (e) {
-              console.error("Error unsubscribing from local audio:", e);
-            }
-          }, 500);
+          // Note: Daily.co's echo cancellation handles preventing hearing yourself
+          // We use muteAllLocalAudio below to mute local audio playback
           
           // NUCLEAR OPTION: Mute ALL audio elements that could be playing local audio
           // Daily.co plays your voice back through audio elements we can't always detect
