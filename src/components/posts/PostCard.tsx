@@ -401,7 +401,7 @@ export default function PostCard({
                 title={post.user.walletAddress ? "Send a tip" : "This user needs to connect their wallet to receive tips"}
                 disabled={!post.user.walletAddress}
               >
-                <span className="text-sm font-medium">💎</span>
+                <img src="https://static.wixstatic.com/media/e2da02_a2f337f44f9b4fea9f3284c060b7d197~mv2.png" alt="" className="w-4 h-4" />
                 <span className="text-sm font-medium">Tip</span>
                 {!post.user.walletAddress && (
                   <span className="text-[10px] text-muted-foreground">(Wallet required)</span>
