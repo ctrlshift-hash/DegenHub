@@ -114,12 +114,14 @@ export default function VoiceChatRoom({
             currentUserId = session.user.id;
             if (currentUserId === hostId) {
               setIsHost(true);
+              console.log("✅ Host detected via email session:", currentUserId);
             }
           } else if (publicKey) {
             // For wallet users, we need to get their userId
             const walletAddr = publicKey.toBase58();
             if (data.room.host.walletAddress === walletAddr) {
               setIsHost(true);
+              console.log("✅ Host detected via wallet:", walletAddr);
             }
             // Find wallet user ID from participants or fetch separately
             const walletParticipant = data.room.participants.find((p: any) => p.user?.walletAddress === walletAddr);
@@ -127,6 +129,15 @@ export default function VoiceChatRoom({
               currentUserId = walletParticipant.user.id;
             }
           }
+          
+          console.log("🔍 Host status check:", {
+            isHost,
+            hostId,
+            currentUserId,
+            sessionUserId: session?.user?.id,
+            publicKey: publicKey?.toBase58(),
+            hostWallet: data.room.host.walletAddress,
+          });
           
           // Check if user is co-host (need userId for this)
           if (currentUserId && data.room.coHosts) {
@@ -1067,7 +1078,34 @@ export default function VoiceChatRoom({
                   }
                   
                   const displayName = (participant.user_name || participant.user_id || "Guest").trim();
-                  const participantUserId = participantUserIds.get(sessionId) || participant.user_id;
+                  // Try multiple ways to get participantUserId
+                  let participantUserId = participantUserIds.get(sessionId) || participant.user_id;
+                  
+                  // If still no userId, try to extract from user_name if it contains user info
+                  // Or try to match by name/wallet from room participants
+                  if (!participantUserId && roomId) {
+                    // We can still show buttons if we have sessionId - we'll use that for kicking
+                    // But ideally we should have userId
+                    console.warn("⚠️ No participantUserId for:", { sessionId, displayName, user_id: participant.user_id });
+                  }
+                  
+                  // Debug: Log participant info for host/co-host visibility
+                  if (isHost || isCoHost) {
+                    console.log("👤 Participant card:", {
+                      sessionId,
+                      displayName,
+                      participantUserId,
+                      participantUserIds_map: Array.from(participantUserIds.entries()),
+                      participant_user_id: participant.user_id,
+                      hasParticipantUserId: !!participantUserId,
+                      isHost,
+                      isCoHost,
+                      willShowButtons: (isHost || isCoHost) && !!participantUserId,
+                    });
+                  }
+                  
+                  // Show buttons if host/co-host, even if participantUserId is missing (we'll use sessionId as fallback)
+                  const canShowButtons = (isHost || isCoHost) && (participantUserId || sessionId);
                   
                   const handleKick = async () => {
                     if (!participantUserId || !roomId || !confirm(`Kick ${displayName} from the room?`)) {
@@ -1131,7 +1169,7 @@ export default function VoiceChatRoom({
                       const response = await fetch(`/api/voice/rooms/${roomId}/kick`, {
                         method: "POST",
                         headers,
-                        body: JSON.stringify({ participantUserId }),
+                        body: JSON.stringify({ participantUserId: userIdToKick }),
                       });
 
                       if (response.ok) {
@@ -1163,9 +1201,9 @@ export default function VoiceChatRoom({
                         isSpeaking ? "border-green-500 shadow-lg shadow-green-500/30" : "border-gray-700"
                       }`}
                     >
-                      {(isHost || isCoHost) && participantUserId && (
+                      {canShowButtons && (
                         <div className="absolute top-2 right-2 flex gap-1 z-10">
-                          {isHost && (
+                          {isHost && participantUserId && (
                             <button
                               onClick={async () => {
                                 if (!participantUserId || !roomId || !confirm(`Make ${displayName} a co-host?`)) return;
@@ -1199,7 +1237,7 @@ export default function VoiceChatRoom({
                             onClick={handleKick}
                             className="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title={isCoHost && !isHost && participantUserId === roomHostId ? "Co-hosts cannot kick the host" : "Kick participant"}
-                            disabled={isCoHost && !isHost && participantUserId === roomHostId}
+                            disabled={isCoHost && !isHost && participantUserId === roomHostId || !participantUserId}
                           >
                             <UserX className="h-3 w-3 text-white" />
                           </button>
