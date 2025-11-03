@@ -149,6 +149,44 @@ export default function VoiceChatRoom({
           if (data.room.speakerMode) {
             setSpeakerMode(data.room.speakerMode);
           }
+          
+          // Store profile images for participants
+          const profileMap = new Map<string, string>();
+          data.room.participants.forEach((p: any) => {
+            if (p.user?.id && p.user?.profileImage) {
+              profileMap.set(p.user.id, p.user.profileImage);
+            }
+          });
+          setParticipantProfileImages(profileMap);
+          
+          // Check current user's speaker status
+          if (currentUserId) {
+            try {
+              const participantResponse = await fetch(`/api/voice/rooms/${roomId}/participant-status`, { headers });
+              if (participantResponse.ok) {
+                const participantData = await participantResponse.json();
+                setIsSpeaker(participantData.isSpeaker || false);
+              }
+            } catch (e) {
+              console.error("Error checking speaker status:", e);
+            }
+          }
+          
+          // Fetch profile image for current user if not already loaded
+          if (currentUserId && !profileMap.has(currentUserId)) {
+            fetch(`/api/users/${currentUserId}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.user?.profileImage) {
+                  setParticipantProfileImages((prev) => {
+                    const updated = new Map(prev);
+                    updated.set(currentUserId!, data.user.profileImage);
+                    return updated;
+                  });
+                }
+              })
+              .catch(err => console.error("Error fetching own profile image:", err));
+          }
         }
       } catch (error) {
         console.error("Error checking host status:", error);
@@ -156,7 +194,7 @@ export default function VoiceChatRoom({
     };
 
     checkHostStatus();
-  }, [roomId, session, publicKey]);
+  }, [roomId, session, publicKey, callFrame]);
 
   useEffect(() => {
     if (!roomUrl || !iframeRef.current || isCreatingRef.current) {
@@ -909,15 +947,43 @@ export default function VoiceChatRoom({
               const localInParticipants = Array.from(participants.values()).some(p => p.local);
               if (localInParticipants) return null;
               
+              const localIsSpeaking = Array.from(participants.values()).some(p => p.local && speakingParticipants.has(p.session_id));
+              
+              // Get current user's profile image
+              let currentUserProfileImage: string | null = null;
+              if (session?.user?.id) {
+                currentUserProfileImage = participantProfileImages.get(session.user.id) || null;
+              }
+              
               return (
-                <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-xl p-6 flex flex-col items-center">
+                <div className={`relative bg-gradient-to-br from-gray-800 to-gray-900 border rounded-xl p-6 flex flex-col items-center transition-all ${
+                  localIsSpeaking ? "border-green-500 shadow-lg shadow-green-500/30" : "border-gray-700"
+                }`}>
                   <div className="relative mb-3">
-                    <div className="w-20 h-20 rounded-full bg-degen-purple flex items-center justify-center text-white text-2xl font-bold">
-                      {userName.charAt(0).toUpperCase()}
-                    </div>
-                    {!isMuted && (
+                    {currentUserProfileImage ? (
+                      <img 
+                        src={currentUserProfileImage} 
+                        alt={userName}
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-degen-purple flex items-center justify-center text-white text-2xl font-bold">
+                        {userName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    {localIsSpeaking && (
                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-black animate-pulse flex items-center justify-center">
                         <Mic className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                    {/* Voice bars animation when speaking */}
+                    {localIsSpeaking && (
+                      <div className="absolute -left-2 top-1/2 -translate-y-1/2 flex gap-0.5">
+                        <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '8px', animationDelay: '0ms' }}></div>
+                        <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '12px', animationDelay: '150ms' }}></div>
+                        <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '16px', animationDelay: '300ms' }}></div>
+                        <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '12px', animationDelay: '150ms' }}></div>
+                        <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '8px', animationDelay: '0ms' }}></div>
                       </div>
                     )}
                   </div>
@@ -1169,15 +1235,52 @@ export default function VoiceChatRoom({
 
       {/* Controls */}
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-t border-gray-700 p-4 flex items-center justify-center gap-4 flex-shrink-0">
+        {/* Request to Speak button (for non-speakers in NOMINATED mode) */}
+        {speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && (
+          <button
+            onClick={async () => {
+              if (!roomId || requestedToSpeak) return;
+              try {
+                const headers: Record<string, string> = { "Content-Type": "application/json" };
+                if (publicKey && !session?.user) {
+                  headers["X-Wallet-Address"] = publicKey.toBase58();
+                }
+                const response = await fetch(`/api/voice/rooms/${roomId}/request-speak`, {
+                  method: "POST",
+                  headers,
+                });
+                if (response.ok) {
+                  setRequestedToSpeak(true);
+                  alert("Request to speak sent to room hosts!");
+                } else {
+                  const error = await response.json();
+                  alert(error.error || "Failed to request to speak");
+                }
+              } catch (error) {
+                console.error("Error requesting to speak:", error);
+              }
+            }}
+            disabled={requestedToSpeak || isLoading}
+            className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="Request to speak"
+          >
+            {requestedToSpeak ? "Request Sent" : "Request to Speak"}
+          </button>
+        )}
+        
         <button
           onClick={toggleMute}
-          disabled={isLoading}
+          disabled={isLoading || (speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && !isMuted)}
           className={`p-3 rounded-full transition-all ${
             isMuted
               ? "bg-red-600 hover:bg-red-700 text-white"
               : "bg-gray-700 hover:bg-gray-600 text-white"
           } disabled:opacity-50 disabled:cursor-not-allowed`}
-          title={isMuted ? "Unmute" : "Mute"}
+          title={
+            speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && !isMuted
+              ? "You must be nominated to speak"
+              : isMuted ? "Unmute" : "Mute"
+          }
         >
           {isMuted ? (
             <MicOff className="h-5 w-5" />
