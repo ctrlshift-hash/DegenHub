@@ -1,6 +1,6 @@
 # DegenHub
 
-A crypto degen social media platform built with Next.js 14, featuring dual authentication, token-gated channels, and SOL tipping functionality.
+A crypto degen social media platform built with Next.js 14, featuring dual authentication, community channels, voice chat, and SOL tipping functionality.
 
 **Website**: https://www.degenhub.io/  
 **X (Twitter)**: https://x.com/DegenHub_io
@@ -31,7 +31,7 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
 ### Dual Authentication System
 - **Solana Wallet Login**: Connect with Phantom, Solflare, and other Solana wallets
 - **Email/Username Signup**: Traditional authentication for casual users
-- **Verified Badges**: Wallet-connected users get verified status
+- **Verified Badges**: Both wallet and email users receive verified status
 
 ### Social Feed
 - Create posts with text and images
@@ -42,15 +42,14 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
 
 ### User Profiles
 - **Wallet Users**: Display wallet address, portfolio value, verified badge
-- **Email Users**: Basic profile with "unverified" status
+- **Email Users**: Full profile functionality with verified badge
 - Bio, profile pictures, followers/following
 - Post history and engagement stats
 
-### Token-Gated Channels
-- Create exclusive channels requiring specific token holdings
-- Only wallet-connected users can access
-- Minimum balance requirements
-- Token verification system
+### Channels
+- Create and join community channels
+- Share posts within channel discussions
+- Channel-specific feed and engagement
 
 ### Tipping System
 - Tip SOL directly to posts and users
@@ -123,7 +122,7 @@ degenhub/
 │   ├── app/                    # Next.js App Router pages
 │   │   ├── auth/              # Authentication pages
 │   │   ├── profile/           # User profile pages
-│   │   ├── channels/          # Token-gated channels
+│   │   ├── channels/          # Community channels
 │   │   └── settings/          # User settings
 │   ├── components/            # React components
 │   │   ├── auth/              # Authentication components
@@ -169,7 +168,7 @@ degenhub/
 - **Likes/Reposts**: Engagement data
 - **Follows**: User relationships
 - **Tips**: SOL tipping transactions
-- **Channels**: Token-gated communities
+- **Channels**: Community channels and discussions
 
 ## Security Features
 
@@ -182,25 +181,35 @@ degenhub/
 ## Roadmap
 
 ### Phase 1 (MVP)
-- [x] Dual authentication system
+- [x] Dual authentication system (wallet and email)
 - [x] Basic social feed
-- [x] Post creation and interactions
-- [x] User profiles
+- [x] Post creation and interactions (likes, comments, reposts)
+- [x] User profiles with verified badges
 - [x] Dark mode UI
+- [x] Community channels
+- [x] Voice chat rooms with host controls
+- [x] Real-time user count display
+- [x] Username availability validation
 
 ### Phase 2 (Coming Soon)
 - [ ] Real-time updates with Socket.io
-- [ ] Token-gated channel access
+- [ ] Token-gated channel access (exclusive channels requiring token holdings)
 - [ ] SOL tipping functionality
-- [ ] Advanced token tagging
+- [ ] Advanced token tagging and discovery
 - [ ] Mobile app
+- [ ] Voice chat improvements (enhanced moderation, recording)
 
 ### Phase 3 (Future)
-- [ ] NFT integration
-- [ ] DeFi portfolio tracking
-- [ ] Cross-chain support
-- [ ] Advanced analytics
+- [ ] NFT integration (display collections, PFP verification)
+- [ ] DeFi portfolio tracking and PnL analytics
+- [ ] Cross-chain support (Ethereum, Base, etc.)
+- [ ] Advanced analytics dashboard for users
 - [ ] API for third-party integrations
+- [ ] Notification system improvements (email/push notifications)
+- [ ] Multi-language support
+- [ ] Content moderation and reporting tools
+- [ ] Creator monetization features
+- [ ] Token launch tools and integrations
 
 ## Contributing
 
