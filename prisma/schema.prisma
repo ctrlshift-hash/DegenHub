@@ -43,8 +43,11 @@ model User {
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsSent     Notification[] @relation("NotificationActor")
   channelPosts          ChannelPost[]
-  ownedVoiceRooms      VoiceRoom[]    @relation("RoomHost")
+  ownedVoiceRooms      VoiceRoom[]       @relation("RoomHost")
   roomParticipants      RoomParticipant[]
+  roomCoHosts           RoomCoHost[]
+  roomBannedUsers       RoomBannedUser[]
+  roomHistory           RoomHistory[]
 
   @@index([username])
   @@index([walletAddress])
@@ -317,31 +320,62 @@ model JeetCard {
   @@map("jeet_cards")
 }
 
+enum SpeakerMode {
+  OPEN      // Everyone can speak
+  NOMINATED // Only nominated speakers can speak
+}
+
 model VoiceRoom {
-  id              String   @id @default(cuid())
+  id              String      @id @default(cuid())
   name            String
   description     String?
-  dailyRoomUrl    String?  // Daily.co room URL/token
-  dailyRoomToken  String?  // Daily.co meeting token
-  isPublic        Boolean  @default(true)
-  maxParticipants Int      @default(50)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  category        String?     // Gaming, Trading, General, etc.
+  dailyRoomUrl    String?     // Daily.co room URL/token
+  dailyRoomToken  String?     // Daily.co meeting token
+  isPublic        Boolean     @default(true)
+  maxParticipants Int         @default(50)
+  speakerMode     SpeakerMode @default(OPEN) // Open mic or nominated speakers
+  isRecording     Boolean     @default(false)
+  recordingUrl    String?     // URL to recording if available
+  voiceQuality    String      @default("high") // low, medium, high
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   hostId          String
 
   // Relations
   host        User              @relation("RoomHost", fields: [hostId], references: [id], onDelete: Cascade)
   participants RoomParticipant[]
+  coHosts     RoomCoHost[]
+  bannedUsers RoomBannedUser[]
+  history     RoomHistory[]
 
   @@index([hostId])
   @@index([isPublic, createdAt])
+  @@index([category])
   @@map("voice_rooms")
 }
 
 model RoomParticipant {
+  id          String   @id @default(cuid())
+  joinedAt    DateTime @default(now())
+  leftAt      DateTime?
+  isSpeaker   Boolean  @default(true) // Only matters if room is in NOMINATED mode
+  roomId      String
+  userId      String
+
+  // Relations
+  room VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("room_participants")
+}
+
+model RoomCoHost {
   id        String   @id @default(cuid())
-  joinedAt  DateTime @default(now())
-  leftAt    DateTime?
+  addedAt   DateTime @default(now())
   roomId    String
   userId    String
 
@@ -352,5 +386,38 @@ model RoomParticipant {
   @@unique([roomId, userId])
   @@index([roomId])
   @@index([userId])
-  @@map("room_participants")
+  @@map("room_co_hosts")
+}
+
+model RoomBannedUser {
+  id        String   @id @default(cuid())
+  bannedAt  DateTime @default(now())
+  reason    String?
+  roomId    String
+  userId    String
+
+  // Relations
+  room VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("room_banned_users")
+}
+
+model RoomHistory {
+  id        String   @id @default(cuid())
+  action    String   // "joined", "left", "kicked", "muted", "unmuted", "co_host_added", etc.
+  userId    String?
+  details   String?  // JSON or text details
+  createdAt DateTime @default(now())
+  roomId    String
+
+  // Relations
+  room VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([roomId, createdAt])
+  @@map("room_history")
 }

@@ -17,8 +17,11 @@ export default function CreateRoomModal({
 }: CreateRoomModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("General");
   const [isPublic, setIsPublic] = useState(true);
   const [maxParticipants, setMaxParticipants] = useState(50);
+  const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">("OPEN");
+  const [voiceQuality, setVoiceQuality] = useState<"low" | "medium" | "high">("high");
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
@@ -50,8 +53,11 @@ export default function CreateRoomModal({
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim() || null,
+          category: category || null,
           isPublic,
           maxParticipants: parseInt(maxParticipants.toString()) || 50,
+          speakerMode,
+          voiceQuality,
         }),
       });
 

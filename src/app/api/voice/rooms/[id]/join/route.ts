@@ -19,11 +19,22 @@ export async function POST(
         participants: {
           where: { leftAt: null },
         },
+        bannedUsers: {
+          where: { userId },
+        },
       },
     });
 
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
+    }
+
+    // Check if user is banned
+    if (room.bannedUsers.length > 0) {
+      return NextResponse.json(
+        { error: "You are banned from this room" },
+        { status: 403 }
+      );
     }
 
     // Check if room is full
@@ -45,6 +56,9 @@ export async function POST(
       },
     });
 
+    // Determine if user should be a speaker (OPEN mode = always true, NOMINATED = false by default)
+    const isSpeaker = room.speakerMode === "OPEN" ? true : false;
+
     let participant;
     if (existingParticipant && existingParticipant.leftAt) {
       // Rejoin
@@ -53,6 +67,7 @@ export async function POST(
         data: {
           joinedAt: new Date(),
           leftAt: null,
+          isSpeaker,
         },
       });
     } else if (!existingParticipant) {
@@ -61,11 +76,22 @@ export async function POST(
         data: {
           roomId: id,
           userId: userId,
+          isSpeaker,
         },
       });
     } else {
       participant = existingParticipant;
     }
+
+    // Log to room history
+    await prisma.roomHistory.create({
+      data: {
+        roomId: id,
+        userId: userId,
+        action: "joined",
+        details: JSON.stringify({ speakerMode: room.speakerMode, isSpeaker }),
+      },
+    });
 
     // Generate Daily.co token
     let token: string | null = null;

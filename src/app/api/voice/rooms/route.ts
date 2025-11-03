@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     
     const { user, userId } = await getUserFromRequest(request);
     const body = await request.json();
-    const { name, description, isPublic, maxParticipants } = body;
+    const { name, description, category, isPublic, maxParticipants, speakerMode, voiceQuality } = body;
 
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
@@ -138,8 +138,11 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         description: description?.trim() || null,
+        category: category?.trim() || null,
         isPublic: isPublic !== false,
         maxParticipants: maxParticipants || 50,
+        speakerMode: speakerMode || "OPEN",
+        voiceQuality: voiceQuality || "high",
         hostId: userId,
         dailyRoomUrl: dailyRoom.url,
       },
