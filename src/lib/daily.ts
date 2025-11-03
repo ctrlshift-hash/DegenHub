@@ -81,33 +81,52 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
       }),
     });
 
+    const responseText = await response.text();
+    console.log("📥 Daily.co API Response Status:", response.status);
+    console.log("📥 Daily.co API Response Body (first 500 chars):", responseText.substring(0, 500));
+
     if (!response.ok) {
-      const errorText = await response.text();
       let error: any;
       try {
-        error = JSON.parse(errorText);
+        error = JSON.parse(responseText);
       } catch {
-        error = { message: errorText || "Unknown error" };
+        error = { message: responseText || "Unknown error" };
       }
       
+      const errorMsg = error.error || error.message || error.info?.msg || JSON.stringify(error);
       console.error("❌ Daily.co API Error:", {
         status: response.status,
         statusText: response.statusText,
         error: error,
+        errorMessage: errorMsg,
         roomName: sanitizedName,
         originalName: name,
+        fullResponse: responseText,
       });
       
       // Return more detailed error info
-      throw new Error(`Daily.co API error (${response.status}): ${error.error || error.message || JSON.stringify(error)}`);
+      throw new Error(`Daily.co API error (${response.status}): ${errorMsg}`);
     }
 
-    const result = await response.json();
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("❌ Failed to parse Daily.co response as JSON:", responseText);
+      throw new Error("Daily.co returned invalid JSON response");
+    }
+
+    if (!result || !result.url) {
+      console.error("❌ Daily.co response missing URL:", result);
+      throw new Error("Daily.co response missing room URL");
+    }
+
     console.log("✅ Daily.co room created successfully:", result.url);
     return result;
   } catch (error: any) {
     console.error("❌ Exception creating Daily.co room:", error);
     console.error("Error message:", error?.message || error);
+    console.error("Error stack:", error?.stack);
     return null;
   }
 }
