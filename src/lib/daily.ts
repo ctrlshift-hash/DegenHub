@@ -58,7 +58,8 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
   const sanitizedName = sanitizeRoomName(name);
   console.log(`✅ Creating Daily.co room: "${name}" -> "${sanitizedName}"`);
 
-  const requestBody = {
+  // Minimal request body - only include properties that definitely work
+  const requestBody: any = {
     name: sanitizedName,
     properties: {
       max_participants: maxParticipants || 50,
@@ -66,11 +67,11 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
       enable_prejoin_ui: false,
       start_video_off: true,
       enable_screenshare: false,
-      enable_echo_cancellation: true,
-      enable_noise_suppression: true,
-      enable_automatic_gain_control: true,
     },
   };
+  
+  // Only add audio settings if they're supported (may have been removed from API)
+  // These were causing issues, so removing them to match what worked before
 
   console.log("📤 Daily.co API Request:", {
     url: `${DAILY_API_URL}/rooms`,
