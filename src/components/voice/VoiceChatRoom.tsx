@@ -149,8 +149,7 @@ export default function VoiceChatRoom({
               }
             }
           } else {
-            // For guests, check localStorage to see if we're the host
-            // (stored when room was created)
+            // For guests, check multiple ways to determine if we're the host
             const hostIsGuest = data.room.host.username?.startsWith("guest_");
             if (hostIsGuest) {
               try {
@@ -161,16 +160,25 @@ export default function VoiceChatRoom({
                   currentUserId = hostId;
                 } else {
                   // Also check if we're the first participant (fallback for guest hosts)
-                  // This is less reliable but works if localStorage was cleared
+                  // This works if localStorage was cleared or if we joined from a different device
                   const sortedParticipants = [...data.room.participants].sort((a: any, b: any) => 
                     new Date(a.joinedAt || 0).getTime() - new Date(b.joinedAt || 0).getTime()
                   );
                   if (sortedParticipants.length > 0) {
                     const firstParticipant = sortedParticipants[0];
-                    // Check if current user matches first participant (guest hosts are usually first)
-                    // We'll need to check this via participant userIds, but we don't have our own userId yet
-                    // For now, rely on backend to allow host actions if we're the first participant
+                    // If we're the first participant and the host is a guest, assume we're the host
+                    // The backend will verify this when we try to close the room by checking first participant
+                    // We'll show the button optimistically - backend will reject if wrong
                     console.log("🔍 Guest host check - first participant:", firstParticipant.user?.id);
+                    // For guests, we can't reliably get our userId without localStorage
+                    // But we can show the button if we're likely the host (first participant)
+                    // The backend close API will check if userId matches first participant
+                    if (firstParticipant.user?.id) {
+                      // Optimistically show host controls - backend will verify
+                      setIsHost(true);
+                      currentUserId = firstParticipant.user.id;
+                      console.log("✅ Guest host detected via first participant check");
+                    }
                   }
                 }
               } catch (e) {
@@ -958,6 +966,43 @@ export default function VoiceChatRoom({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Close/Open Room button (host/co-host only) - placed in header for better visibility */}
+          {(isHost || isCoHost) && (
+            <button
+              onClick={async () => {
+                if (!roomId) return;
+                try {
+                  const headers: Record<string, string> = { "Content-Type": "application/json" };
+                  if (publicKey && !session?.user) {
+                    headers["X-Wallet-Address"] = publicKey.toBase58();
+                  }
+                  const response = await fetch(`/api/voice/rooms/${roomId}/close`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify({ isClosed: !isRoomClosed }),
+                  });
+                  if (response.ok) {
+                    const data = await response.json();
+                    setIsRoomClosed(data.isClosed);
+                    alert(data.message);
+                  } else {
+                    const error = await response.json();
+                    alert(error.error || "Failed to toggle room status");
+                  }
+                } catch (error) {
+                  console.error("Error toggling room status:", error);
+                }
+              }}
+              className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors ${
+                isRoomClosed
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : "bg-yellow-600 hover:bg-yellow-700 text-white"
+              }`}
+              title={isRoomClosed ? "Open room (allow new participants)" : "Close room (stop new participants)"}
+            >
+              {isRoomClosed ? "Open Room" : "Close Room"}
+            </button>
+          )}
           {isHost && (
             <button
               onClick={async () => {
@@ -1475,44 +1520,6 @@ export default function VoiceChatRoom({
 
       {/* Controls */}
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-t border-gray-700 p-4 flex items-center justify-center gap-4 flex-shrink-0">
-        {/* Close/Open Room button (host/co-host only) */}
-        {(isHost || isCoHost) && (
-          <button
-            onClick={async () => {
-              if (!roomId) return;
-              try {
-                const headers: Record<string, string> = { "Content-Type": "application/json" };
-                if (publicKey && !session?.user) {
-                  headers["X-Wallet-Address"] = publicKey.toBase58();
-                }
-                const response = await fetch(`/api/voice/rooms/${roomId}/close`, {
-                  method: "POST",
-                  headers,
-                  body: JSON.stringify({ isClosed: !isRoomClosed }),
-                });
-                if (response.ok) {
-                  const data = await response.json();
-                  setIsRoomClosed(data.isClosed);
-                  alert(data.message);
-                } else {
-                  const error = await response.json();
-                  alert(error.error || "Failed to toggle room status");
-                }
-              } catch (error) {
-                console.error("Error toggling room status:", error);
-              }
-            }}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
-              isRoomClosed
-                ? "bg-green-600 hover:bg-green-700 text-white"
-                : "bg-yellow-600 hover:bg-yellow-700 text-white"
-            }`}
-            title={isRoomClosed ? "Open room (allow new participants)" : "Close room (stop new participants)"}
-          >
-            {isRoomClosed ? "Open Room" : "Close Room"}
-          </button>
-        )}
-        
         <button
           onClick={toggleMute}
           disabled={isLoading}

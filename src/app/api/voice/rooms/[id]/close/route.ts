@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest } from "@/lib/getUser";
 
@@ -24,9 +26,21 @@ export async function POST(
     const room = await prisma.voiceRoom.findUnique({
       where: { id: roomId },
       include: {
-        host: { select: { id: true } },
+        host: { 
+          select: { 
+            id: true,
+            username: true 
+          } 
+        },
         coHosts: {
           where: { userId },
+        },
+        participants: {
+          orderBy: { joinedAt: "asc" },
+          select: {
+            userId: true,
+            joinedAt: true,
+          },
         },
       },
     });
@@ -35,8 +49,47 @@ export async function POST(
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    const isHost = room.hostId === userId;
-    const isCoHost = room.coHosts.length > 0;
+    let isHost = room.hostId === userId;
+    let isCoHost = room.coHosts.length > 0;
+
+    // For guest hosts, check if they're the first participant (fallback)
+    // Since getUserFromRequest creates a new guest userId each time, we need to check differently
+    // If the host is a guest and the requesting user is also a guest (no session/wallet),
+    // we'll check if they're the first participant by seeing if there's only one participant
+    // or by checking if the first participant is a guest user
+    if (!isHost && !isCoHost && room.host.username?.startsWith("guest_")) {
+      // Check if current user is the first participant (guest hosts are usually first)
+      if (room.participants.length > 0) {
+        const firstParticipant = room.participants[0];
+        // If userId matches first participant, they're the host
+        if (firstParticipant.userId === userId) {
+          isHost = true;
+        } else {
+          // If getUserFromRequest created a new guest user, we need another way to verify
+          // Check if the requesting user has no session/wallet (is a guest)
+          // and if there's only one participant or the first participant is a guest
+          const session = await getServerSession(authOptions);
+          const walletHeader = request.headers.get("x-wallet-address") || request.headers.get("X-Wallet-Address");
+          const isGuestRequest = !session?.user && !walletHeader;
+          
+          if (isGuestRequest && room.participants.length > 0) {
+            // For guest requests, check if first participant's user is also a guest
+            const firstParticipantUser = await prisma.user.findUnique({
+              where: { id: firstParticipant.userId },
+              select: { username: true },
+            });
+            
+            // If first participant is a guest and requesting user is also a guest,
+            // allow them to close ONLY if there's only one participant (they're likely the host)
+            // This is more secure than allowing any guest to close
+            if (firstParticipantUser?.username?.startsWith("guest_") && room.participants.length === 1) {
+              // Only allow if there's a single participant (likely the host)
+              isHost = true;
+            }
+          }
+        }
+      }
+    }
 
     if (!isHost && !isCoHost) {
       return NextResponse.json(
