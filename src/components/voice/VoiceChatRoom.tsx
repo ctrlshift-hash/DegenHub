@@ -576,7 +576,7 @@ export default function VoiceChatRoom({
         setSpeakingParticipants(new Set());
       });
 
-      // Listen for app messages (kick notifications, speak requests)
+      // Listen for app messages (kick notifications)
       daily.on("app-message", (event: any) => {
         console.log("App message received:", event);
         if (event.data?.event === "kick") {
@@ -586,6 +586,7 @@ export default function VoiceChatRoom({
           setTimeout(() => {
             handleLeave();
           }, 1000);
+        }
       });
 
       // Join the room (audio-only)
