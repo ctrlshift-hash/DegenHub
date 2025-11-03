@@ -42,11 +42,16 @@ export default function RoomList() {
     fetchRooms();
     // Refresh rooms every 10 seconds
     const interval = setInterval(fetchRooms, 10000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Separate useEffect for auto-join after rooms are loaded
+  useEffect(() => {
+    if (rooms.length === 0 || selectedRoom) return; // Wait for rooms to load or skip if already in a room
     
-    // Check for ?join=roomId query parameter to auto-join
     const urlParams = new URLSearchParams(window.location.search);
     const joinRoomId = urlParams.get("join");
-    if (joinRoomId && !selectedRoom) {
+    if (joinRoomId) {
       // Auto-join the room
       handleJoinRoom(joinRoomId, "").catch(err => {
         console.error("Auto-join failed:", err);
@@ -54,9 +59,7 @@ export default function RoomList() {
         window.history.replaceState({}, "", window.location.pathname);
       });
     }
-    
-    return () => clearInterval(interval);
-  }, []);
+  }, [rooms]); // Run when rooms are loaded
 
   const fetchRooms = async () => {
     try {
@@ -148,10 +151,8 @@ export default function RoomList() {
       }
     }
     setSelectedRoom(null);
-    // Small delay before refreshing to ensure leave is processed
-    setTimeout(() => {
-      fetchRooms(); // Refresh room list
-    }, 500);
+    // Refresh immediately (leave is already processed)
+    fetchRooms();
   };
 
   const handleDeleteRoom = async (roomId: string, roomName: string) => {
@@ -241,9 +242,9 @@ export default function RoomList() {
       {showCreateModal && (
         <CreateRoomModal
           onClose={() => setShowCreateModal(false)}
-          onRoomCreated={() => {
+          onRoomCreated={async () => {
             setShowCreateModal(false);
-            fetchRooms();
+            await fetchRooms(); // Refresh immediately
           }}
         />
       )}
