@@ -15,7 +15,7 @@ export default function SignupPage() {
 
   return (
     <Layout user={null}>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md -mt-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">Join DegenHub</h1>
