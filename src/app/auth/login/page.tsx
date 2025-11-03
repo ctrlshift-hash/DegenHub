@@ -15,8 +15,8 @@ export default function LoginPage() {
 
   return (
     <Layout user={null}>
-      <div className="min-h-[calc(100vh-200px)] flex items-center justify-start p-4">
-        <div className="w-full max-w-md ml-8">
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center space-x-2 mb-4">
