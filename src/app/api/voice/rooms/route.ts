@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       maxParticipants: room.maxParticipants,
       createdAt: room.createdAt,
       host: room.host,
-      participantCount: room.participants.filter((p) => !p.leftAt).length,
+      participantCount: room.participants.length, // Already filtered by leftAt: null in the query
     }));
 
     return NextResponse.json({
