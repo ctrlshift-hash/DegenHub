@@ -1316,8 +1316,10 @@ export default function VoiceChatRoom({
                   // Send app message to all hosts/co-hosts in the room
                   if (callFrame) {
                     const participantsObj = callFrame.participants();
+                    // Send to all non-local participants - they'll check if they're host/co-host
                     Object.values(participantsObj).forEach((p: any) => {
-                      if (!p.local && (p.user_id === roomHostId || /* check if co-host */)) {
+                      if (!p.local) {
+                        // Send to everyone - host/co-host will check if they should receive it
                         callFrame.sendAppMessage({
                           event: "request_to_speak",
                           username: data.requestingUser?.username || userName,
