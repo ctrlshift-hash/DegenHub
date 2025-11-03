@@ -55,10 +55,17 @@ export async function DELETE(
       });
     }
 
-    // Delete the room (cascades to participants via Prisma schema)
-    await prisma.voiceRoom.delete({
-      where: { id },
-    });
+    // Delete the room using raw SQL to avoid isClosed column issues
+    // Cascades will still work via database foreign key constraints
+    try {
+      await prisma.$executeRaw`DELETE FROM voice_rooms WHERE id = ${id}`;
+    } catch (rawError: any) {
+      // If raw SQL fails, try Prisma delete as fallback
+      console.warn("Raw SQL delete failed, trying Prisma delete:", rawError);
+      await prisma.voiceRoom.delete({
+        where: { id },
+      });
+    }
 
     // Note: We don't delete the Daily.co room via API
     // Daily.co rooms expire automatically after inactivity
