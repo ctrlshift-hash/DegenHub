@@ -1087,6 +1087,25 @@ export default function VoiceChatRoom({
                   .catch(() => {}); // Silent fail
               }
               
+              // Debug logging for host display
+              if (publicKey && roomHostData) {
+                const walletAddr = publicKey.toBase58();
+                const isWalletHost = roomHostData.walletAddress === walletAddr;
+                console.log("🔍 Local user card debug:", {
+                  isWalletHost,
+                  displayUserName,
+                  currentUserId,
+                  hasProfileImage: !!currentUserProfileImage,
+                  roomHostData_username: roomHostData.username,
+                  roomHostData_profileImage: roomHostData.profileImage,
+                  publicKey_wallet: walletAddr,
+                  roomHost_wallet: roomHostData.walletAddress,
+                  walletMatch: walletAddr === roomHostData.walletAddress,
+                  isHost_state: isHost,
+                  participantProfileImages_has_host: participantProfileImages.has(roomHostId || ""),
+                });
+              }
+              
               return (
                 <div className={`relative bg-gradient-to-br from-gray-800 to-gray-900 border rounded-xl p-6 flex flex-col items-center transition-all ${
                   localIsSpeaking ? "border-green-500 shadow-lg shadow-green-500/30" : "border-gray-700"
