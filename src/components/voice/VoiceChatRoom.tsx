@@ -991,10 +991,18 @@ export default function VoiceChatRoom({
                 localIsSpeaking = !isMuted;
               }
               
-              // Get current user's profile image
+              // Get current user's profile image and username
               let currentUserProfileImage: string | null = null;
+              let displayUserName = userName || "Guest";
+              
               if (session?.user?.id) {
+                // Email-authenticated user
                 currentUserProfileImage = participantProfileImages.get(session.user.id) || null;
+                // Use session username first, then userName prop, then fallback
+                displayUserName = session.user.username || userName || "Guest";
+              } else if (publicKey) {
+                // For wallet users, userName prop should have the correct username
+                displayUserName = userName || `anon_${publicKey.toBase58().slice(0, 6)}`;
               }
               
               return (
