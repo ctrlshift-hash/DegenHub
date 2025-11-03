@@ -50,7 +50,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:block w-64 h-screen border-r border-border bg-card">
+    <aside className="hidden md:block w-64 h-screen border-r border-border bg-card">
       <div className="p-6">
         <div className="space-y-2">
           {navItems.map((item) => {
