@@ -484,21 +484,27 @@ export default function VoiceChatRoom({
         });
       });
 
-      // Detect when participants are speaking (skip local user to avoid echo)
-      daily.on("participant-updated", (event: any) => {
+      // Detect when participants are speaking using track-state-changed
+      daily.on("track-state-changed", (event: any) => {
         if (!event.participant || !event.participant.session_id) return;
         
-        // Skip local user for speaking indicators (echo cancellation is handled by Daily.co)
+        // Skip local user for speaking indicators
         if (event.participant.local) {
           return;
         }
         
-        if (event.participant.audioTrack) {
-          const sessionId = event.participant.session_id;
+        const sessionId = event.participant.session_id;
+        
+        // Check if audio track is speaking
+        if (event.track?.kind === "audio") {
+          const isSpeaking = event.participant.tracks?.audio?.isSpeaking || 
+                            event.participant.tracks?.audio?.state === "playing";
+          
           setSpeakingParticipants(prev => {
             const updated = new Set(prev);
-            if (event.participant.tracks?.audio?.isSpeaking) {
+            if (isSpeaking) {
               updated.add(sessionId);
+              lastActivityRef.current = Date.now();
             } else {
               updated.delete(sessionId);
             }
@@ -506,26 +512,34 @@ export default function VoiceChatRoom({
           });
         }
       });
-
-      // Use Daily.co's speaking-detected event (skip local user)
-      // Note: "speaking-started" and "speaking-stopped" may not be in Daily.co's types but work at runtime
-      (daily.on as any)("speaking-started", (event: any) => {
-        if (event.participant && !event.participant.local) {
-          setSpeakingParticipants(prev => new Set(prev).add(event.participant.session_id));
-        }
-        // Reset inactivity timer when someone speaks
-        lastActivityRef.current = Date.now();
-      });
-
-      (daily.on as any)("speaking-stopped", (event: any) => {
-        if (event.participant && !event.participant.local) {
-          setSpeakingParticipants(prev => {
-            const updated = new Set(prev);
-            updated.delete(event.participant.session_id);
-            return updated;
+      
+      // Also check participant state periodically (fallback)
+      const checkSpeakingInterval = setInterval(() => {
+        try {
+          const participantsObj = daily!.participants();
+          const updatedSpeaking = new Set<string>();
+          
+          Object.values(participantsObj).forEach((p: any) => {
+            if (!p.local && p.session_id) {
+              const isSpeaking = p.tracks?.audio?.isSpeaking || 
+                                p.tracks?.audio?.state === "playing" ||
+                                (p.audioTrack && p.audioTrack.enabled && !p.audioTrack.muted && p.audioTrack.readyState === "live");
+              
+              if (isSpeaking) {
+                updatedSpeaking.add(p.session_id);
+                lastActivityRef.current = Date.now();
+              }
+            }
           });
+          
+          setSpeakingParticipants(updatedSpeaking);
+        } catch (e) {
+          console.error("Error checking speaking state:", e);
         }
-      });
+      }, 500); // Check every 500ms
+      
+      // Store interval for cleanup
+      (daily as any)._speakingCheckInterval = checkSpeakingInterval;
 
       daily.on("error", (event: any) => {
         console.error("Daily.co error:", event);
