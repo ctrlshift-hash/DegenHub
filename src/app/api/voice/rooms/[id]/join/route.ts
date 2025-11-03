@@ -29,6 +29,14 @@ export async function POST(
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
+    // Check if room is closed (column may not exist yet if migration hasn't run)
+    if ((room as any).isClosed === true) {
+      return NextResponse.json(
+        { error: "Room is closed - no new participants can join" },
+        { status: 403 }
+      );
+    }
+
     // Check if user is banned
     if (room.bannedUsers.length > 0) {
       return NextResponse.json(
