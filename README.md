@@ -1,6 +1,9 @@
-# DegenHub 🚀
+# DegenHub
 
 A crypto degen social media platform built with Next.js 14, featuring dual authentication, token-gated channels, and SOL tipping functionality.
+
+**Website**: https://www.degenhub.io/  
+**X (Twitter)**: https://x.com/DegenHub_io
 
 ## IMPORTANT: Production/Deployment Notes
 - You **must** use a CLOUD DATABASE (PlanetScale, Supabase, Neon/Postgres, etc). Do not use local SQLite or a local Postgres instance for deployments like Vercel!
@@ -23,39 +26,39 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
    npx prisma generate
    ```
 
-## ✨ Features
+## Features
 
-### 🔐 Dual Authentication System
+### Dual Authentication System
 - **Solana Wallet Login**: Connect with Phantom, Solflare, and other Solana wallets
 - **Email/Username Signup**: Traditional authentication for casual users
 - **Verified Badges**: Wallet-connected users get verified status
 
-### 📱 Social Feed
+### Social Feed
 - Create posts with text and images
 - Like, comment, and repost functionality
 - Real-time feed updates
 - Token tagging system ($SOL, $BONK style)
 - Mobile-responsive design
 
-### 👤 User Profiles
+### User Profiles
 - **Wallet Users**: Display wallet address, portfolio value, verified badge
 - **Email Users**: Basic profile with "unverified" status
 - Bio, profile pictures, followers/following
 - Post history and engagement stats
 
-### 🔒 Token-Gated Channels
+### Token-Gated Channels
 - Create exclusive channels requiring specific token holdings
 - Only wallet-connected users can access
 - Minimum balance requirements
 - Token verification system
 
-### 💎 Tipping System
+### Tipping System
 - Tip SOL directly to posts and users
 - Wallet users only
 - Transaction signature tracking
 - Tip leaderboards
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Frontend**: Next.js 14 with App Router, TypeScript, Tailwind CSS
 - **Blockchain**: Solana Web3.js, Wallet Adapter
@@ -64,7 +67,7 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
 - **Real-time**: Socket.io for live updates
 - **UI**: Custom components with dark mode
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+ 
@@ -112,7 +115,7 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
 6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 degenhub/
@@ -134,7 +137,7 @@ degenhub/
 └── public/                    # Static assets
 ```
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 - **Primary**: Degen Purple (#8B5CF6)
@@ -148,7 +151,7 @@ degenhub/
 - High contrast for readability
 - Glowing effects for premium features
 
-## 🔧 Available Scripts
+## Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
@@ -157,7 +160,7 @@ degenhub/
 - `npx prisma studio` - Open Prisma Studio
 - `npx prisma migrate dev` - Run database migrations
 
-## 🗄 Database Schema
+## Database Schema
 
 ### Core Tables
 - **Users**: User accounts (wallet/email)
@@ -168,7 +171,7 @@ degenhub/
 - **Tips**: SOL tipping transactions
 - **Channels**: Token-gated communities
 
-## 🔐 Security Features
+## Security Features
 
 - Wallet signature verification
 - Token balance validation
@@ -176,9 +179,9 @@ degenhub/
 - Input sanitization
 - CSRF protection
 
-## 🚧 Roadmap
+## Roadmap
 
-### Phase 1 (MVP) ✅
+### Phase 1 (MVP)
 - [x] Dual authentication system
 - [x] Basic social feed
 - [x] Post creation and interactions
@@ -199,7 +202,7 @@ degenhub/
 - [ ] Advanced analytics
 - [ ] API for third-party integrations
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -207,11 +210,11 @@ degenhub/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Solana Foundation for the amazing blockchain
 - Next.js team for the excellent framework
@@ -220,4 +223,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for the crypto degen community**
+Built for the crypto degen community
