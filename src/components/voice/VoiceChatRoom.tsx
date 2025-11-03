@@ -1321,11 +1321,15 @@ export default function VoiceChatRoom({
                     Object.values(participantsObj).forEach((p: any) => {
                       if (!p.local) {
                         // Send to everyone - host/co-host will check if they should receive it
-                        callFrame.sendAppMessage({
-                          event: "request_to_speak",
-                          username: data.requestingUser?.username || userName,
-                          userId: data.requestingUser?.userId,
-                        }, p.session_id).catch(err => console.error("Error sending speak request:", err));
+                        try {
+                          callFrame.sendAppMessage({
+                            event: "request_to_speak",
+                            username: data.requestingUser?.username || userName,
+                            userId: data.requestingUser?.userId,
+                          }, p.session_id);
+                        } catch (err) {
+                          console.error("Error sending speak request:", err);
+                        }
                       }
                     });
                   }
