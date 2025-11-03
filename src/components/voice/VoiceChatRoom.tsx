@@ -58,6 +58,8 @@ interface VoiceChatRoomProps {
   onLeave: () => void;
   roomName: string;
   roomId?: string; // Add roomId for leaving on unmount
+  speakerMode?: "OPEN" | "NOMINATED";
+  initialIsSpeaker?: boolean;
 }
 
 export default function VoiceChatRoom({
@@ -67,6 +69,8 @@ export default function VoiceChatRoom({
   onLeave,
   roomName,
   roomId,
+  speakerMode: initialSpeakerMode,
+  initialIsSpeaker,
 }: VoiceChatRoomProps) {
   const [callFrame, setCallFrame] = useState<DailyCall | null>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -77,8 +81,11 @@ export default function VoiceChatRoom({
   const [isHost, setIsHost] = useState(false);
   const [isCoHost, setIsCoHost] = useState(false);
   const [roomHostId, setRoomHostId] = useState<string | null>(null);
-  const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">("OPEN");
+  const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">(initialSpeakerMode || "OPEN");
   const [participantUserIds, setParticipantUserIds] = useState<Map<string, string>>(new Map()); // Map session_id to userId
+  const [participantProfileImages, setParticipantProfileImages] = useState<Map<string, string>>(new Map()); // Map userId to profileImage
+  const [isSpeaker, setIsSpeaker] = useState(initialIsSpeaker || false); // Current user's speaker status
+  const [requestedToSpeak, setRequestedToSpeak] = useState(false);
   const iframeRef = useRef<HTMLDivElement>(null);
   const dailyInstanceRef = useRef<DailyCall | null>(null);
   const isCreatingRef = useRef(false);
@@ -388,6 +395,22 @@ export default function VoiceChatRoom({
             updated.set(sessionId, event.participant.user_id);
             return updated;
           });
+          
+          // Fetch profile image for this user
+          if (roomId) {
+            fetch(`/api/users/${event.participant.user_id}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.user?.profileImage) {
+                  setParticipantProfileImages((prev) => {
+                    const updated = new Map(prev);
+                    updated.set(event.participant.user_id, data.user.profileImage);
+                    return updated;
+                  });
+                }
+              })
+              .catch(err => console.error("Error fetching profile image:", err));
+          }
         }
         
         setParticipants(prev => {
@@ -514,12 +537,21 @@ export default function VoiceChatRoom({
           videoSource: false, // Explicitly disable video
           audioSource: true, // Explicitly enable audio only
         })
-        .then(() => {
+        .then(async () => {
           console.log("Join promise resolved");
           // Disable video tracks
           daily!.setLocalVideo(false);
-          // Enable only audio
-          daily!.setLocalAudio(true);
+          
+          // Check if user should be muted (NOMINATED mode and not a speaker)
+          if (speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost) {
+            // User is not a speaker in NOMINATED mode - mute them
+            daily!.setLocalAudio(false);
+            setIsMuted(true);
+          } else {
+            // Enable audio
+            daily!.setLocalAudio(true);
+            setIsMuted(false);
+          }
           
           // Note: Daily.co's echo cancellation handles preventing hearing yourself
           // We use muteAllLocalAudio below to mute local audio playback
@@ -711,6 +743,14 @@ export default function VoiceChatRoom({
 
   const toggleMute = () => {
     if (!callFrame) return;
+    
+    // In NOMINATED mode, non-speakers can't unmute unless they're host/co-host or are a speaker
+    if (speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && !isMuted) {
+      // They're trying to unmute but aren't a speaker - show request to speak option
+      alert("You need to be nominated as a speaker to speak. Would you like to request to speak?");
+      return;
+    }
+    
     callFrame.setLocalAudio(!isMuted);
     setIsMuted(!isMuted);
   };
@@ -1077,12 +1117,34 @@ export default function VoiceChatRoom({
                         </div>
                       )}
                       <div className="relative mb-3">
-                        <div className="w-20 h-20 rounded-full bg-degen-purple flex items-center justify-center text-white text-2xl font-bold">
-                          {displayName.charAt(0).toUpperCase() || "?"}
-                        </div>
+                        {/* Profile image or placeholder */}
+                        {(() => {
+                          const profileImage = participantUserId ? participantProfileImages.get(participantUserId) : null;
+                          return profileImage ? (
+                            <img 
+                              src={profileImage} 
+                              alt={displayName}
+                              className="w-20 h-20 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-20 h-20 rounded-full bg-degen-purple flex items-center justify-center text-white text-2xl font-bold">
+                              {displayName.charAt(0).toUpperCase() || "?"}
+                            </div>
+                          );
+                        })()}
                         {isSpeaking && (
                           <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-black animate-pulse flex items-center justify-center">
                             <Mic className="h-3 w-3 text-white" />
+                          </div>
+                        )}
+                        {/* Voice bars animation when speaking */}
+                        {isSpeaking && (
+                          <div className="absolute -left-2 top-1/2 -translate-y-1/2 flex gap-0.5">
+                            <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '8px', animationDelay: '0ms' }}></div>
+                            <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '12px', animationDelay: '150ms' }}></div>
+                            <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '16px', animationDelay: '300ms' }}></div>
+                            <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '12px', animationDelay: '150ms' }}></div>
+                            <div className="w-1 bg-green-500 rounded-full animate-pulse" style={{ height: '8px', animationDelay: '0ms' }}></div>
                           </div>
                         )}
                       </div>

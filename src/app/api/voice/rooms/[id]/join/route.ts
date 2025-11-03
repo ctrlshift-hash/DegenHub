@@ -111,10 +111,12 @@ export async function POST(
         id: room.id,
         name: room.name,
         dailyRoomUrl: room.dailyRoomUrl,
+        speakerMode: room.speakerMode,
       },
       participant: {
         id: participant.id,
         joinedAt: participant.joinedAt,
+        isSpeaker: participant.isSpeaker,
       },
       token: token,
     });
