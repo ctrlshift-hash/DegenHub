@@ -30,16 +30,22 @@ export interface DailyToken {
 /**
  * Sanitize room name for Daily.co API
  * Daily.co requires URL-safe room names (no spaces, special chars)
+ * Appends a unique identifier to allow duplicate names
  */
 function sanitizeRoomName(name: string): string {
-  return name
+  const sanitized = name
     .trim()
     .toLowerCase()
     .replace(/\s+/g, "-")           // Replace spaces with hyphens
     .replace(/[^a-z0-9\-]/g, "")      // Remove special characters except hyphens
     .replace(/-+/g, "-")              // Replace multiple hyphens with one
     .replace(/^-|-$/g, "")            // Remove leading/trailing hyphens
-    || "room-" + Date.now();         // Fallback if name becomes empty
+    || "room";                       // Fallback if name becomes empty
+  
+  // Append unique identifier (timestamp + random) to allow duplicate names
+  // This ensures Daily.co room names are unique while users can reuse names
+  const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  return `${sanitized}-${uniqueId}`;
 }
 
 export async function createDailyRoom(name: string, maxParticipants: number = 50): Promise<DailyRoom | null> {
@@ -52,8 +58,9 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
   }
   
   // Sanitize the room name for Daily.co (must be URL-safe)
+  // Note: This adds a unique ID to allow users to reuse room names
   const sanitizedName = sanitizeRoomName(name);
-  console.log(`✅ Creating Daily.co room: "${name}" -> "${sanitizedName}"`);
+  console.log(`✅ Creating Daily.co room: "${name}" -> "${sanitizedName}" (with unique ID)`);
 
   // Minimal request body - only include properties that definitely work
   const requestBody: any = {
