@@ -15,15 +15,14 @@ export default function LoginPage() {
 
   return (
     <Layout user={null}>
-      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
-            <p className="text-muted-foreground">
-              Choose your preferred sign-in method
-            </p>
-          </div>
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
+          <p className="text-muted-foreground">
+            Choose your preferred sign-in method
+          </p>
+        </div>
 
         {/* Auth Method Toggle */}
         <div className="flex bg-muted rounded-lg p-1 mb-6">
@@ -65,7 +64,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-sm text-muted-foreground">
+        <div className="mt-6 text-sm text-muted-foreground">
           <p>
             Don't have an account?{" "}
             <Link href="/auth/signup" className="text-purple-600 hover:underline">
@@ -82,7 +81,6 @@ export default function LoginPage() {
               Privacy Policy
             </Link>
           </p>
-        </div>
         </div>
       </div>
     </Layout>
