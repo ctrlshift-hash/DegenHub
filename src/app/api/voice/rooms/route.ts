@@ -261,9 +261,10 @@ export async function POST(request: NextRequest) {
       hostId: userId,
       dailyRoomUrl: dailyRoom.url,
       isRecording: false,
-      // Only include isClosed if migration has been applied
-      // isClosed: false, // Will be added after migration
     };
+    
+    // Explicitly remove isClosed if it exists (Prisma might try to include it from schema)
+    delete roomData.isClosed;
 
     // Create room in database - don't wait for history
     let room;
