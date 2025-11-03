@@ -127,7 +127,10 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
     console.error("❌ Exception creating Daily.co room:", error);
     console.error("Error message:", error?.message || error);
     console.error("Error stack:", error?.stack);
-    return null;
+    console.error("Error cause:", error?.cause);
+    
+    // Re-throw with more context so the route handler can see it
+    throw new Error(`Daily.co room creation failed: ${error?.message || String(error)}`);
   }
 }
 
