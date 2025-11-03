@@ -1007,24 +1007,15 @@ export default function VoiceChatRoom({
               if (session?.user?.id) {
                 // Email-authenticated user
                 currentUserId = session.user.id;
-                currentUserProfileImage = participantProfileImages.get(session.user.id) || null;
+                // Check if we're the host - if so, use host profile image
+                if (isHost && roomHostId && roomHostId === session.user.id) {
+                  currentUserProfileImage = participantProfileImages.get(roomHostId) || null;
+                } else {
+                  currentUserProfileImage = participantProfileImages.get(session.user.id) || null;
+                }
                 // Use session username first, then userName prop, then fallback
                 displayUserName = session.user.username || userName || "Guest";
               } else if (publicKey) {
-                // For wallet users, try to use roomHostId if we're the host
-                if (roomHostId) {
-                  // Check if we're the host by comparing wallet address
-                  // We'll use the roomHostId to get profile image if we match
-                  const hostWallet = publicKey.toBase58();
-                  // We need to check if host's wallet matches - but we don't have that info here
-                  // So we'll rely on participantUserIds to map our session to userId
-                }
-                // For wallet users, try to find our userId from participantUserIds or room data
-                // Check if we're the host first
-                if (roomHostId && participantUserIds.has(roomHostId)) {
-                  // Actually, let's find our userId from the participants map
-                  // We'll look for a participant with our wallet address or session
-                }
                 displayUserName = userName || `anon_${publicKey.toBase58().slice(0, 6)}`;
                 
                 // Try to get userId from participantUserIds if available
@@ -1045,6 +1036,12 @@ export default function VoiceChatRoom({
                   } catch (e) {
                     // Ignore
                   }
+                }
+                
+                // If we're the host and still no profile image, try using roomHostId
+                if (isHost && roomHostId && !currentUserProfileImage) {
+                  currentUserId = roomHostId;
+                  currentUserProfileImage = participantProfileImages.get(roomHostId) || null;
                 }
               }
               
