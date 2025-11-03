@@ -88,8 +88,9 @@ export default function RoomList() {
         }
         
         // Check if there are more rooms
-        const totalFetched = reset ? newRooms.length : rooms.length + newRooms.length;
-        setHasMore(totalFetched < (data.pagination?.total || 0));
+        const currentTotal = reset ? newRooms.length : rooms.length + newRooms.length;
+        const totalRooms = data.pagination?.total || 0;
+        setHasMore(currentTotal < totalRooms);
       }
     } catch (error) {
       console.error("Failed to fetch rooms:", error);
@@ -208,12 +209,12 @@ export default function RoomList() {
 
       if (response.ok) {
         // Room already removed from UI, just fetch to ensure sync
-        fetchRooms();
+        fetchRooms(0, true);
       } else {
         // Revert optimistic update on error
         const error = await response.json();
         alert(error.error || "Failed to delete room");
-        fetchRooms(); // Refresh to show correct state
+        fetchRooms(0, true); // Refresh to show correct state
       }
     } catch (error) {
       console.error("Error deleting room:", error);
