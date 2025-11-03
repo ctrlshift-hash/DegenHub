@@ -68,6 +68,10 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
 
 ## Getting Started
 
+**Live Website**: Visit [https://www.degenhub.io/](https://www.degenhub.io/) to use DegenHub.
+
+**For Developers**: The instructions below are for setting up a local development environment.
+
 ### Prerequisites
 - Node.js 18+ 
 - PostgreSQL database
@@ -112,7 +116,7 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
    ```
 
 6. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+   Navigate to [http://localhost:3000](http://localhost:3000) (local development only)
 
 ## Project Structure
 
