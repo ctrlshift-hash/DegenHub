@@ -485,7 +485,8 @@ export default function VoiceChatRoom({
       });
 
       // Detect when participants are speaking using track-state-changed
-      daily.on("track-state-changed", (event: any) => {
+      // Note: "track-state-changed" is not in Daily.co's TypeScript types but works at runtime
+      (daily.on as any)("track-state-changed", (event: any) => {
         if (!event.participant || !event.participant.session_id) return;
         
         // Skip local user for speaking indicators
