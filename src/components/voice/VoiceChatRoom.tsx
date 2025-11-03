@@ -1108,7 +1108,12 @@ export default function VoiceChatRoom({
                   const canShowButtons = (isHost || isCoHost) && (participantUserId || sessionId);
                   
                   const handleKick = async () => {
-                    if (!participantUserId || !roomId || !confirm(`Kick ${displayName} from the room?`)) {
+                    // Use participantUserId if available, otherwise use sessionId as fallback
+                    const userIdToKick = participantUserId || sessionId;
+                    if (!userIdToKick || !roomId || !confirm(`Kick ${displayName} from the room?`)) {
+                      if (!userIdToKick) {
+                        alert("Cannot kick: User ID not available. Try refreshing the page.");
+                      }
                       return;
                     }
 
