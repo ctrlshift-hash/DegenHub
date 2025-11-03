@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
-import { Mic, Users, Plus, Trash2 } from "lucide-react";
+import { Mic, Users, Plus, Trash2, Lock, Unlock } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useWallet } from "@/contexts/WalletContext";
 import VoiceChatRoom from "./VoiceChatRoom";
@@ -38,6 +38,7 @@ export default function RoomList() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [roomClosedStates, setRoomClosedStates] = useState<Map<string, boolean>>(new Map());
   const { data: session } = useSession();
   const { publicKey } = useWallet();
 
@@ -63,6 +64,17 @@ export default function RoomList() {
     }, 30000); // 30 seconds instead of 10
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch closed status for rooms when they're loaded
+  useEffect(() => {
+    if (rooms.length > 0) {
+      const fetchStatuses = async () => {
+        const statusPromises = rooms.map(room => fetchRoomStatus(room.id));
+        await Promise.all(statusPromises);
+      };
+      fetchStatuses();
+    }
+  }, [rooms.length]);
   
   // Auto-join from URL param - check immediately, don't wait for rooms
   useEffect(() => {
@@ -254,7 +266,61 @@ export default function RoomList() {
     if (publicKey && room.host.walletAddress) {
       return room.host.walletAddress === publicKey.toBase58();
     }
+    // For guests, check localStorage to see if we're the host
+    if (room.host.username?.startsWith("guest_")) {
+      try {
+        const storedHostId = localStorage.getItem(`voiceRoomHost_${room.id}`);
+        return storedHostId === room.host.id;
+      } catch (e) {
+        // localStorage not available
+      }
+    }
     return false;
+  };
+
+  // Fetch room closed status
+  const fetchRoomStatus = async (roomId: string) => {
+    try {
+      const headers: Record<string, string> = {};
+      if (publicKey && !session?.user) {
+        headers["X-Wallet-Address"] = publicKey.toBase58();
+      }
+      const response = await fetch(`/api/voice/rooms/${roomId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (typeof data.room.isClosed === "boolean") {
+          setRoomClosedStates(prev => new Map(prev).set(roomId, data.room.isClosed));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching room status:", error);
+    }
+  };
+
+  // Toggle room closed/open status
+  const handleToggleRoomClosed = async (roomId: string, currentClosed: boolean) => {
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (publicKey && !session?.user) {
+        headers["X-Wallet-Address"] = publicKey.toBase58();
+      }
+      const response = await fetch(`/api/voice/rooms/${roomId}/close`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ isClosed: !currentClosed }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRoomClosedStates(prev => new Map(prev).set(roomId, data.isClosed));
+        alert(data.message);
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to toggle room status");
+      }
+    } catch (error) {
+      console.error("Error toggling room status:", error);
+      alert("Failed to toggle room status");
+    }
   };
 
   // Get current username for the room
@@ -333,18 +399,37 @@ export default function RoomList() {
                 <h3 className="text-sm font-bold text-white truncate flex-1 min-w-0">
                   {room.name}
                 </h3>
-                {isHost(room) && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteRoom(room.id, room.name);
-                    }}
-                    className="ml-1 p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
-                    title="Delete room (host only)"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                )}
+                <div className="flex items-center gap-1 ml-1 flex-shrink-0">
+                  {isHost(room) && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const isClosed = roomClosedStates.get(room.id) ?? false;
+                          handleToggleRoomClosed(room.id, isClosed);
+                        }}
+                        className="p-1 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/20 rounded transition-colors"
+                        title={roomClosedStates.get(room.id) ? "Open room (allow new participants)" : "Close room (stop new participants)"}
+                      >
+                        {roomClosedStates.get(room.id) ? (
+                          <Unlock className="h-3 w-3" />
+                        ) : (
+                          <Lock className="h-3 w-3" />
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRoom(room.id, room.name);
+                        }}
+                        className="p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+                        title="Delete room (host only)"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -357,9 +442,17 @@ export default function RoomList() {
                 <span className="truncate">@{room.host.username}</span>
               </div>
 
-              {room.participantCount >= room.maxParticipants && (
-                <div className="mt-1.5 text-xs text-red-400 font-medium">Full</div>
-              )}
+              <div className="flex items-center gap-2 mt-1.5">
+                {room.participantCount >= room.maxParticipants && (
+                  <div className="text-xs text-red-400 font-medium">Full</div>
+                )}
+                {roomClosedStates.get(room.id) && (
+                  <div className="text-xs text-yellow-400 font-medium flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    Closed
+                  </div>
+                )}
+              </div>
               </div>
             ))}
           </div>
