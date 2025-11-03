@@ -37,14 +37,8 @@ export async function POST(
     }
 
     // Use getUserFromRequest for consistent user identification (supports email/wallet/unique guests)
-    // If walletAddress is in body, add it to headers for getUserFromRequest
-    const requestWithWallet = walletAddress ? new NextRequest(request.url, {
-      method: request.method,
-      headers: { ...Object.fromEntries(request.headers.entries()), "x-wallet-address": walletAddress },
-      body: request.body,
-    }) : request;
-    
-    const { userId: resolvedUserId, user } = await getUserFromRequest(requestWithWallet);
+    // Pass walletAddress from body if not in headers
+    const { userId: resolvedUserId, user } = await getUserFromRequest(request, walletAddress || null);
     const userId = resolvedUserId;
     
     // Only set actorId for authenticated users (email or wallet), not for guests (for notifications)

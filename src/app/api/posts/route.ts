@@ -158,15 +158,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { content, imageUrl, imageUrls, walletAddress } = body;
     
-    // Create a new request with walletAddress in headers if provided (for getUserFromRequest)
-    const requestWithWallet = walletAddress ? new NextRequest(request.url, {
-      method: request.method,
-      headers: { ...Object.fromEntries(request.headers.entries()), "x-wallet-address": walletAddress },
-      body: request.body,
-    }) : request;
-    
     // Use getUserFromRequest for consistent user identification (supports email/wallet/unique guests)
-    const { userId, user } = await getUserFromRequest(requestWithWallet);
+    // Pass walletAddress from body if not in headers
+    const { userId, user } = await getUserFromRequest(request, walletAddress || null);
 
     // Support both single imageUrl (backwards compat) and array of imageUrls
     const images = imageUrls || (imageUrl ? [imageUrl] : []);

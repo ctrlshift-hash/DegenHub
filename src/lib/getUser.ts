@@ -6,8 +6,10 @@ import { prisma } from "@/lib/prisma";
 /**
  * Helper function to get user from request (supports email/wallet/guest)
  * Returns userId and user data
+ * @param request - The NextRequest object
+ * @param walletAddress - Optional wallet address from request body (if not in headers)
  */
-export async function getUserFromRequest(request: NextRequest) {
+export async function getUserFromRequest(request: NextRequest, walletAddress?: string | null) {
   const session = await getServerSession(authOptions);
   
   // Check for email-authenticated user
@@ -27,7 +29,8 @@ export async function getUserFromRequest(request: NextRequest) {
   }
   
   // Check for wallet-authenticated user
-  const walletHeader = request.headers.get("x-wallet-address") || request.headers.get("X-Wallet-Address");
+  // Priority: provided walletAddress parameter > header > null
+  const walletHeader = walletAddress || request.headers.get("x-wallet-address") || request.headers.get("X-Wallet-Address");
   if (walletHeader) {
     let walletUser = await prisma.user.findFirst({ where: { walletAddress: walletHeader } });
     if (!walletUser) {
