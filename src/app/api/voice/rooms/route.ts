@@ -113,22 +113,40 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Daily.co room
+    console.log("🔍 Creating Daily.co room for:", name.trim());
     const dailyRoom = await createDailyRoom(name.trim(), maxParticipants || 50);
     
     if (!dailyRoom || !dailyRoom.url) {
       // Check if API key is loaded
       const apiKeyCheck = process.env.DAILY_API_KEY || "";
-      const errorMessage = !apiKeyCheck 
-        ? "DAILY_API_KEY not found in environment. Make sure it's in .env.local and you restarted the server."
-        : "Daily.co API returned null. Check server console for API error (HTTP status code and error message).";
+      
+      // More helpful error messages
+      let errorMessage = "Failed to create Daily.co room. ";
+      if (!apiKeyCheck) {
+        errorMessage += "DAILY_API_KEY is missing. Please set it in your Vercel environment variables.";
+      } else {
+        errorMessage += "Daily.co API returned null. This could be due to:\n";
+        errorMessage += "1. Invalid API key\n";
+        errorMessage += "2. Daily.co service issue\n";
+        errorMessage += "3. Room name conflict\n";
+        errorMessage += "Check server logs for detailed error.";
+      }
+      
+      console.error("❌ Room creation failed:", {
+        roomName: name.trim(),
+        apiKeyExists: !!apiKeyCheck,
+        apiKeyLength: apiKeyCheck.length,
+        dailyRoomResult: dailyRoom,
+      });
       
       return NextResponse.json(
         { 
           error: errorMessage,
-          debug: {
+          debug: process.env.NODE_ENV === "development" ? {
             apiKeyLoaded: !!apiKeyCheck,
             apiKeyLength: apiKeyCheck.length,
-          }
+            apiKeyPrefix: apiKeyCheck.substring(0, 10) + "...",
+          } : undefined
         },
         { status: 500 }
       );
