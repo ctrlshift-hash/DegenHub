@@ -291,7 +291,7 @@ export default function RoomList() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Voice Rooms</h1>
+          <h1 className="text-2xl font-bold text-white">Voice Chat</h1>
           <p className="text-gray-400 mt-1">Join or create a voice chat room</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
@@ -325,19 +325,19 @@ export default function RoomList() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {rooms.map((room) => (
               <div
               key={room.id}
-              className="bg-card border border-gray-700 rounded-lg p-4 hover:border-degen-purple transition-colors flex flex-col"
+              className="bg-card border border-gray-700 rounded-lg p-3 hover:border-degen-purple transition-colors flex flex-col"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-1">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold text-white mb-0.5 truncate">
                     {room.name}
                   </h3>
                   {room.description && (
-                    <p className="text-sm text-gray-400 mb-2">
+                    <p className="text-xs text-gray-400 mb-1 line-clamp-2">
                       {room.description}
                     </p>
                   )}
@@ -345,35 +345,33 @@ export default function RoomList() {
                 {isHost(room) && (
                   <button
                     onClick={() => handleDeleteRoom(room.id, room.name)}
-                    className="ml-2 p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+                    className="ml-1 p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
                     title="Delete room (host only)"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-4 text-sm text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    <span>
-                      {room.participantCount}/{room.maxParticipants}
-                    </span>
-                  </div>
-                  <span>Host: @{room.host.username}</span>
+              <div className="flex items-center gap-3 text-xs text-gray-400 mb-2">
+                <div className="flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5" />
+                  <span>
+                    {room.participantCount}/{room.maxParticipants}
+                  </span>
                 </div>
+                <span className="truncate">@{room.host.username}</span>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end mt-auto">
                 <Button
                   onClick={() => handleJoinRoom(room.id, room.name)}
-                  className="px-6"
+                  className="px-4 py-1.5 text-sm"
                   disabled={room.participantCount >= room.maxParticipants}
                 >
                   {room.participantCount >= room.maxParticipants
-                    ? "Room Full"
-                    : "Join Room"}
+                    ? "Full"
+                    : "Join"}
                 </Button>
               </div>
               </div>

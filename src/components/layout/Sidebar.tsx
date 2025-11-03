@@ -28,7 +28,7 @@ const navItems = [
   { href: "/notifications", icon: Bell, label: "Notifications" },
   { href: "/messages", icon: MessageCircle, label: "Messages" },
   { href: "/channels", icon: Hash, label: "Channels" },
-  { href: "/voice-rooms", icon: Mic, label: "Voice Rooms" },
+  { href: "/voice-rooms", icon: Mic, label: "Voice Chat" },
   { href: "/trending", icon: TrendingUp, label: "Trending" },
   { href: "/top-traders", icon: Wallet, label: "Top Traders" },
   { href: "/jeet-leaderboard", icon: ThumbsDown, label: "Jeet Leaderboard" },
