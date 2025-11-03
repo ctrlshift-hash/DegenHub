@@ -10,9 +10,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
 
+    // Use explicit select to avoid Prisma trying to fetch isClosed column if it doesn't exist yet
     const rooms = await prisma.voiceRoom.findMany({
       where: { isPublic: true },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isPublic: true,
+        maxParticipants: true,
+        createdAt: true,
         host: {
           select: {
             id: true,
@@ -24,7 +31,10 @@ export async function GET(request: NextRequest) {
         },
         participants: {
           where: { leftAt: null },
-          include: {
+          select: {
+            id: true,
+            roomId: true,
+            userId: true,
             user: {
               select: {
                 id: true,
