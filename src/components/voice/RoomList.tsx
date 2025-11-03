@@ -64,21 +64,21 @@ export default function RoomList() {
     return () => clearInterval(interval);
   }, []);
   
-  // Separate useEffect for auto-join after rooms are loaded
+  // Auto-join from URL param - check immediately, don't wait for rooms
   useEffect(() => {
-    if (rooms.length === 0 || selectedRoom) return; // Wait for rooms to load or skip if already in a room
+    if (selectedRoom) return; // Skip if already in a room
     
     const urlParams = new URLSearchParams(window.location.search);
     const joinRoomId = urlParams.get("join");
     if (joinRoomId) {
-      // Auto-join the room
+      // Join immediately - don't wait for rooms list
       handleJoinRoom(joinRoomId, "").catch(err => {
         console.error("Auto-join failed:", err);
         // Remove the query param on error
         window.history.replaceState({}, "", window.location.pathname);
       });
     }
-  }, [rooms]); // Run when rooms are loaded
+  }, []); // Run once on mount
 
   const fetchRooms = async (pageNum: number = 0, reset: boolean = false) => {
     try {
@@ -126,12 +126,7 @@ export default function RoomList() {
 
   const handleJoinRoom = async (roomId: string, roomName: string) => {
     try {
-      // Get room name if not provided (from URL join)
-      if (!roomName) {
-        const room = rooms.find(r => r.id === roomId);
-        roomName = room?.name || "Voice Room";
-      }
-      
+      // Optimize: Don't wait for room name from rooms list, use API response instead
       // Get user identifier for header
       const headers: Record<string, string> = {};
       if (session?.user?.id) {
@@ -141,6 +136,7 @@ export default function RoomList() {
       }
       // Guest users don't need headers
 
+      // Start joining immediately - don't wait for room name
       const response = await fetch(`/api/voice/rooms/${roomId}/join`, {
         method: "POST",
         headers,
@@ -155,14 +151,15 @@ export default function RoomList() {
           return;
         }
         
+        // Set selected room immediately so VoiceChatRoom can start connecting
         setSelectedRoom({
           roomUrl: data.room.dailyRoomUrl,
           token: data.token || null,
-          roomName: data.room.name || roomName,
+          roomName: data.room.name || roomName || "Voice Room",
           roomId: roomId, // Store room ID for leaving
         });
         
-        // Remove join query param from URL
+        // Remove join query param from URL immediately
         window.history.replaceState({}, "", window.location.pathname);
       } else {
         const error = await response.json();

@@ -76,22 +76,25 @@ export async function POST(
     // Determine if user should be a speaker (OPEN mode = always true, NOMINATED = false by default)
     const isSpeaker = room.speakerMode === "OPEN" ? true : false;
 
-    // Generate Daily.co token FIRST (before DB operations to speed up)
+    // Generate Daily.co token and update/create participant in parallel for maximum speed
     let token: string | null = null;
-    if (room.dailyRoomUrl) {
-      const urlParts = room.dailyRoomUrl.split("/");
-      const roomName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || "";
-      
-      if (roomName) {
-        const dailyToken = await generateDailyToken(roomName, userId, user.username);
-        if (dailyToken) {
-          token = dailyToken.token;
-        }
-      }
-    }
+    const tokenPromise = room.dailyRoomUrl
+      ? (() => {
+          const urlParts = room.dailyRoomUrl.split("/");
+          const roomName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || "";
+          if (roomName) {
+            return generateDailyToken(roomName, userId, user.username)
+              .then(dailyToken => dailyToken?.token || null)
+              .catch(err => {
+                console.error("Token generation failed (non-critical):", err);
+                return null;
+              });
+          }
+          return Promise.resolve(null);
+        })()
+      : Promise.resolve(null);
 
-    // Update/create participant in parallel with history (don't wait for history)
-    let participant;
+    // Update/create participant in parallel with token generation
     const participantPromise = existingParticipant && existingParticipant.leftAt
       ? prisma.roomParticipant.update({
           where: { id: existingParticipant.id },
@@ -112,7 +115,7 @@ export async function POST(
       : Promise.resolve(existingParticipant);
 
     // Don't wait for history - fire and forget for speed
-    const historyPromise = prisma.roomHistory.create({
+    prisma.roomHistory.create({
       data: {
         roomId: id,
         userId: userId,
@@ -121,7 +124,9 @@ export async function POST(
       },
     }).catch(err => console.error("History log failed (non-critical):", err));
 
-    participant = await participantPromise;
+    // Wait for both token and participant in parallel
+    const [tokenResult, participant] = await Promise.all([tokenPromise, participantPromise]);
+    token = tokenResult;
 
     return NextResponse.json({
       room: {

@@ -251,8 +251,8 @@ export default function VoiceChatRoom({
 
         console.log("Creating Daily.co frame for room:", roomUrl);
         
-        // Reduced wait time for faster joining
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Minimal wait for faster joining
+        await new Promise(resolve => setTimeout(resolve, 50));
 
       // Create Daily.co call frame (audio-only)
       let daily: DailyCall | null = null;
@@ -298,8 +298,8 @@ export default function VoiceChatRoom({
                 iframeRef.current.innerHTML = "";
               }
               
-              // Reduced wait time
-              await new Promise(resolve => setTimeout(resolve, 200));
+              // Minimal wait time
+              await new Promise(resolve => setTimeout(resolve, 100));
               
               // Check one more time
               if (isCleaningUp) {
@@ -1370,8 +1370,15 @@ export default function VoiceChatRoom({
                           <button
                             onClick={handleKick}
                             className="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={isCoHost && !isHost && participantUserId === roomHostId ? "Co-hosts cannot kick the host" : "Kick participant"}
-                            disabled={isCoHost && !isHost && participantUserId === roomHostId || !participantUserId}
+                            title={
+                              participantUserId === roomHostId 
+                                ? "Cannot kick the host" 
+                                : "Kick participant"
+                            }
+                            disabled={
+                              participantUserId === roomHostId || 
+                              (!participantUserId && !sessionId)
+                            }
                           >
                             <UserX className="h-3 w-3 text-white" />
                           </button>
