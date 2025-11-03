@@ -12,15 +12,32 @@ export async function POST(
     const { id } = await params;
     const { user, userId } = await getUserFromRequest(request);
 
-    // Check if room exists
+    // Check if room exists - use select to avoid isClosed column issues
     const room = await prisma.voiceRoom.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        dailyRoomUrl: true,
+        speakerMode: true,
+        maxParticipants: true,
         participants: {
           where: { leftAt: null },
+          select: {
+            id: true,
+            userId: true,
+            roomId: true,
+            joinedAt: true,
+            leftAt: true,
+          },
         },
         bannedUsers: {
           where: { userId },
+          select: {
+            id: true,
+            userId: true,
+            roomId: true,
+          },
         },
       },
     });
@@ -130,8 +147,21 @@ export async function POST(
     });
   } catch (error: any) {
     console.error("Error joining room:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+      stack: error.stack,
+    });
     return NextResponse.json(
-      { error: "Failed to join room" },
+      { 
+        error: "Failed to join room",
+        details: error.message || String(error),
+        ...(process.env.NODE_ENV === "development" && {
+          code: error.code,
+          meta: error.meta,
+        }),
+      },
       { status: 500 }
     );
   }
