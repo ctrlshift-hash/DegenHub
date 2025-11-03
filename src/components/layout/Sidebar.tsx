@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
@@ -17,7 +17,8 @@ import {
   Newspaper,
   Skull,
   ThumbsDown,
-  Mic
+  Mic,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,27 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
+  const [userCount, setUserCount] = useState<number | null>(null);
+
+  // Fetch live user count
+  useEffect(() => {
+    const fetchUserCount = async () => {
+      try {
+        const response = await fetch("/api/users/count");
+        if (response.ok) {
+          const data = await response.json();
+          setUserCount(data.count);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user count:", error);
+      }
+    };
+
+    fetchUserCount();
+    // Refresh every 30 seconds to keep it live
+    const interval = setInterval(fetchUserCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCopyCA = async () => {
     try {
@@ -52,14 +74,24 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:block w-64 h-screen border-r border-border bg-card">
       <div className="p-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 mb-6">
-          <img
-            src="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png"
-            alt="DegenHub"
-            className="h-10 w-auto"
-          />
-        </Link>
+        {/* Logo and User Count */}
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/" className="flex items-center space-x-2">
+            <img
+              src="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png"
+              alt="DegenHub"
+              className="h-10 w-auto"
+            />
+          </Link>
+          {userCount !== null && (
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-degen-purple/10 rounded-lg border border-degen-purple/20">
+              <Users className="h-3.5 w-3.5 text-degen-purple" />
+              <span className="text-xs font-semibold text-degen-purple">
+                {userCount.toLocaleString()}
+              </span>
+            </div>
+          )}
+        </div>
 
         <div className="space-y-2">
           {navItems.map((item) => {

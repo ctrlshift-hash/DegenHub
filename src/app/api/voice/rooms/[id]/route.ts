@@ -37,9 +37,15 @@ export async function DELETE(
     // For guest hosts, check if they're the first participant (earliest joinedAt)
     let isHost = room.hostId === userId;
     
+    // Admin check: Allow deletion if user email/wallet matches admin environment variable
+    const isAdmin = process.env.ADMIN_EMAIL && (
+      user?.email === process.env.ADMIN_EMAIL ||
+      user?.walletAddress === process.env.ADMIN_WALLET_ADDRESS
+    );
+    
     // If userId doesn't match but user is a guest (username starts with "guest_"), 
     // check if they're the first participant (they're likely the creator/host)
-    if (!isHost && user && user.username?.startsWith("guest_")) {
+    if (!isHost && !isAdmin && user && user.username?.startsWith("guest_")) {
       const hostUser = await prisma.user.findUnique({
         where: { id: room.hostId },
         select: { username: true },
@@ -64,7 +70,7 @@ export async function DELETE(
       }
     }
     
-    if (!isHost) {
+    if (!isHost && !isAdmin) {
       return NextResponse.json(
         { error: "Only the room host can delete this room" },
         { status: 403 }

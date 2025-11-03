@@ -361,9 +361,21 @@ export default function JeetLeaderboardPage() {
     });
   };
 
+  const testimonials = [
+    { text: "Ansem asked me for money and blocked me.", author: "Former Follower" },
+    { text: "Lynk bought the top so fast, I think he was aiming for it.", author: "Chart Watcher" },
+    { text: "Frankdegods said 'trust me bro' right before the dump. I trusted.", author: "Rugged Investor" },
+    { text: "Beaver's stop-loss is actually a 'continue losing' button.", author: "Technical Analyst" },
+    { text: "Dior's entries are designer, exits are from Wish.com.", author: "Fashion Victim" },
+    { text: "Casino went all-in and the house always wins. He IS the house.", author: "Card Counter" },
+    { text: "James Wynn's name is ironic. Very ironic.", author: "Grammar Police" },
+    { text: "Otta was early to the party... the going away party.", author: "Party Pooper" },
+    { text: "Xunle catches wicks. All of them. Especially the red ones.", author: "Wick Watcher" },
+  ];
+
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
         <h1 className="text-2xl font-bold mb-4">Jeet Leaderboard</h1>
         {/* Callout to key actions */}
         <div className="mb-4 rounded-lg border border-indigo-700/40 bg-indigo-900/20 p-3 flex flex-wrap items-center gap-3" role="region" aria-label="Quick actions">
@@ -395,31 +407,54 @@ export default function JeetLeaderboardPage() {
           </label>
         </div>
 
-        {loading ? (
-          <div className="text-muted-foreground">Loading…</div>
-        ) : (onlyWatchlist ? profiles.filter(p=>watchlist.includes(p.wallet)) : profiles).length === 0 ? (
-          <div className="text-muted-foreground">No entries yet.</div>
-        ) : (
-          <div className="space-y-3">
-            {(onlyWatchlist ? profiles.filter(p=>watchlist.includes(p.wallet)) : profiles).map((p) => (
-              <div key={p.wallet} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 hover:bg-accent transition-colors">
-                <img src={p.pfpUrl} alt={p.name} className="h-10 w-10 rounded-full object-cover" />
-                <button className="text-left hover:underline font-semibold" onClick={() => setSelected(p)}>
-                  {p.name}
-                </button>
-                <div className="font-mono text-sm text-muted-foreground ml-2">
-                  {p.wallet.slice(0, 6)}…{p.wallet.slice(-6)}
-                </div>
-                <button className={`ml-2 text-xs px-2 py-1 rounded ${watchlist.includes(p.wallet)?"bg-yellow-500/20 text-yellow-400":"bg-muted"}`} onClick={()=>toggleWatch(p.wallet)}>
-                  {watchlist.includes(p.wallet)?"★ Watched":"☆ Watch"}
-                </button>
-                <div className="ml-auto font-semibold text-red-400">
-                  {p.pnlSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL ({p.pnlUsd.toLocaleString(undefined, { style: "currency", currency: "USD", currencyDisplay: "symbol" }).replace("US$", "$")})
+        {/* Leaderboard and Testimonials Grid */}
+        <div className="grid lg:grid-cols-[1fr_300px] gap-6">
+          {/* Leaderboard */}
+          <div>
+            {loading ? (
+              <div className="text-muted-foreground">Loading…</div>
+            ) : (onlyWatchlist ? profiles.filter(p=>watchlist.includes(p.wallet)) : profiles).length === 0 ? (
+              <div className="text-muted-foreground">No entries yet.</div>
+            ) : (
+              <div className="space-y-3">
+                {(onlyWatchlist ? profiles.filter(p=>watchlist.includes(p.wallet)) : profiles).map((p) => (
+                  <div key={p.wallet} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 hover:bg-accent transition-colors">
+                    <img src={p.pfpUrl} alt={p.name} className="h-10 w-10 rounded-full object-cover" />
+                    <button className="text-left hover:underline font-semibold" onClick={() => setSelected(p)}>
+                      {p.name}
+                    </button>
+                    <div className="font-mono text-sm text-muted-foreground ml-2">
+                      {p.wallet ? p.wallet.slice(0, 6) + "…" + p.wallet.slice(-6) : "N/A"}
+                    </div>
+                    <button className={`ml-2 text-xs px-2 py-1 rounded ${watchlist.includes(p.wallet)?"bg-yellow-500/20 text-yellow-400":"bg-muted"}`} onClick={()=>toggleWatch(p.wallet)}>
+                      {watchlist.includes(p.wallet)?"★ Watched":"☆ Watch"}
+                    </button>
+                    <div className="ml-auto font-semibold text-red-400">
+                      {p.pnlSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL ({p.pnlUsd.toLocaleString(undefined, { style: "currency", currency: "USD", currencyDisplay: "symbol" }).replace("US$", "$")})
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Testimonials Sidebar */}
+          <div className="hidden lg:block">
+            <div className="sticky top-4">
+              <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-4">
+                <h2 className="text-lg font-bold mb-3 text-yellow-400">💬 Community Testimonials</h2>
+                <div className="space-y-4">
+                  {testimonials.map((testimonial, idx) => (
+                    <div key={idx} className="border-l-2 border-yellow-500/50 pl-3 py-2">
+                      <p className="text-sm text-gray-300 italic mb-1">"{testimonial.text}"</p>
+                      <p className="text-xs text-gray-500">— {testimonial.author}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Bottom actions: Nominate + Create My Jeet Card */}

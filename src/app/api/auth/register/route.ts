@@ -24,6 +24,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
+      // Provide more specific error message
+      if (existingUser.email === email) {
+        return NextResponse.json(
+          { error: "An account with this email already exists" },
+          { status: 400 }
+        );
+      } else if (existingUser.username === username) {
+        return NextResponse.json(
+          { error: "Username is already taken. Please choose another." },
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
         { error: "User already exists with this email or username" },
         { status: 400 }
