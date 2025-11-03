@@ -831,11 +831,29 @@ export default function VoiceChatRoom({
                         headers["X-Wallet-Address"] = publicKey.toBase58();
                       }
 
-                      // First, eject from Daily.co if we have the call frame
+                      // First, send message to participant that they're being kicked
                       if (callFrame && sessionId) {
                         try {
-                          // Use Daily.co's API to eject the participant
-                          await fetch("/api/voice/rooms/eject", {
+                          // Send app message to the participant before ejecting
+                          await callFrame.sendAppMessage(
+                            { 
+                              event: "kick", 
+                              message: "You have been kicked from the room" 
+                            },
+                            sessionId
+                          );
+                          
+                          // Small delay so they see the message
+                          await new Promise(resolve => setTimeout(resolve, 500));
+                        } catch (e) {
+                          console.error("Error sending kick message:", e);
+                        }
+                      }
+
+                      // Eject from Daily.co using server API
+                      if (roomUrl && sessionId) {
+                        try {
+                          const ejectResponse = await fetch("/api/voice/rooms/eject", {
                             method: "POST",
                             headers: {
                               "Content-Type": "application/json",
@@ -845,13 +863,20 @@ export default function VoiceChatRoom({
                               sessionId,
                             }),
                           });
-                          console.log("✅ Ejected participant from Daily.co:", sessionId);
+                          
+                          if (!ejectResponse.ok) {
+                            const ejectError = await ejectResponse.json();
+                            console.error("Failed to eject from Daily.co:", ejectError);
+                            // Continue anyway - we'll mark as kicked in DB
+                          } else {
+                            console.log("✅ Ejected participant from Daily.co:", sessionId);
+                          }
                         } catch (e) {
                           console.error("Error ejecting from Daily.co (will still mark as kicked):", e);
                         }
                       }
 
-                      // Then mark as kicked in database
+                      // Mark as kicked in database
                       const response = await fetch(`/api/voice/rooms/${roomId}/kick`, {
                         method: "POST",
                         headers,

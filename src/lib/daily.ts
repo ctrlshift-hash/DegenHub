@@ -182,8 +182,13 @@ export async function ejectParticipantFromDailyRoom(
     return false;
   }
 
+  // Sanitize room name (remove protocol and domain if present)
+  const sanitizedRoomName = roomName.replace(/^https?:\/\//, "").replace(/^[^\/]+\//, "").split("/")[0];
+
   try {
-    const response = await fetch(`${DAILY_API_URL}/rooms/${roomName}/eject`, {
+    console.log("🚫 Ejecting participant:", { roomName: sanitizedRoomName, sessionId });
+    
+    const response = await fetch(`${DAILY_API_URL}/rooms/${sanitizedRoomName}/eject`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -194,11 +199,22 @@ export async function ejectParticipantFromDailyRoom(
       }),
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(responseText);
+      } catch {
+        errorData = { message: responseText };
+      }
+      
       console.error("❌ Failed to eject participant from Daily.co:", {
         status: response.status,
-        error: errorText,
+        statusText: response.statusText,
+        error: errorData,
+        roomName: sanitizedRoomName,
+        sessionId,
       });
       return false;
     }
