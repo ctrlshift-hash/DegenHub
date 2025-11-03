@@ -79,6 +79,7 @@ export default function VoiceChatRoom({
   const [isHost, setIsHost] = useState(false);
   const [isCoHost, setIsCoHost] = useState(false);
   const [roomHostId, setRoomHostId] = useState<string | null>(null);
+  const [roomHostData, setRoomHostData] = useState<{ username: string; profileImage: string | null; walletAddress: string | null } | null>(null);
   const [participantUserIds, setParticipantUserIds] = useState<Map<string, string>>(new Map()); // Map session_id to userId
   const [participantProfileImages, setParticipantProfileImages] = useState<Map<string, string>>(new Map()); // Map userId to profileImage
   const [isRoomClosed, setIsRoomClosed] = useState(false);
@@ -108,6 +109,13 @@ export default function VoiceChatRoom({
           const hostId = data.room.host.id;
           setRoomHostId(hostId);
           
+          // Store host data for local user display
+          setRoomHostData({
+            username: data.room.host.username || "Host",
+            profileImage: data.room.host.profileImage || null,
+            walletAddress: data.room.host.walletAddress || null,
+          });
+          
           // Check if current user is host (by email session or wallet)
           let currentUserId: string | null = null;
           if (session?.user?.id) {
@@ -122,11 +130,15 @@ export default function VoiceChatRoom({
             if (data.room.host.walletAddress === walletAddr) {
               setIsHost(true);
               console.log("✅ Host detected via wallet:", walletAddr);
+              // Use host ID as currentUserId since we're the host
+              currentUserId = hostId;
             }
             // Find wallet user ID from participants or fetch separately
-            const walletParticipant = data.room.participants.find((p: any) => p.user?.walletAddress === walletAddr);
-            if (walletParticipant) {
-              currentUserId = walletParticipant.user.id;
+            if (!currentUserId) {
+              const walletParticipant = data.room.participants.find((p: any) => p.user?.walletAddress === walletAddr);
+              if (walletParticipant) {
+                currentUserId = walletParticipant.user.id;
+              }
             }
           }
           
@@ -1016,32 +1028,43 @@ export default function VoiceChatRoom({
                 // Use session username first, then userName prop, then fallback
                 displayUserName = session.user.username || userName || "Guest";
               } else if (publicKey) {
-                displayUserName = userName || `anon_${publicKey.toBase58().slice(0, 6)}`;
-                
-                // Try to get userId from participantUserIds if available
-                // Find our session ID first
-                if (callFrame) {
-                  try {
-                    const participantsObj = callFrame.participants();
-                    const localParticipant = Object.values(participantsObj).find((p: any) => p.local);
-                    if (localParticipant) {
-                      const localSessionId = (localParticipant as any).session_id;
-                      if (localSessionId) {
-                        currentUserId = participantUserIds.get(localSessionId) || null;
-                        if (currentUserId) {
-                          currentUserProfileImage = participantProfileImages.get(currentUserId) || null;
+                // For wallet users, check if we're the host first
+                if (isHost && roomHostData) {
+                  // Use host data from room details
+                  displayUserName = roomHostData.username;
+                  currentUserId = roomHostId;
+                  currentUserProfileImage = roomHostData.profileImage || participantProfileImages.get(roomHostId || "") || null;
+                } else {
+                  // Not the host, try to get from participantUserIds
+                  displayUserName = userName || `anon_${publicKey.toBase58().slice(0, 6)}`;
+                  
+                  // Try to get userId from participantUserIds if available
+                  // Find our session ID first
+                  if (callFrame) {
+                    try {
+                      const participantsObj = callFrame.participants();
+                      const localParticipant = Object.values(participantsObj).find((p: any) => p.local);
+                      if (localParticipant) {
+                        const localSessionId = (localParticipant as any).session_id;
+                        if (localSessionId) {
+                          currentUserId = participantUserIds.get(localSessionId) || null;
+                          if (currentUserId) {
+                            currentUserProfileImage = participantProfileImages.get(currentUserId) || null;
+                            // Try to get username from room participants
+                            // (We don't have username in participantUserIds, so we'll use userName prop or anon)
+                          }
                         }
                       }
+                    } catch (e) {
+                      // Ignore
                     }
-                  } catch (e) {
-                    // Ignore
                   }
-                }
-                
-                // If we're the host and still no profile image, try using roomHostId
-                if (isHost && roomHostId && !currentUserProfileImage) {
-                  currentUserId = roomHostId;
-                  currentUserProfileImage = participantProfileImages.get(roomHostId) || null;
+                  
+                  // Fallback: try using roomHostId if available (shouldn't happen if not host)
+                  if (!currentUserProfileImage && roomHostId) {
+                    currentUserId = roomHostId;
+                    currentUserProfileImage = participantProfileImages.get(roomHostId) || null;
+                  }
                 }
               }
               
