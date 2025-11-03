@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import DailyIframe from "@daily-co/daily-js";
 import type { DailyCall } from "@daily-co/daily-js";
-import { X, Mic, MicOff, PhoneOff, Users, UserX, Crown, Share2, Shield } from "lucide-react";
+import { X, Mic, MicOff, PhoneOff, Users, UserX, Crown, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSession } from "next-auth/react";
 import { useWallet } from "@/contexts/WalletContext";
@@ -467,51 +467,78 @@ export default function VoiceChatRoom({
         });
       });
 
-      // Detect when participants are speaking using track-state-changed
-      // Note: "track-state-changed" is not in Daily.co's TypeScript types but works at runtime
-      (daily.on as any)("track-state-changed", (event: any) => {
+      // Detect when participants are speaking - use participant-updated event
+      daily.on("participant-updated", (event: any) => {
         if (!event.participant || !event.participant.session_id) return;
         
-        // Skip local user for speaking indicators
-        if (event.participant.local) {
-          return;
-        }
-        
         const sessionId = event.participant.session_id;
+        const tracks = event.participant.tracks || {};
+        const audioTrack = tracks.audio;
         
-        // Check if audio track is speaking
-        if (event.track?.kind === "audio") {
-          const isSpeaking = event.participant.tracks?.audio?.isSpeaking || 
-                            event.participant.tracks?.audio?.state === "playing";
-          
+        // Check if speaking
+        const isSpeaking = audioTrack?.isSpeaking === true ||
+                          (audioTrack && audioTrack.state === "playing");
+        
+        setSpeakingParticipants(prev => {
+          const updated = new Set(prev);
+          if (isSpeaking) {
+            updated.add(sessionId);
+            if (!event.participant.local) {
+              lastActivityRef.current = Date.now();
+            }
+          } else {
+            updated.delete(sessionId);
+          }
+          return updated;
+        });
+      });
+      
+      // Also use speaking-started and speaking-stopped events
+      (daily.on as any)("speaking-started", (event: any) => {
+        if (event.participant?.session_id) {
           setSpeakingParticipants(prev => {
             const updated = new Set(prev);
-            if (isSpeaking) {
-              updated.add(sessionId);
+            updated.add(event.participant.session_id);
+            if (!event.participant.local) {
               lastActivityRef.current = Date.now();
-            } else {
-              updated.delete(sessionId);
             }
             return updated;
           });
         }
       });
+
+      (daily.on as any)("speaking-stopped", (event: any) => {
+        if (event.participant?.session_id) {
+          setSpeakingParticipants(prev => {
+            const updated = new Set(prev);
+            updated.delete(event.participant.session_id);
+            return updated;
+          });
+        }
+      });
       
-      // Also check participant state periodically (fallback)
+      // Poll participant state periodically as fallback (more reliable)
       const checkSpeakingInterval = setInterval(() => {
         try {
           const participantsObj = daily!.participants();
           const updatedSpeaking = new Set<string>();
           
           Object.values(participantsObj).forEach((p: any) => {
-            if (!p.local && p.session_id) {
-              const isSpeaking = p.tracks?.audio?.isSpeaking || 
-                                p.tracks?.audio?.state === "playing" ||
-                                (p.audioTrack && p.audioTrack.enabled && !p.audioTrack.muted && p.audioTrack.readyState === "live");
+            if (p.session_id) {
+              const tracks = p.tracks || {};
+              const audioTrack = tracks.audio;
+              
+              // Check multiple indicators for speaking
+              const isSpeaking = 
+                audioTrack?.isSpeaking === true ||
+                (audioTrack && audioTrack.state === "playing") ||
+                false;
               
               if (isSpeaking) {
                 updatedSpeaking.add(p.session_id);
-                lastActivityRef.current = Date.now();
+                if (!p.local) {
+                  lastActivityRef.current = Date.now();
+                }
               }
             }
           });
@@ -520,7 +547,7 @@ export default function VoiceChatRoom({
         } catch (e) {
           console.error("Error checking speaking state:", e);
         }
-      }, 500); // Check every 500ms
+      }, 300); // Check every 300ms for responsive indicators
       
       // Store interval for cleanup
       (daily as any)._speakingCheckInterval = checkSpeakingInterval;
@@ -1145,36 +1172,6 @@ export default function VoiceChatRoom({
                               title="Make co-host"
                             >
                               <Crown className="h-3 w-3 text-white" />
-                            </button>
-                          )}
-                          {speakerMode === "NOMINATED" && (isHost || isCoHost) && (
-                            <button
-                              onClick={async () => {
-                                if (!participantUserId || !roomId) return;
-                                try {
-                                  const headers: Record<string, string> = { "Content-Type": "application/json" };
-                                  if (publicKey && !session?.user) {
-                                    headers["X-Wallet-Address"] = publicKey.toBase58();
-                                  }
-                                  const response = await fetch(`/api/voice/rooms/${roomId}/speaker`, {
-                                    method: "POST",
-                                    headers,
-                                    body: JSON.stringify({ participantUserId, isSpeaker: true }),
-                                  });
-                                  if (response.ok) {
-                                    alert(`${displayName} can now speak`);
-                                  } else {
-                                    const error = await response.json();
-                                    alert(error.error || "Failed to nominate speaker");
-                                  }
-                                } catch (error) {
-                                  console.error("Error nominating speaker:", error);
-                                }
-                              }}
-                              className="p-1.5 bg-green-600/80 hover:bg-green-600 rounded-full transition-colors"
-                              title="Nominate as speaker"
-                            >
-                              <Shield className="h-3 w-3 text-white" />
                             </button>
                           )}
                           <button

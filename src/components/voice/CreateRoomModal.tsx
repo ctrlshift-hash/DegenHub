@@ -20,7 +20,6 @@ export default function CreateRoomModal({
   const [category, setCategory] = useState("General");
   const [isPublic, setIsPublic] = useState(true);
   const [maxParticipants, setMaxParticipants] = useState(50);
-  const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">("OPEN");
   const [voiceQuality, setVoiceQuality] = useState<"low" | "medium" | "high">("high");
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +55,7 @@ export default function CreateRoomModal({
           category: category || null,
           isPublic,
           maxParticipants: parseInt(maxParticipants.toString()) || 50,
-          speakerMode,
+          speakerMode: "OPEN", // Always open mic
           voiceQuality,
         }),
       });
@@ -151,40 +150,6 @@ export default function CreateRoomModal({
             <label htmlFor="isPublic" className="text-sm text-gray-300">
               Public room (visible to everyone)
             </label>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-100">
-              Speaker Mode *
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="speakerMode"
-                  value="OPEN"
-                  checked={speakerMode === "OPEN"}
-                  onChange={(e) => setSpeakerMode(e.target.value as "OPEN" | "NOMINATED")}
-                  className="w-4 h-4 border-gray-700 bg-gray-900 text-degen-purple focus:ring-degen-purple"
-                />
-                <span className="text-sm text-gray-300">
-                  Open Mic - Everyone can speak when they join
-                </span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="speakerMode"
-                  value="NOMINATED"
-                  checked={speakerMode === "NOMINATED"}
-                  onChange={(e) => setSpeakerMode(e.target.value as "OPEN" | "NOMINATED")}
-                  className="w-4 h-4 border-gray-700 bg-gray-900 text-degen-purple focus:ring-degen-purple"
-                />
-                <span className="text-sm text-gray-300">
-                  Nominated Speakers - Only hosts/co-hosts can speak (others must be nominated)
-                </span>
-              </label>
-            </div>
           </div>
 
           <div className="flex gap-2 pt-2">
