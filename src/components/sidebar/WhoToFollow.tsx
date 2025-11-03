@@ -125,10 +125,6 @@ export default function WhoToFollow() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount, no dependencies
 
-  if (!session?.user && !connected) {
-    return null; // Don't show if not logged in
-  }
-
   if (loading) {
     return (
       <div className="bg-card rounded-lg border border-border p-4">
@@ -141,7 +137,14 @@ export default function WhoToFollow() {
   }
 
   if (suggestions.length === 0) {
-    return null;
+    return (
+      <div className="bg-card rounded-lg border border-border p-4">
+        <h3 className="text-lg font-bold mb-4">Who to follow</h3>
+        <p className="text-sm text-muted-foreground text-center py-4">
+          No suggestions available at the moment
+        </p>
+      </div>
+    );
   }
 
   return (
