@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import DailyIframe from "@daily-co/daily-js";
 import type { DailyCall } from "@daily-co/daily-js";
-import { X, Mic, MicOff, PhoneOff, Users, UserX } from "lucide-react";
+import { X, Mic, MicOff, PhoneOff, Users, UserX, Crown, Share2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSession } from "next-auth/react";
 import { useWallet } from "@/contexts/WalletContext";
@@ -100,12 +100,24 @@ export default function VoiceChatRoom({
         if (response.ok) {
           const data = await response.json();
           const roomHostId = data.room.host.id;
+          const currentUserId = session?.user?.id || null;
           
           // Check if current user is host (by email session or wallet)
           if (session?.user?.id === roomHostId) {
             setIsHost(true);
           } else if (publicKey && data.room.host.walletAddress === publicKey.toBase58()) {
             setIsHost(true);
+          }
+          
+          // Check if user is co-host
+          if (currentUserId && data.room.coHosts) {
+            const isCoHostUser = data.room.coHosts.some((ch: any) => ch.userId === currentUserId);
+            setIsCoHost(isCoHostUser);
+          }
+          
+          // Get speaker mode
+          if (data.room.speakerMode) {
+            setSpeakerMode(data.room.speakerMode);
           }
         }
       } catch (error) {
@@ -765,12 +777,25 @@ export default function VoiceChatRoom({
             {otherParticipants.length} {otherParticipants.length === 1 ? "participant" : "participants"}
           </p>
         </div>
-        <button
-          onClick={handleLeave}
-          className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              const roomLink = `${window.location.origin}/voice-rooms?join=${roomId}`;
+              await navigator.clipboard.writeText(roomLink);
+              alert("Room link copied to clipboard!");
+            }}
+            className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
+            title="Share room link"
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleLeave}
+            className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Participants Grid */}
@@ -925,14 +950,76 @@ export default function VoiceChatRoom({
                         isSpeaking ? "border-green-500 shadow-lg shadow-green-500/30" : "border-gray-700"
                       }`}
                     >
-                      {isHost && participantUserId && (
-                        <button
-                          onClick={handleKick}
-                          className="absolute top-2 right-2 p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors z-10"
-                          title="Kick participant"
-                        >
-                          <UserX className="h-4 w-4 text-white" />
-                        </button>
+                      {(isHost || isCoHost) && participantUserId && (
+                        <div className="absolute top-2 right-2 flex gap-1 z-10">
+                          {isHost && (
+                            <button
+                              onClick={async () => {
+                                if (!participantUserId || !roomId || !confirm(`Make ${displayName} a co-host?`)) return;
+                                try {
+                                  const headers: Record<string, string> = { "Content-Type": "application/json" };
+                                  if (publicKey && !session?.user) {
+                                    headers["X-Wallet-Address"] = publicKey.toBase58();
+                                  }
+                                  const response = await fetch(`/api/voice/rooms/${roomId}/co-host`, {
+                                    method: "POST",
+                                    headers,
+                                    body: JSON.stringify({ coHostUserId: participantUserId, action: "add" }),
+                                  });
+                                  if (response.ok) {
+                                    alert(`${displayName} is now a co-host`);
+                                  } else {
+                                    const error = await response.json();
+                                    alert(error.error || "Failed to add co-host");
+                                  }
+                                } catch (error) {
+                                  console.error("Error adding co-host:", error);
+                                }
+                              }}
+                              className="p-1.5 bg-yellow-600/80 hover:bg-yellow-600 rounded-full transition-colors"
+                              title="Make co-host"
+                            >
+                              <Crown className="h-3 w-3 text-white" />
+                            </button>
+                          )}
+                          {speakerMode === "NOMINATED" && (isHost || isCoHost) && (
+                            <button
+                              onClick={async () => {
+                                if (!participantUserId || !roomId) return;
+                                try {
+                                  const headers: Record<string, string> = { "Content-Type": "application/json" };
+                                  if (publicKey && !session?.user) {
+                                    headers["X-Wallet-Address"] = publicKey.toBase58();
+                                  }
+                                  const response = await fetch(`/api/voice/rooms/${roomId}/speaker`, {
+                                    method: "POST",
+                                    headers,
+                                    body: JSON.stringify({ participantUserId, action: "nominate" }),
+                                  });
+                                  if (response.ok) {
+                                    alert(`${displayName} can now speak`);
+                                  } else {
+                                    const error = await response.json();
+                                    alert(error.error || "Failed to nominate speaker");
+                                  }
+                                } catch (error) {
+                                  console.error("Error nominating speaker:", error);
+                                }
+                              }}
+                              className="p-1.5 bg-green-600/80 hover:bg-green-600 rounded-full transition-colors"
+                              title="Nominate as speaker"
+                            >
+                              <Shield className="h-3 w-3 text-white" />
+                            </button>
+                          )}
+                          <button
+                            onClick={handleKick}
+                            className="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors"
+                            title="Kick participant"
+                          >
+                            <UserX className="h-3 w-3 text-white" />
+                          </button>
+                        </div>
                       )}
                       <div className="relative mb-3">
                         <div className="w-20 h-20 rounded-full bg-degen-purple flex items-center justify-center text-white text-2xl font-bold">

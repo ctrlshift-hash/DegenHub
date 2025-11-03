@@ -95,20 +95,51 @@ export async function POST(
       }
     }
 
+    // Check kick count - if 2 or more, auto-ban
+    const kickHistory = await prisma.roomHistory.findMany({
+      where: {
+        roomId,
+        userId: participantUserId,
+        action: "kicked",
+      },
+    });
+
+    const kickCount = kickHistory.length + 1; // +1 for this kick
+
     // Log to room history
     await prisma.roomHistory.create({
       data: {
         roomId,
         userId: participantUserId,
         action: "kicked",
-        details: JSON.stringify({ kickedBy: userId }),
+        details: JSON.stringify({ kickedBy: userId, kickCount }),
       },
     });
+
+    // If kicked 2+ times, auto-ban
+    if (kickCount >= 2) {
+      await prisma.roomBannedUser.upsert({
+        where: {
+          roomId_userId: {
+            roomId,
+            userId: participantUserId,
+          },
+        },
+        update: {},
+        create: {
+          roomId,
+          userId: participantUserId,
+          reason: `Kicked ${kickCount} times`,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
       message: "Participant kicked successfully",
       sessionId: null, // We don't have session_id here, client needs to provide it
+      kickCount,
+      banned: kickCount >= 2,
     });
   } catch (error: any) {
     console.error("Error kicking participant:", error);

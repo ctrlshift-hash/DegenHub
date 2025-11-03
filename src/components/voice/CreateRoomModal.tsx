@@ -153,6 +153,40 @@ export default function CreateRoomModal({
             </label>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-100">
+              Speaker Mode *
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="speakerMode"
+                  value="OPEN"
+                  checked={speakerMode === "OPEN"}
+                  onChange={(e) => setSpeakerMode(e.target.value as "OPEN" | "NOMINATED")}
+                  className="w-4 h-4 border-gray-700 bg-gray-900 text-degen-purple focus:ring-degen-purple"
+                />
+                <span className="text-sm text-gray-300">
+                  Open Mic - Everyone can speak when they join
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="speakerMode"
+                  value="NOMINATED"
+                  checked={speakerMode === "NOMINATED"}
+                  onChange={(e) => setSpeakerMode(e.target.value as "OPEN" | "NOMINATED")}
+                  className="w-4 h-4 border-gray-700 bg-gray-900 text-degen-purple focus:ring-degen-purple"
+                />
+                <span className="text-sm text-gray-300">
+                  Nominated Speakers - Only hosts/co-hosts can speak (others must be nominated)
+                </span>
+              </label>
+            </div>
+          </div>
+
           <div className="flex gap-2 pt-2">
             <Button
               type="submit"

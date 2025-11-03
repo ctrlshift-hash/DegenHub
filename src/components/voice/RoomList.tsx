@@ -173,6 +173,7 @@ export default function RoomList() {
       return session.user.username;
     }
     if (publicKey) {
+      // Will use actual username from Daily.co token if available
       return `anon_${publicKey.toBase58().slice(0, 6)}`;
     }
     return "Guest";

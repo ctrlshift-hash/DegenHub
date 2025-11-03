@@ -89,6 +89,17 @@ export async function GET(
             isVerified: true,
           },
         },
+        coHosts: {
+          select: {
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
         participants: {
           where: { leftAt: null },
           include: {
@@ -117,8 +128,10 @@ export async function GET(
         description: room.description,
         isPublic: room.isPublic,
         maxParticipants: room.maxParticipants,
+        speakerMode: room.speakerMode,
         createdAt: room.createdAt,
         host: room.host,
+        coHosts: room.coHosts || [],
         participants: room.participants.map((p) => ({
           id: p.id,
           user: p.user,
