@@ -801,6 +801,37 @@ export default function VoiceChatRoom({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {isHost && (
+            <button
+              onClick={async () => {
+                if (!confirm("End this room? This will close the room and remove all participants.")) return;
+                try {
+                  const headers: Record<string, string> = {};
+                  if (publicKey && !session?.user) {
+                    headers["X-Wallet-Address"] = publicKey.toBase58();
+                  }
+                  const response = await fetch(`/api/voice/rooms/${roomId}`, {
+                    method: "DELETE",
+                    headers,
+                  });
+                  if (response.ok) {
+                    alert("Room ended successfully");
+                    handleLeave();
+                  } else {
+                    const error = await response.json();
+                    alert(error.error || "Failed to end room");
+                  }
+                } catch (error) {
+                  console.error("Error ending room:", error);
+                  alert("Failed to end room");
+                }
+              }}
+              className="text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 hover:bg-red-900/20 rounded-lg font-semibold text-sm"
+              title="End room (host only)"
+            >
+              End Room
+            </button>
+          )}
           <button
             onClick={async () => {
               const roomLink = `${window.location.origin}/voice-rooms?join=${roomId}`;
