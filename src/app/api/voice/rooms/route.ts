@@ -263,28 +263,78 @@ export async function POST(request: NextRequest) {
       isRecording: false,
     };
     
-    // Explicitly remove isClosed if it exists (Prisma might try to include it from schema)
-    delete roomData.isClosed;
-
-    // Create room in database - don't wait for history
+    // Use raw SQL to bypass Prisma's validation of isClosed column
+    // TODO: Switch back to Prisma.create() after migration adds isClosed column
     let room;
     try {
-      room = await prisma.voiceRoom.create({
-        data: roomData,
-        include: {
-          host: {
-            select: {
-              id: true,
-              username: true,
-              profileImage: true,
-              walletAddress: true,
-              isVerified: true,
-            },
-          },
+      console.log("⚠️ Using raw SQL to create room (isClosed column migration pending)");
+      
+      // Use raw SQL to insert without isClosed
+      const result = await prisma.$queryRaw<Array<{ id: string }>>`
+        INSERT INTO voice_rooms (
+          id, name, description, category, "isPublic", "maxParticipants", 
+          "speakerMode", "voiceQuality", "hostId", "dailyRoomUrl", 
+          "isRecording", "createdAt", "updatedAt"
+        )
+        VALUES (
+          gen_random_uuid()::text, ${roomData.name}, ${roomData.description || null}, 
+          ${roomData.category || null}, ${roomData.isPublic}, ${roomData.maxParticipants},
+          ${roomData.speakerMode}, ${roomData.voiceQuality}, ${roomData.hostId},
+          ${roomData.dailyRoomUrl}, ${roomData.isRecording}, NOW(), NOW()
+        )
+        RETURNING id
+      `;
+      
+      const newRoomId = result[0]?.id;
+      if (!newRoomId) {
+        throw new Error("Raw SQL insert returned no ID");
+      }
+      
+      // Fetch the created room with host info
+      const roomFromDb = await prisma.$queryRaw<Array<{
+        id: string;
+        name: string;
+        description: string | null;
+        isPublic: boolean;
+        maxParticipants: number;
+        createdAt: Date;
+        hostId: string;
+      }>>`
+        SELECT id, name, description, "isPublic", "maxParticipants", "createdAt", "hostId"
+        FROM voice_rooms
+        WHERE id = ${newRoomId}
+      `;
+      
+      if (!roomFromDb || roomFromDb.length === 0) {
+        throw new Error("Failed to fetch created room");
+      }
+      
+      const roomData = roomFromDb[0];
+      
+      // Fetch host info separately
+      const host = await prisma.user.findUnique({
+        where: { id: roomData.hostId },
+        select: {
+          id: true,
+          username: true,
+          profileImage: true,
+          walletAddress: true,
+          isVerified: true,
         },
       });
       
-      // Log creation to history asynchronously (don't wait)
+      // Construct room object in the format expected by the response
+      room = {
+        id: roomData.id,
+        name: roomData.name,
+        description: roomData.description,
+        isPublic: roomData.isPublic,
+        maxParticipants: roomData.maxParticipants,
+        createdAt: roomData.createdAt,
+        host: host || null,
+      };
+      
+      // Log creation to history asynchronously
       prisma.roomHistory.create({
         data: {
           roomId: room.id,
@@ -295,83 +345,17 @@ export async function POST(request: NextRequest) {
       
     } catch (dbError: any) {
       console.error("❌ Database error creating room:", dbError);
-      
-      // If error is about isClosed column not existing, try with raw SQL
-      if (dbError.message?.includes("isClosed") || dbError.code === "P2021") {
-        console.log("⚠️ isClosed column doesn't exist, using raw SQL workaround");
-        try {
-          // Use raw SQL to insert without isClosed
-          const result = await prisma.$queryRaw<Array<{ id: string }>>`
-            INSERT INTO voice_rooms (
-              id, name, description, category, "isPublic", "maxParticipants", 
-              "speakerMode", "voiceQuality", "hostId", "dailyRoomUrl", 
-              "isRecording", "createdAt", "updatedAt"
-            )
-            VALUES (
-              gen_random_uuid()::text, ${roomData.name}, ${roomData.description}, 
-              ${roomData.category}, ${roomData.isPublic}, ${roomData.maxParticipants},
-              ${roomData.speakerMode}, ${roomData.voiceQuality}, ${roomData.hostId},
-              ${roomData.dailyRoomUrl}, ${roomData.isRecording}, NOW(), NOW()
-            )
-            RETURNING id
-          `;
-          
-          const newRoomId = result[0]?.id;
-          if (newRoomId) {
-            // Fetch the created room
-            room = await prisma.voiceRoom.findUnique({
-              where: { id: newRoomId },
-              include: {
-                host: {
-                  select: {
-                    id: true,
-                    username: true,
-                    profileImage: true,
-                    walletAddress: true,
-                    isVerified: true,
-                  },
-                },
-              },
-            });
-          }
-          
-          if (!room) {
-            throw new Error("Failed to create room with raw SQL fallback");
-          }
-          
-          // Log creation to history asynchronously
-          prisma.roomHistory.create({
-            data: {
-              roomId: room.id,
-              userId: userId,
-              action: "room_created",
-            },
-          }).catch(err => console.error("History log failed (non-critical):", err));
-        } catch (rawSqlError: any) {
-          console.error("❌ Raw SQL fallback also failed:", rawSqlError);
-          return NextResponse.json(
-            { 
-              error: `Database error: ${dbError.message || "Failed to save room to database"}`,
-              details: process.env.NODE_ENV === "development" ? {
-                code: dbError.code,
-                meta: dbError.meta,
-              } : undefined
-            },
-            { status: 500 }
-          );
-        }
-      } else {
-        return NextResponse.json(
-          { 
-            error: `Database error: ${dbError.message || "Failed to save room to database"}`,
-            details: process.env.NODE_ENV === "development" ? {
-              code: dbError.code,
-              meta: dbError.meta,
-            } : undefined
-          },
-          { status: 500 }
-        );
-      }
+      return NextResponse.json(
+        { 
+          error: `Database error: ${dbError.message || "Failed to save room to database"}`,
+          details: process.env.NODE_ENV === "development" ? {
+            code: dbError.code,
+            meta: dbError.meta,
+            fullError: String(dbError),
+          } : undefined
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
