@@ -76,6 +76,7 @@ export default function VoiceChatRoom({
   const [speakingParticipants, setSpeakingParticipants] = useState<Set<string>>(new Set());
   const [isHost, setIsHost] = useState(false);
   const [isCoHost, setIsCoHost] = useState(false);
+  const [roomHostId, setRoomHostId] = useState<string | null>(null);
   const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">("OPEN");
   const [participantUserIds, setParticipantUserIds] = useState<Map<string, string>>(new Map()); // Map session_id to userId
   const iframeRef = useRef<HTMLDivElement>(null);
@@ -101,20 +102,40 @@ export default function VoiceChatRoom({
         const response = await fetch(`/api/voice/rooms/${roomId}`, { headers });
         if (response.ok) {
           const data = await response.json();
-          const roomHostId = data.room.host.id;
-          const currentUserId = session?.user?.id || null;
+          const hostId = data.room.host.id;
+          setRoomHostId(hostId);
           
           // Check if current user is host (by email session or wallet)
-          if (session?.user?.id === roomHostId) {
-            setIsHost(true);
-          } else if (publicKey && data.room.host.walletAddress === publicKey.toBase58()) {
-            setIsHost(true);
+          let currentUserId: string | null = null;
+          if (session?.user?.id) {
+            currentUserId = session.user.id;
+            if (currentUserId === hostId) {
+              setIsHost(true);
+            }
+          } else if (publicKey) {
+            // For wallet users, we need to get their userId
+            const walletAddr = publicKey.toBase58();
+            if (data.room.host.walletAddress === walletAddr) {
+              setIsHost(true);
+            }
+            // Find wallet user ID from participants or fetch separately
+            const walletParticipant = data.room.participants.find((p: any) => p.user?.walletAddress === walletAddr);
+            if (walletParticipant) {
+              currentUserId = walletParticipant.user.id;
+            }
           }
           
-          // Check if user is co-host
+          // Check if user is co-host (need userId for this)
           if (currentUserId && data.room.coHosts) {
-            const isCoHostUser = data.room.coHosts.some((ch: any) => ch.userId === currentUserId);
+            const isCoHostUser = data.room.coHosts.some((ch: any) => ch.userId === currentUserId || ch.user?.walletAddress === publicKey?.toBase58());
             setIsCoHost(isCoHostUser);
+          } else if (publicKey && !currentUserId && data.room.coHosts) {
+            // Try to match by wallet address in co-hosts
+            const walletAddr = publicKey.toBase58();
+            const isCoHostByWallet = data.room.coHosts.some((ch: any) => ch.user?.walletAddress === walletAddr);
+            if (isCoHostByWallet) {
+              setIsCoHost(true);
+            }
           }
           
           // Get speaker mode
@@ -996,7 +1017,7 @@ export default function VoiceChatRoom({
                                   const response = await fetch(`/api/voice/rooms/${roomId}/speaker`, {
                                     method: "POST",
                                     headers,
-                                    body: JSON.stringify({ participantUserId, action: "nominate" }),
+                                    body: JSON.stringify({ participantUserId, isSpeaker: true }),
                                   });
                                   if (response.ok) {
                                     alert(`${displayName} can now speak`);
@@ -1016,8 +1037,9 @@ export default function VoiceChatRoom({
                           )}
                           <button
                             onClick={handleKick}
-                            className="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors"
-                            title="Kick participant"
+                            className="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={isCoHost && !isHost && participantUserId === roomHostId ? "Co-hosts cannot kick the host" : "Kick participant"}
+                            disabled={isCoHost && !isHost && participantUserId === roomHostId}
                           >
                             <UserX className="h-3 w-3 text-white" />
                           </button>

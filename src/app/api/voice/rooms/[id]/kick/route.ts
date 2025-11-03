@@ -57,6 +57,14 @@ export async function POST(
       );
     }
 
+    // Co-hosts cannot kick the host
+    if (isCoHost && !isHost && participantUserId === room.hostId) {
+      return NextResponse.json(
+        { error: "Co-hosts cannot kick the room host" },
+        { status: 403 }
+      );
+    }
+
     // Find the participant
     const participant = await prisma.roomParticipant.findUnique({
       where: {
