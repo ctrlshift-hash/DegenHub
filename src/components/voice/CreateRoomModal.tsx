@@ -62,6 +62,14 @@ export default function CreateRoomModal({
 
       if (response.ok) {
         const data = await response.json();
+        // Store hostId in localStorage for guest hosts (they get new IDs each request)
+        if (data.room?.id && data.room?.host?.id) {
+          try {
+            localStorage.setItem(`voiceRoomHost_${data.room.id}`, data.room.host.id);
+          } catch (e) {
+            // localStorage not available
+          }
+        }
         onRoomCreated();
         // Close modal immediately after creation
         onClose();

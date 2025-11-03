@@ -52,6 +52,15 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:block w-64 h-screen border-r border-border bg-card">
       <div className="p-6">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-2 mb-6">
+          <img
+            src="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png"
+            alt="DegenHub"
+            className="h-10 w-auto"
+          />
+        </Link>
+
         <div className="space-y-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -88,7 +97,7 @@ export default function Sidebar() {
           {/* Social Icons */}
           <div className="flex items-center justify-center gap-3">
             <a
-              href="https://twitter.com"
+              href="https://x.com/DegenHub_io"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 bg-degen-purple hover:bg-degen-purple/90 rounded-lg transition-all hover:scale-110 hover:shadow-lg hover:shadow-degen-purple/30 active:scale-95 flex items-center justify-center"

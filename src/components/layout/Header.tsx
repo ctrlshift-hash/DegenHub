@@ -183,14 +183,6 @@ export default function Header({ user }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-degen-purple to-degen-pink flex items-center justify-center">
-              <span className="text-white font-bold text-lg">D</span>
-            </div>
-            <span className="text-xl font-bold gradient-text">DegenHub</span>
-          </Link>
-
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => {

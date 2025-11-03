@@ -29,7 +29,21 @@ export async function POST(
           select: { id: true },
         },
         coHosts: {
-          where: { userId },
+          select: {
+            userId: true,
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+        participants: {
+          where: { leftAt: null },
+          select: {
+            userId: true,
+            joinedAt: true,
+          },
         },
       },
     });
@@ -38,9 +52,37 @@ export async function POST(
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    // Only host or co-host can kick participants
-    const isHost = room.hostId === userId;
-    const isCoHost = room.coHosts.length > 0;
+    // Check if user is the host
+    // For guest hosts, check if they're the first participant (earliest joinedAt)
+    let isHost = room.hostId === userId;
+    
+    // If userId doesn't match but user is a guest, check if they're the first participant
+    if (!isHost && user && user.username?.startsWith("guest_")) {
+      const hostUser = await prisma.user.findUnique({
+        where: { id: room.hostId },
+        select: { username: true },
+      });
+      
+      // If host is also a guest, check if current user is the first participant
+      if (hostUser?.username?.startsWith("guest_")) {
+        const userParticipant = room.participants.find((p: any) => p.userId === userId);
+        if (userParticipant) {
+          // Sort participants by joinedAt to find the first one
+          const sortedParticipants = [...room.participants].sort((a: any, b: any) => 
+            new Date(a.joinedAt || 0).getTime() - new Date(b.joinedAt || 0).getTime()
+          );
+          
+          // If this user is the first participant (earliest joinedAt), they're likely the host
+          if (sortedParticipants.length > 0 && sortedParticipants[0].userId === userId) {
+            isHost = true;
+          }
+        }
+      }
+    }
+    
+    // Check if user is a co-host
+    // Include host in coHosts check if needed
+    const isCoHost = room.coHosts.some((ch: any) => ch.userId === userId || ch.user?.id === userId);
 
     if (!isHost && !isCoHost) {
       return NextResponse.json(

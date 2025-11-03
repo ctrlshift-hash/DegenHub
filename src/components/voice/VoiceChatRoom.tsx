@@ -125,7 +125,7 @@ export default function VoiceChatRoom({
             walletAddress: data.room.host.walletAddress || null,
           });
           
-          // Check if current user is host (by email session or wallet)
+          // Check if current user is host (by email session, wallet, or guest)
           let currentUserId: string | null = null;
           if (session?.user?.id) {
             currentUserId = session.user.id;
@@ -146,6 +146,36 @@ export default function VoiceChatRoom({
               const walletParticipant = data.room.participants.find((p: any) => p.user?.walletAddress === walletAddr);
               if (walletParticipant) {
                 currentUserId = walletParticipant.user.id;
+              }
+            }
+          } else {
+            // For guests, check localStorage to see if we're the host
+            // (stored when room was created)
+            const hostIsGuest = data.room.host.username?.startsWith("guest_");
+            if (hostIsGuest) {
+              try {
+                const storedHostId = localStorage.getItem(`voiceRoomHost_${roomId}`);
+                if (storedHostId === hostId) {
+                  setIsHost(true);
+                  console.log("✅ Host detected via localStorage (guest):", hostId);
+                  currentUserId = hostId;
+                } else {
+                  // Also check if we're the first participant (fallback for guest hosts)
+                  // This is less reliable but works if localStorage was cleared
+                  const sortedParticipants = [...data.room.participants].sort((a: any, b: any) => 
+                    new Date(a.joinedAt || 0).getTime() - new Date(b.joinedAt || 0).getTime()
+                  );
+                  if (sortedParticipants.length > 0) {
+                    const firstParticipant = sortedParticipants[0];
+                    // Check if current user matches first participant (guest hosts are usually first)
+                    // We'll need to check this via participant userIds, but we don't have our own userId yet
+                    // For now, rely on backend to allow host actions if we're the first participant
+                    console.log("🔍 Guest host check - first participant:", firstParticipant.user?.id);
+                  }
+                }
+              } catch (e) {
+                // localStorage not available (SSR)
+                console.log("⚠️ localStorage not available for guest host check");
               }
             }
           }
@@ -931,7 +961,7 @@ export default function VoiceChatRoom({
           {isHost && (
             <button
               onClick={async () => {
-                if (!confirm("End this room? This will close the room and remove all participants.")) return;
+                if (!confirm("Delete this room? This will close the room and remove all participants.")) return;
                 try {
                   const headers: Record<string, string> = {};
                   if (publicKey && !session?.user) {
@@ -942,21 +972,27 @@ export default function VoiceChatRoom({
                     headers,
                   });
                   if (response.ok) {
-                    alert("Room ended successfully");
+                    // Remove from localStorage
+                    try {
+                      localStorage.removeItem(`voiceRoomHost_${roomId}`);
+                    } catch (e) {
+                      // Ignore
+                    }
+                    alert("Room deleted successfully");
                     handleLeave();
                   } else {
                     const error = await response.json();
-                    alert(error.error || "Failed to end room");
+                    alert(error.error || "Failed to delete room");
                   }
                 } catch (error) {
-                  console.error("Error ending room:", error);
-                  alert("Failed to end room");
+                  console.error("Error deleting room:", error);
+                  alert("Failed to delete room");
                 }
               }}
               className="text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 hover:bg-red-900/20 rounded-lg font-semibold text-sm"
-              title="End room (host only)"
+              title="Delete room (host only)"
             >
-              End Room
+              Delete Room
             </button>
           )}
           <button
@@ -1362,7 +1398,7 @@ export default function VoiceChatRoom({
                                   console.error("Error adding co-host:", error);
                                 }
                               }}
-                              className="p-1.5 bg-yellow-600/90 hover:bg-yellow-600 rounded-full transition-colors shadow-lg"
+                              className="p-1.5 bg-yellow-600/90 hover:bg-yellow-600 rounded-full transition-colors shadow-lg z-30"
                               title="Make co-host"
                             >
                               <Crown className="h-3.5 w-3.5 text-white" />
@@ -1370,9 +1406,11 @@ export default function VoiceChatRoom({
                           )}
                           <button
                             onClick={handleKick}
-                            className="p-1.5 bg-red-600/90 hover:bg-red-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                            className="p-1.5 bg-red-600/90 hover:bg-red-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg z-30"
                             title={
-                              participantUserId === roomHostId 
+                              !participantUserId 
+                                ? `Kick ${displayName} (by session)` 
+                                : participantUserId === roomHostId 
                                 ? "Cannot kick the host" 
                                 : `Kick ${displayName}`
                             }

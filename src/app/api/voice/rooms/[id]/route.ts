@@ -33,8 +33,38 @@ export async function DELETE(
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    // Only host can delete the room
-    if (room.hostId !== userId) {
+    // Check if user is the host
+    // For guest hosts, check if they're the first participant (earliest joinedAt)
+    let isHost = room.hostId === userId;
+    
+    // If userId doesn't match but user is a guest (username starts with "guest_"), 
+    // check if they're the first participant (they're likely the creator/host)
+    if (!isHost && user && user.username?.startsWith("guest_")) {
+      const hostUser = await prisma.user.findUnique({
+        where: { id: room.hostId },
+        select: { username: true },
+      });
+      
+      // If host is also a guest, check if current user is the first participant
+      if (hostUser?.username?.startsWith("guest_")) {
+        const userParticipant = room.participants.find(p => p.userId === userId);
+        if (userParticipant) {
+          // Get all participants sorted by joinedAt to find the first one
+          const allParticipants = await prisma.roomParticipant.findMany({
+            where: { roomId: id },
+            orderBy: { joinedAt: "asc" },
+            select: { userId: true, joinedAt: true },
+          });
+          
+          // If this user is the first participant (earliest joinedAt), they're likely the host
+          if (allParticipants.length > 0 && allParticipants[0].userId === userId) {
+            isHost = true;
+          }
+        }
+      }
+    }
+    
+    if (!isHost) {
       return NextResponse.json(
         { error: "Only the room host can delete this room" },
         { status: 403 }
