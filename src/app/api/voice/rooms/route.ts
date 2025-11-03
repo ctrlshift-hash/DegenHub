@@ -5,10 +5,11 @@ import { createDailyRoom } from "@/lib/daily";
 
 // GET /api/voice/rooms - List all public rooms
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const limit = parseInt(searchParams.get("limit") || "20");
+  const offset = parseInt(searchParams.get("offset") || "0");
+  
   try {
-    const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const offset = parseInt(searchParams.get("offset") || "0");
 
     // Use explicit select to avoid Prisma trying to fetch isClosed column if it doesn't exist yet
     const rooms = await prisma.voiceRoom.findMany({
