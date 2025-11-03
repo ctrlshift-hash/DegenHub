@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import DailyIframe from "@daily-co/daily-js";
 import type { DailyCall } from "@daily-co/daily-js";
-import { X, Mic, MicOff, PhoneOff, Users } from "lucide-react";
+import { X, Mic, MicOff, PhoneOff, Users, UserX } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSession } from "next-auth/react";
 import { useWallet } from "@/contexts/WalletContext";
@@ -74,6 +74,8 @@ export default function VoiceChatRoom({
   const [error, setError] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Map<string, Participant>>(new Map());
   const [speakingParticipants, setSpeakingParticipants] = useState<Set<string>>(new Set());
+  const [isHost, setIsHost] = useState(false);
+  const [participantUserIds, setParticipantUserIds] = useState<Map<string, string>>(new Map()); // Map session_id to userId
   const iframeRef = useRef<HTMLDivElement>(null);
   const dailyInstanceRef = useRef<DailyCall | null>(null);
   const isCreatingRef = useRef(false);
@@ -82,6 +84,37 @@ export default function VoiceChatRoom({
   const MAX_INACTIVITY_MINUTES = 30; // Auto-leave after 30 minutes of inactivity
   const { data: session } = useSession();
   const { publicKey } = useWallet();
+
+  // Fetch room details to check if user is host
+  useEffect(() => {
+    if (!roomId) return;
+
+    const checkHostStatus = async () => {
+      try {
+        const headers: Record<string, string> = {};
+        if (publicKey && !session?.user) {
+          headers["X-Wallet-Address"] = publicKey.toBase58();
+        }
+
+        const response = await fetch(`/api/voice/rooms/${roomId}`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          const roomHostId = data.room.host.id;
+          
+          // Check if current user is host (by email session or wallet)
+          if (session?.user?.id === roomHostId) {
+            setIsHost(true);
+          } else if (publicKey && data.room.host.walletAddress === publicKey.toBase58()) {
+            setIsHost(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking host status:", error);
+      }
+    };
+
+    checkHostStatus();
+  }, [roomId, session, publicKey]);
 
   useEffect(() => {
     if (!roomUrl || !iframeRef.current || isCreatingRef.current) {
@@ -312,6 +345,15 @@ export default function VoiceChatRoom({
         
         const sessionId = event.participant.session_id;
         console.log("Participant joined:", sessionId, event.participant.user_name);
+        
+        // Store userId mapping if available
+        if (event.participant.user_id) {
+          setParticipantUserIds((prev) => {
+            const updated = new Map(prev);
+            updated.set(sessionId, event.participant.user_id);
+            return updated;
+          });
+        }
         
         setParticipants(prev => {
           const updated = new Map(prev);
@@ -774,6 +816,58 @@ export default function VoiceChatRoom({
                   const sessionId = participant.session_id || "";
                   const isSpeaking = speakingParticipants.has(sessionId);
                   const displayName = (participant.user_name || participant.user_id || "Guest").trim();
+                  const participantUserId = participantUserIds.get(sessionId) || participant.user_id;
+                  
+                  const handleKick = async () => {
+                    if (!participantUserId || !roomId || !confirm(`Kick ${displayName} from the room?`)) {
+                      return;
+                    }
+
+                    try {
+                      const headers: Record<string, string> = {
+                        "Content-Type": "application/json",
+                      };
+                      if (publicKey && !session?.user) {
+                        headers["X-Wallet-Address"] = publicKey.toBase58();
+                      }
+
+                      const response = await fetch(`/api/voice/rooms/${roomId}/kick`, {
+                        method: "POST",
+                        headers,
+                        body: JSON.stringify({ participantUserId }),
+                      });
+
+                      if (response.ok) {
+                        // Remove from Daily.co call using their API
+                        if (callFrame && sessionId) {
+                          try {
+                            // Daily.co doesn't have a direct removeParticipant method
+                            // Instead, we'll just remove from local state and let Daily.co handle it
+                            console.log("Participant kicked:", sessionId);
+                          } catch (e) {
+                            console.error("Error removing participant from Daily.co:", e);
+                          }
+                        }
+                        // Remove from local state
+                        setParticipants((prev) => {
+                          const updated = new Map(prev);
+                          updated.delete(sessionId);
+                          return updated;
+                        });
+                        setParticipantUserIds((prev) => {
+                          const updated = new Map(prev);
+                          updated.delete(sessionId);
+                          return updated;
+                        });
+                      } else {
+                        const error = await response.json();
+                        alert(error.error || "Failed to kick participant");
+                      }
+                    } catch (error) {
+                      console.error("Error kicking participant:", error);
+                      alert("Failed to kick participant");
+                    }
+                  };
                   
                   return (
                     <div
@@ -782,6 +876,15 @@ export default function VoiceChatRoom({
                         isSpeaking ? "border-green-500 shadow-lg shadow-green-500/30" : "border-gray-700"
                       }`}
                     >
+                      {isHost && participantUserId && (
+                        <button
+                          onClick={handleKick}
+                          className="absolute top-2 right-2 p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors z-10"
+                          title="Kick participant"
+                        >
+                          <UserX className="h-4 w-4 text-white" />
+                        </button>
+                      )}
                       <div className="relative mb-3">
                         <div className="w-20 h-20 rounded-full bg-degen-purple flex items-center justify-center text-white text-2xl font-bold">
                           {displayName.charAt(0).toUpperCase() || "?"}
