@@ -309,11 +309,11 @@ export async function POST(request: NextRequest) {
         throw new Error("Failed to fetch created room");
       }
       
-      const roomData = roomFromDb[0];
+      const fetchedRoom = roomFromDb[0];
       
       // Fetch host info separately
       const host = await prisma.user.findUnique({
-        where: { id: roomData.hostId },
+        where: { id: fetchedRoom.hostId },
         select: {
           id: true,
           username: true,
@@ -325,12 +325,12 @@ export async function POST(request: NextRequest) {
       
       // Construct room object in the format expected by the response
       room = {
-        id: roomData.id,
-        name: roomData.name,
-        description: roomData.description,
-        isPublic: roomData.isPublic,
-        maxParticipants: roomData.maxParticipants,
-        createdAt: roomData.createdAt,
+        id: fetchedRoom.id,
+        name: fetchedRoom.name,
+        description: fetchedRoom.description,
+        isPublic: fetchedRoom.isPublic,
+        maxParticipants: fetchedRoom.maxParticipants,
+        createdAt: fetchedRoom.createdAt,
         host: host || null,
       };
       
