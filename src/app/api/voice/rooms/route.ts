@@ -92,8 +92,8 @@ export async function GET(request: NextRequest) {
           FROM voice_rooms
           WHERE "isPublic" = true
           ORDER BY "createdAt" DESC
-          LIMIT ${limit}
-          OFFSET ${offset}
+          LIMIT ${Number(limit)}
+          OFFSET ${Number(offset)}
         ` as any[];
         
         // Fetch host and participants separately
