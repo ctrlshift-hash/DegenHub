@@ -132,9 +132,8 @@ export default function VoiceChatRoom({
               console.log("✅ Host detected via wallet:", walletAddr);
               // Use host ID as currentUserId since we're the host
               currentUserId = hostId;
-            }
-            // Find wallet user ID from participants or fetch separately
-            if (!currentUserId) {
+            } else {
+              // Find wallet user ID from participants or fetch separately
               const walletParticipant = data.room.participants.find((p: any) => p.user?.walletAddress === walletAddr);
               if (walletParticipant) {
                 currentUserId = walletParticipant.user.id;
@@ -1028,15 +1027,18 @@ export default function VoiceChatRoom({
                 // Use session username first, then userName prop, then fallback
                 displayUserName = session.user.username || userName || "Guest";
               } else if (publicKey) {
-                // For wallet users, check if we're the host first
-                if (isHost && roomHostData) {
-                  // Use host data from room details
+                // For wallet users, check if we're the host by comparing wallet addresses directly
+                const walletAddr = publicKey.toBase58();
+                const isWalletHost = roomHostData && roomHostData.walletAddress === walletAddr;
+                
+                if (isWalletHost && roomHostData) {
+                  // We're the host - use host data from room details
                   displayUserName = roomHostData.username;
                   currentUserId = roomHostId;
                   currentUserProfileImage = roomHostData.profileImage || participantProfileImages.get(roomHostId || "") || null;
                 } else {
                   // Not the host, try to get from participantUserIds
-                  displayUserName = userName || `anon_${publicKey.toBase58().slice(0, 6)}`;
+                  displayUserName = userName || `anon_${walletAddr.slice(0, 6)}`;
                   
                   // Try to get userId from participantUserIds if available
                   // Find our session ID first
