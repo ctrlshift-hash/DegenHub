@@ -42,6 +42,19 @@ export default function RoomList() {
     fetchRooms();
     // Refresh rooms every 10 seconds
     const interval = setInterval(fetchRooms, 10000);
+    
+    // Check for ?join=roomId query parameter to auto-join
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinRoomId = urlParams.get("join");
+    if (joinRoomId && !selectedRoom) {
+      // Auto-join the room
+      handleJoinRoom(joinRoomId, "").catch(err => {
+        console.error("Auto-join failed:", err);
+        // Remove the query param on error
+        window.history.replaceState({}, "", window.location.pathname);
+      });
+    }
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -61,6 +74,12 @@ export default function RoomList() {
 
   const handleJoinRoom = async (roomId: string, roomName: string) => {
     try {
+      // Get room name if not provided (from URL join)
+      if (!roomName) {
+        const room = rooms.find(r => r.id === roomId);
+        roomName = room?.name || "Voice Room";
+      }
+      
       // Get user identifier for header
       const headers: Record<string, string> = {};
       if (session?.user?.id) {
@@ -87,17 +106,24 @@ export default function RoomList() {
         setSelectedRoom({
           roomUrl: data.room.dailyRoomUrl,
           token: data.token || null,
-          roomName: roomName,
+          roomName: data.room.name || roomName,
           roomId: roomId, // Store room ID for leaving
         });
+        
+        // Remove join query param from URL
+        window.history.replaceState({}, "", window.location.pathname);
       } else {
         const error = await response.json();
         console.error("Failed to join room:", error);
         alert(error.error || "Failed to join room. Check console for details.");
+        // Remove join query param on error
+        window.history.replaceState({}, "", window.location.pathname);
       }
     } catch (error) {
       console.error("Error joining room:", error);
       alert("Failed to join room");
+      // Remove join query param on error
+      window.history.replaceState({}, "", window.location.pathname);
     }
   };
 
@@ -139,16 +165,22 @@ export default function RoomList() {
         headers["X-Wallet-Address"] = publicKey.toBase58();
       }
 
+      // Optimistic UI update - remove from list immediately
+      setRooms(prev => prev.filter(r => r.id !== roomId));
+      
       const response = await fetch(`/api/voice/rooms/${roomId}`, {
         method: "DELETE",
         headers,
       });
 
       if (response.ok) {
-        fetchRooms(); // Refresh room list
+        // Room already removed from UI, just fetch to ensure sync
+        fetchRooms();
       } else {
+        // Revert optimistic update on error
         const error = await response.json();
         alert(error.error || "Failed to delete room");
+        fetchRooms(); // Refresh to show correct state
       }
     } catch (error) {
       console.error("Error deleting room:", error);

@@ -61,7 +61,10 @@ export default function CreateRoomModal({
       });
 
       if (response.ok) {
+        const data = await response.json();
         onRoomCreated();
+        // Close modal immediately after creation
+        onClose();
       } else {
         const data = await response.json();
         console.error("Room creation error:", data);
