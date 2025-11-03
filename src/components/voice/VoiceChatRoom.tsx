@@ -77,6 +77,9 @@ export default function VoiceChatRoom({
   const iframeRef = useRef<HTMLDivElement>(null);
   const dailyInstanceRef = useRef<DailyCall | null>(null);
   const isCreatingRef = useRef(false);
+  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+  const MAX_INACTIVITY_MINUTES = 30; // Auto-leave after 30 minutes of inactivity
   const { data: session } = useSession();
   const { publicKey } = useWallet();
 
@@ -372,6 +375,8 @@ export default function VoiceChatRoom({
         if (event.participant && !event.participant.local) {
           setSpeakingParticipants(prev => new Set(prev).add(event.participant.session_id));
         }
+        // Reset inactivity timer when someone speaks
+        lastActivityRef.current = Date.now();
       });
 
       (daily.on as any)("speaking-stopped", (event: any) => {
@@ -487,7 +492,25 @@ export default function VoiceChatRoom({
           // Watch for participant updates
           daily!.on("participant-updated", () => {
             muteAllLocalAudio();
+            // Reset inactivity timer on participant activity
+            lastActivityRef.current = Date.now();
           });
+          
+          // Set up inactivity timeout to auto-leave after MAX_INACTIVITY_MINUTES
+          const checkInactivity = () => {
+            const now = Date.now();
+            const inactiveMinutes = (now - lastActivityRef.current) / (1000 * 60);
+            
+            if (inactiveMinutes >= MAX_INACTIVITY_MINUTES) {
+              console.log(`Auto-leaving room after ${MAX_INACTIVITY_MINUTES} minutes of inactivity`);
+              handleLeave();
+            } else {
+              inactivityTimerRef.current = setTimeout(checkInactivity, 60000); // Check every minute
+            }
+          };
+          
+          // Start inactivity check
+          inactivityTimerRef.current = setTimeout(checkInactivity, 60000);
           
           // Watch for DOM changes
           const observer = new MutationObserver(() => {
@@ -533,6 +556,12 @@ export default function VoiceChatRoom({
     // Cleanup on unmount (page refresh, navigation, etc.)
     return () => {
       isCreatingRef.current = false;
+      
+      // Clear inactivity timer
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+        inactivityTimerRef.current = null;
+      }
       
       // Leave the room properly (this tells Daily.co you left)
       if (dailyInstanceRef.current) {
