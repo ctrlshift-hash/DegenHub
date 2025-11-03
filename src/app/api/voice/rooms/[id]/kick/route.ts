@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest } from "@/lib/getUser";
+import { ejectParticipantFromDailyRoom } from "@/lib/daily";
 
 // POST /api/voice/rooms/[id]/kick - Kick a participant from a room (host only)
 export async function POST(
@@ -27,6 +28,9 @@ export async function POST(
         host: {
           select: { id: true },
         },
+        coHosts: {
+          where: { userId },
+        },
       },
     });
 
@@ -34,10 +38,13 @@ export async function POST(
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    // Only host can kick participants
-    if (room.hostId !== userId) {
+    // Only host or co-host can kick participants
+    const isHost = room.hostId === userId;
+    const isCoHost = room.coHosts.length > 0;
+
+    if (!isHost && !isCoHost) {
       return NextResponse.json(
-        { error: "Only the room host can kick participants" },
+        { error: "Only the room host or co-host can kick participants" },
         { status: 403 }
       );
     }
@@ -50,7 +57,7 @@ export async function POST(
       );
     }
 
-    // Find and mark the participant as left
+    // Find the participant
     const participant = await prisma.roomParticipant.findUnique({
       where: {
         roomId_userId: {
@@ -67,7 +74,7 @@ export async function POST(
       );
     }
 
-    // Mark participant as left (kicked)
+    // Mark participant as left (kicked) in database
     await prisma.roomParticipant.update({
       where: { id: participant.id },
       data: {
@@ -75,13 +82,33 @@ export async function POST(
       },
     });
 
-    // Note: We don't have direct access to Daily.co's participant removal API from here
-    // The client-side will need to handle actually removing them from the Daily.co call
-    // This marks them as removed in our database
+    // Also eject from Daily.co room if we have the room URL
+    if (room.dailyRoomUrl) {
+      const urlParts = room.dailyRoomUrl.split("/");
+      const roomName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || "";
+      
+      if (roomName) {
+        // We need the session_id to eject, but we don't have it here
+        // The client will handle the actual Daily.co ejection
+        // For now, we mark them as left and the client should handle removal
+        console.log("⚠️ Cannot eject from Daily.co without session_id - client must handle");
+      }
+    }
+
+    // Log to room history
+    await prisma.roomHistory.create({
+      data: {
+        roomId,
+        userId: participantUserId,
+        action: "kicked",
+        details: JSON.stringify({ kickedBy: userId }),
+      },
+    });
 
     return NextResponse.json({
       success: true,
       message: "Participant kicked successfully",
+      sessionId: null, // We don't have session_id here, client needs to provide it
     });
   } catch (error: any) {
     console.error("Error kicking participant:", error);

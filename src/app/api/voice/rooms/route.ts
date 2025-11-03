@@ -178,33 +178,35 @@ export async function POST(request: NextRequest) {
       isRecording: false,
     };
 
-    console.log("📝 Creating room with data:", {
-      ...roomData,
-      dailyRoomUrl: roomData.dailyRoomUrl ? "SET" : "MISSING",
-    });
-
+    // Create room in database - don't wait for history
     let room;
     try {
       room = await prisma.voiceRoom.create({
         data: roomData,
-      include: {
-        host: {
-          select: {
-            id: true,
-            username: true,
-            profileImage: true,
-            walletAddress: true,
-            isVerified: true,
+        include: {
+          host: {
+            select: {
+              id: true,
+              username: true,
+              profileImage: true,
+              walletAddress: true,
+              isVerified: true,
+            },
           },
         },
-      },
       });
-      console.log("✅ Room created successfully:", room.id);
+      
+      // Log creation to history asynchronously (don't wait)
+      prisma.roomHistory.create({
+        data: {
+          roomId: room.id,
+          userId: userId,
+          action: "room_created",
+        },
+      }).catch(err => console.error("History log failed (non-critical):", err));
+      
     } catch (dbError: any) {
       console.error("❌ Database error creating room:", dbError);
-      console.error("Error code:", dbError.code);
-      console.error("Error message:", dbError.message);
-      console.error("Error meta:", dbError.meta);
       return NextResponse.json(
         { 
           error: `Database error: ${dbError.message || "Failed to save room to database"}`,

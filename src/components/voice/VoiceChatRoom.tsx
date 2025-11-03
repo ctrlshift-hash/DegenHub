@@ -137,20 +137,20 @@ export default function VoiceChatRoom({
       dailyInstanceRef.current = null;
     }
 
-    // Clean up global instance (this handles Daily.co's singleton)
-    const cleanupAndCreate = async () => {
-      // Clean up global instance first
-      await cleanupGlobalDailyInstance();
+      // Clean up global instance (this handles Daily.co's singleton)
+      const cleanupAndCreate = async () => {
+        // Clean up global instance first
+        await cleanupGlobalDailyInstance();
 
-      // Clear the container
-      if (iframeRef.current) {
-        iframeRef.current.innerHTML = "";
-      }
+        // Clear the container
+        if (iframeRef.current) {
+          iframeRef.current.innerHTML = "";
+        }
 
-      console.log("Creating Daily.co frame for room:", roomUrl);
-      
-      // Wait longer for Daily.co's internal cleanup to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
+        console.log("Creating Daily.co frame for room:", roomUrl);
+        
+        // Reduced wait time for faster joining
+        await new Promise(resolve => setTimeout(resolve, 100));
 
       // Create Daily.co call frame (audio-only)
       let daily: DailyCall | null = null;
@@ -196,13 +196,13 @@ export default function VoiceChatRoom({
                 iframeRef.current.innerHTML = "";
               }
               
-              // Wait longer for Daily.co's internal cleanup
-              await new Promise(resolve => setTimeout(resolve, 500));
+              // Reduced wait time
+              await new Promise(resolve => setTimeout(resolve, 200));
               
               // Check one more time
               if (isCleaningUp) {
                 console.log("Still cleaning up after retry wait, waiting more...");
-                await new Promise(resolve => setTimeout(resolve, 300));
+                await new Promise(resolve => setTimeout(resolve, 100));
               }
               
               if (!iframeRef.current || isCreatingRef.current) return;
@@ -831,6 +831,27 @@ export default function VoiceChatRoom({
                         headers["X-Wallet-Address"] = publicKey.toBase58();
                       }
 
+                      // First, eject from Daily.co if we have the call frame
+                      if (callFrame && sessionId) {
+                        try {
+                          // Use Daily.co's API to eject the participant
+                          await fetch("/api/voice/rooms/eject", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              roomUrl,
+                              sessionId,
+                            }),
+                          });
+                          console.log("✅ Ejected participant from Daily.co:", sessionId);
+                        } catch (e) {
+                          console.error("Error ejecting from Daily.co (will still mark as kicked):", e);
+                        }
+                      }
+
+                      // Then mark as kicked in database
                       const response = await fetch(`/api/voice/rooms/${roomId}/kick`, {
                         method: "POST",
                         headers,
@@ -838,17 +859,7 @@ export default function VoiceChatRoom({
                       });
 
                       if (response.ok) {
-                        // Remove from Daily.co call using their API
-                        if (callFrame && sessionId) {
-                          try {
-                            // Daily.co doesn't have a direct removeParticipant method
-                            // Instead, we'll just remove from local state and let Daily.co handle it
-                            console.log("Participant kicked:", sessionId);
-                          } catch (e) {
-                            console.error("Error removing participant from Daily.co:", e);
-                          }
-                        }
-                        // Remove from local state
+                        // Remove from local state immediately
                         setParticipants((prev) => {
                           const updated = new Map(prev);
                           updated.delete(sessionId);

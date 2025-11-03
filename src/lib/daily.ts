@@ -28,9 +28,6 @@ export interface DailyToken {
 }
 
 /**
- * Create a Daily.co room
- */
-/**
  * Sanitize room name for Daily.co API
  * Daily.co requires URL-safe room names (no spaces, special chars)
  */
@@ -69,18 +66,6 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
       enable_screenshare: false,
     },
   };
-  
-  // Only add audio settings if they're supported (may have been removed from API)
-  // These were causing issues, so removing them to match what worked before
-
-  console.log("📤 Daily.co API Request:", {
-    url: `${DAILY_API_URL}/rooms`,
-    method: "POST",
-    roomName: sanitizedName,
-    originalName: name,
-    apiKeyPrefix: apiKey.substring(0, 10) + "...",
-    requestBody: JSON.stringify(requestBody),
-  });
 
   try {
     const response = await fetch(`${DAILY_API_URL}/rooms`, {
@@ -92,11 +77,7 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
       body: JSON.stringify(requestBody),
     });
 
-    console.log("📥 Daily.co API Response Status:", response.status, response.statusText);
-    console.log("📥 Daily.co API Response Headers:", Object.fromEntries(response.headers.entries()));
-
     const responseText = await response.text();
-    console.log("📥 Daily.co API Response Body (full):", responseText);
 
     if (!response.ok) {
       let error: any;
@@ -117,7 +98,6 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
         fullResponse: responseText,
       });
       
-      // Return more detailed error info
       throw new Error(`Daily.co API error (${response.status}): ${errorMsg}`);
     }
 
@@ -139,10 +119,6 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
   } catch (error: any) {
     console.error("❌ Exception creating Daily.co room:", error);
     console.error("Error message:", error?.message || error);
-    console.error("Error stack:", error?.stack);
-    console.error("Error cause:", error?.cause);
-    
-    // Re-throw with more context so the route handler can see it
     throw new Error(`Daily.co room creation failed: ${error?.message || String(error)}`);
   }
 }
@@ -189,5 +165,48 @@ export async function generateDailyToken(
   } catch (error) {
     console.error("Error generating Daily.co token:", error);
     return null;
+  }
+}
+
+/**
+ * Eject/remove a participant from a Daily.co room using their session_id
+ */
+export async function ejectParticipantFromDailyRoom(
+  roomName: string,
+  sessionId: string
+): Promise<boolean> {
+  const apiKey = getDailyApiKey();
+  
+  if (!apiKey || apiKey.length === 0) {
+    console.error("❌ DAILY_API_KEY not found in ejectParticipantFromDailyRoom!");
+    return false;
+  }
+
+  try {
+    const response = await fetch(`${DAILY_API_URL}/rooms/${roomName}/eject`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Failed to eject participant from Daily.co:", {
+        status: response.status,
+        error: errorText,
+      });
+      return false;
+    }
+
+    console.log("✅ Participant ejected from Daily.co room:", sessionId);
+    return true;
+  } catch (error) {
+    console.error("❌ Error ejecting participant from Daily.co:", error);
+    return false;
   }
 }

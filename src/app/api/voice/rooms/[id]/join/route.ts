@@ -59,63 +59,52 @@ export async function POST(
     // Determine if user should be a speaker (OPEN mode = always true, NOMINATED = false by default)
     const isSpeaker = room.speakerMode === "OPEN" ? true : false;
 
-    let participant;
-    if (existingParticipant && existingParticipant.leftAt) {
-      // Rejoin
-      participant = await prisma.roomParticipant.update({
-        where: { id: existingParticipant.id },
-        data: {
-          joinedAt: new Date(),
-          leftAt: null,
-          isSpeaker,
-        },
-      });
-    } else if (!existingParticipant) {
-      // First time joining
-      participant = await prisma.roomParticipant.create({
-        data: {
-          roomId: id,
-          userId: userId,
-          isSpeaker,
-        },
-      });
-    } else {
-      participant = existingParticipant;
+    // Generate Daily.co token FIRST (before DB operations to speed up)
+    let token: string | null = null;
+    if (room.dailyRoomUrl) {
+      const urlParts = room.dailyRoomUrl.split("/");
+      const roomName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || "";
+      
+      if (roomName) {
+        const dailyToken = await generateDailyToken(roomName, userId, user.username);
+        if (dailyToken) {
+          token = dailyToken.token;
+        }
+      }
     }
 
-    // Log to room history
-    await prisma.roomHistory.create({
+    // Update/create participant in parallel with history (don't wait for history)
+    let participant;
+    const participantPromise = existingParticipant && existingParticipant.leftAt
+      ? prisma.roomParticipant.update({
+          where: { id: existingParticipant.id },
+          data: {
+            joinedAt: new Date(),
+            leftAt: null,
+            isSpeaker,
+          },
+        })
+      : !existingParticipant
+      ? prisma.roomParticipant.create({
+          data: {
+            roomId: id,
+            userId: userId,
+            isSpeaker,
+          },
+        })
+      : Promise.resolve(existingParticipant);
+
+    // Don't wait for history - fire and forget for speed
+    const historyPromise = prisma.roomHistory.create({
       data: {
         roomId: id,
         userId: userId,
         action: "joined",
         details: JSON.stringify({ speakerMode: room.speakerMode, isSpeaker }),
       },
-    });
+    }).catch(err => console.error("History log failed (non-critical):", err));
 
-    // Generate Daily.co token
-    let token: string | null = null;
-    if (room.dailyRoomUrl) {
-      // Extract room name from URL (format: https://domain.daily.co/room-name)
-      const urlParts = room.dailyRoomUrl.split("/");
-      const roomName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || "";
-      
-      console.log("Generating token for room:", roomName, "URL:", room.dailyRoomUrl);
-      
-      const dailyToken = await generateDailyToken(
-        roomName,
-        userId,
-        user.username
-      );
-      
-      if (!dailyToken) {
-        console.error("Failed to generate Daily.co token");
-      } else {
-        token = dailyToken.token;
-      }
-    } else {
-      console.error("Room has no dailyRoomUrl:", room.id);
-    }
+    participant = await participantPromise;
 
     return NextResponse.json({
       room: {
