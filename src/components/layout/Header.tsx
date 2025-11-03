@@ -183,61 +183,71 @@ export default function Header({ user }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Desktop Navigation */}
+          {/* Left side - Messages only */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => {
-              const isNotifications = item.href === "/notifications";
-              
-              // Show badge logic:
-              // 1. Always hide if on notifications page
-              // 2. If baseline is set (user visited notifications), only show if NEW notifications arrived
-              // 3. If baseline not set yet, show all unread (first time user)
-              let showBadge = false;
-              
-              if (isNotifications) {
-                if (isOnNotificationsPage) {
-                  // On notifications page - never show badge
-                  showBadge = false;
-                } else {
-                  // Not on notifications page
-                  if (baselineCount === null) {
-                    // Never visited notifications page - show all unread
-                    showBadge = unreadCount > 0;
-                  } else {
-                    // User HAS visited notifications - only show if NEW ones arrived
-                    showBadge = unreadCount > baselineCount;
-                  }
-                }
-              }
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors relative"
-                >
-                  <div className="relative">
-                    <item.icon className="h-5 w-5" />
-                    {showBadge && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                        {(() => {
-                          // Show only the NEW notifications count (difference from baseline)
-                          if (baselineCount !== null && unreadCount > baselineCount) {
-                            const newCount = unreadCount - baselineCount;
-                            return newCount > 99 ? "99+" : newCount;
-                          }
-                          return unreadCount > 99 ? "99+" : unreadCount;
-                        })()}
-                      </span>
-                    )}
-                  </div>
-                  <span className="hidden lg:inline">{item.label}</span>
-                </Link>
-              );
-            })}
+            <Link
+              href="/messages"
+              className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors relative"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span className="hidden lg:inline">Messages</span>
+            </Link>
           </nav>
 
-          {/* User Menu */}
+          {/* Right side - Navigation items and User Menu */}
           <div className="flex items-center space-x-4">
+            {/* Home, Search, Notifications */}
+            <nav className="hidden md:flex items-center space-x-8">
+              {navItems.filter(item => item.href !== "/messages").map((item) => {
+                const isNotifications = item.href === "/notifications";
+                
+                // Show badge logic:
+                // 1. Always hide if on notifications page
+                // 2. If baseline is set (user visited notifications), only show if NEW notifications arrived
+                // 3. If baseline not set yet, show all unread (first time user)
+                let showBadge = false;
+                
+                if (isNotifications) {
+                  if (isOnNotificationsPage) {
+                    // On notifications page - never show badge
+                    showBadge = false;
+                  } else {
+                    // Not on notifications page
+                    if (baselineCount === null) {
+                      // Never visited notifications page - show all unread
+                      showBadge = unreadCount > 0;
+                    } else {
+                      // User HAS visited notifications - only show if NEW ones arrived
+                      showBadge = unreadCount > baselineCount;
+                    }
+                  }
+                }
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors relative"
+                  >
+                    <div className="relative">
+                      <item.icon className="h-5 w-5" />
+                      {showBadge && (
+                        <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                          {(() => {
+                            // Show only the NEW notifications count (difference from baseline)
+                            if (baselineCount !== null && unreadCount > baselineCount) {
+                              const newCount = unreadCount - baselineCount;
+                              return newCount > 99 ? "99+" : newCount;
+                            }
+                            return unreadCount > 99 ? "99+" : unreadCount;
+                          })()}
+                        </span>
+                      )}
+                    </div>
+                    <span className="hidden lg:inline">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
             {showUserMenu ? (
               <div className="flex items-center space-x-4">
                 {/* Wallet Connection Status */}
