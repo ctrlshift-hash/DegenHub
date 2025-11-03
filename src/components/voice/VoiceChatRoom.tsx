@@ -84,8 +84,7 @@ export default function VoiceChatRoom({
   const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">(initialSpeakerMode || "OPEN");
   const [participantUserIds, setParticipantUserIds] = useState<Map<string, string>>(new Map()); // Map session_id to userId
   const [participantProfileImages, setParticipantProfileImages] = useState<Map<string, string>>(new Map()); // Map userId to profileImage
-  const [isSpeaker, setIsSpeaker] = useState(initialIsSpeaker || false); // Current user's speaker status
-  const [requestedToSpeak, setRequestedToSpeak] = useState(false);
+  const [isRoomClosed, setIsRoomClosed] = useState(false);
   const iframeRef = useRef<HTMLDivElement>(null);
   const dailyInstanceRef = useRef<DailyCall | null>(null);
   const isCreatingRef = useRef(false);
@@ -145,9 +144,9 @@ export default function VoiceChatRoom({
             }
           }
           
-          // Get speaker mode
-          if (data.room.speakerMode) {
-            setSpeakerMode(data.room.speakerMode);
+          // Get room closed status
+          if (typeof data.room.isClosed === "boolean") {
+            setIsRoomClosed(data.room.isClosed);
           }
           
           // Store profile images for participants
@@ -158,19 +157,6 @@ export default function VoiceChatRoom({
             }
           });
           setParticipantProfileImages(profileMap);
-          
-          // Check current user's speaker status
-          if (currentUserId) {
-            try {
-              const participantResponse = await fetch(`/api/voice/rooms/${roomId}/participant-status`, { headers });
-              if (participantResponse.ok) {
-                const participantData = await participantResponse.json();
-                setIsSpeaker(participantData.isSpeaker || false);
-              }
-            } catch (e) {
-              console.error("Error checking speaker status:", e);
-            }
-          }
           
           // Fetch profile image for current user if not already loaded
           if (currentUserId && !profileMap.has(currentUserId)) {
@@ -576,11 +562,6 @@ export default function VoiceChatRoom({
           setTimeout(() => {
             handleLeave();
           }, 1000);
-        } else if (event.data?.event === "request_to_speak" && (isHost || isCoHost)) {
-          // Show notification to host/co-host
-          const username = event.data?.username || "Someone";
-          alert(`${username} wants to speak!`);
-        }
       });
 
       // Join the room (audio-only)
@@ -599,40 +580,9 @@ export default function VoiceChatRoom({
           // Disable video tracks
           daily!.setLocalVideo(false);
           
-          // Wait a bit for participant status to be checked
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Check if user should be muted (NOMINATED mode and not a speaker)
-          // Double-check speaker status from the actual state
-          const shouldBeMuted = speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost;
-          
-          if (shouldBeMuted) {
-            // User is not a speaker in NOMINATED mode - mute them
-            console.log("Muting user - not a speaker in NOMINATED mode");
-            daily!.setLocalAudio(false);
-            setIsMuted(true);
-            
-            // Continuously enforce muting (in case they try to unmute)
-            const muteEnforcer = setInterval(() => {
-              if (callFrame && speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost) {
-                const currentAudio = daily!.localAudio();
-                if (currentAudio) {
-                  console.log("Enforcing mute - user tried to unmute");
-                  daily!.setLocalAudio(false);
-                  setIsMuted(true);
-                }
-              } else {
-                clearInterval(muteEnforcer);
-              }
-            }, 1000);
-            
-            // Store interval for cleanup
-            (daily as any)._muteEnforcerInterval = muteEnforcer;
-          } else {
-            // Enable audio
-            daily!.setLocalAudio(true);
-            setIsMuted(false);
-          }
+          // Enable audio (open mic for everyone)
+          daily!.setLocalAudio(true);
+          setIsMuted(false);
           
           // Note: Daily.co's echo cancellation handles preventing hearing yourself
           // We use muteAllLocalAudio below to mute local audio playback
@@ -824,14 +774,6 @@ export default function VoiceChatRoom({
 
   const toggleMute = () => {
     if (!callFrame) return;
-    
-    // In NOMINATED mode, non-speakers can't unmute unless they're host/co-host or are a speaker
-    if (speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && !isMuted) {
-      // They're trying to unmute but aren't a speaker - show request to speak option
-      alert("You need to be nominated as a speaker to speak. Would you like to request to speak?");
-      return;
-    }
-    
     callFrame.setLocalAudio(!isMuted);
     setIsMuted(!isMuted);
   };
@@ -1295,73 +1237,53 @@ export default function VoiceChatRoom({
 
       {/* Controls */}
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-t border-gray-700 p-4 flex items-center justify-center gap-4 flex-shrink-0">
-        {/* Request to Speak button (for non-speakers in NOMINATED mode) */}
-        {speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && (
+        {/* Close/Open Room button (host/co-host only) */}
+        {(isHost || isCoHost) && (
           <button
             onClick={async () => {
-              if (!roomId || requestedToSpeak) return;
+              if (!roomId) return;
               try {
                 const headers: Record<string, string> = { "Content-Type": "application/json" };
                 if (publicKey && !session?.user) {
                   headers["X-Wallet-Address"] = publicKey.toBase58();
                 }
-                const response = await fetch(`/api/voice/rooms/${roomId}/request-speak`, {
+                const response = await fetch(`/api/voice/rooms/${roomId}/close`, {
                   method: "POST",
                   headers,
+                  body: JSON.stringify({ isClosed: !isRoomClosed }),
                 });
                 if (response.ok) {
                   const data = await response.json();
-                  setRequestedToSpeak(true);
-                  alert("Request to speak sent to room hosts!");
-                  
-                  // Send app message to all hosts/co-hosts in the room
-                  if (callFrame) {
-                    const participantsObj = callFrame.participants();
-                    // Send to all non-local participants - they'll check if they're host/co-host
-                    Object.values(participantsObj).forEach((p: any) => {
-                      if (!p.local) {
-                        // Send to everyone - host/co-host will check if they should receive it
-                        try {
-                          callFrame.sendAppMessage({
-                            event: "request_to_speak",
-                            username: data.requestingUser?.username || userName,
-                            userId: data.requestingUser?.userId,
-                          }, p.session_id);
-                        } catch (err) {
-                          console.error("Error sending speak request:", err);
-                        }
-                      }
-                    });
-                  }
+                  setIsRoomClosed(data.isClosed);
+                  alert(data.message);
                 } else {
                   const error = await response.json();
-                  alert(error.error || "Failed to request to speak");
+                  alert(error.error || "Failed to toggle room status");
                 }
               } catch (error) {
-                console.error("Error requesting to speak:", error);
+                console.error("Error toggling room status:", error);
               }
             }}
-            disabled={requestedToSpeak || isLoading}
-            className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Request to speak"
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+              isRoomClosed
+                ? "bg-green-600 hover:bg-green-700 text-white"
+                : "bg-yellow-600 hover:bg-yellow-700 text-white"
+            }`}
+            title={isRoomClosed ? "Open room (allow new participants)" : "Close room (stop new participants)"}
           >
-            {requestedToSpeak ? "Request Sent" : "Request to Speak"}
+            {isRoomClosed ? "Open Room" : "Close Room"}
           </button>
         )}
         
         <button
           onClick={toggleMute}
-          disabled={isLoading || (speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && !isMuted)}
+          disabled={isLoading}
           className={`p-3 rounded-full transition-all ${
             isMuted
               ? "bg-red-600 hover:bg-red-700 text-white"
               : "bg-gray-700 hover:bg-gray-600 text-white"
           } disabled:opacity-50 disabled:cursor-not-allowed`}
-          title={
-            speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost && !isMuted
-              ? "You must be nominated to speak"
-              : isMuted ? "Unmute" : "Mute"
-          }
+          title={isMuted ? "Unmute" : "Mute"}
         >
           {isMuted ? (
             <MicOff className="h-5 w-5" />

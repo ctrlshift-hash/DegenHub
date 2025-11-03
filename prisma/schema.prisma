@@ -326,21 +326,22 @@ enum SpeakerMode {
 }
 
 model VoiceRoom {
-  id              String      @id @default(cuid())
-  name            String
-  description     String?
-  category        String?     // Gaming, Trading, General, etc.
-  dailyRoomUrl    String?     // Daily.co room URL/token
-  dailyRoomToken  String?     // Daily.co meeting token
-  isPublic        Boolean     @default(true)
-  maxParticipants Int         @default(50)
-  speakerMode     SpeakerMode @default(OPEN) // Open mic or nominated speakers
-  isRecording     Boolean     @default(false)
-  recordingUrl    String?     // URL to recording if available
-  voiceQuality    String      @default("high") // low, medium, high
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  hostId          String
+      id              String      @id @default(cuid())
+      name            String
+      description     String?
+      category        String?     // Gaming, Trading, General, etc.
+      dailyRoomUrl    String?     // Daily.co room URL/token
+      dailyRoomToken  String?     // Daily.co meeting token
+      isPublic        Boolean     @default(true)
+      isClosed        Boolean     @default(false) // If true, no new participants can join
+      maxParticipants Int         @default(50)
+      speakerMode     SpeakerMode @default(OPEN) // Open mic or nominated speakers
+      isRecording     Boolean     @default(false)
+      recordingUrl    String?     // URL to recording if available
+      voiceQuality    String      @default("high") // low, medium, high
+      createdAt       DateTime    @default(now())
+      updatedAt       DateTime    @updatedAt
+      hostId          String
 
   // Relations
   host        User              @relation("RoomHost", fields: [hostId], references: [id], onDelete: Cascade)
