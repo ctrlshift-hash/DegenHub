@@ -36,15 +36,18 @@ export async function DELETE(
       );
     }
 
-    // Check if there are active participants
+    // Mark all active participants as left (host can always delete, even with participants)
     const activeParticipants = room.participants.filter((p) => !p.leftAt);
     if (activeParticipants.length > 0) {
-      return NextResponse.json(
-        {
-          error: `Cannot delete room. There are ${activeParticipants.length} active participant(s). Ask them to leave first.`,
+      await prisma.roomParticipant.updateMany({
+        where: {
+          roomId: id,
+          leftAt: null,
         },
-        { status: 400 }
-      );
+        data: {
+          leftAt: new Date(),
+        },
+      });
     }
 
     // Delete the room (cascades to participants via Prisma schema)
