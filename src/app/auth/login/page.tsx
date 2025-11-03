@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import WalletConnect from "@/components/auth/WalletConnect";
 import EmailAuth from "@/components/auth/EmailAuth";
-import { Button } from "@/components/ui/Button";
+import Layout from "@/components/layout/Layout";
 import { Wallet, Mail } from "lucide-react";
 
 type AuthMode = "wallet" | "email";
@@ -14,21 +14,16 @@ export default function LoginPage() {
   const [emailMode, setEmailMode] = useState<"login" | "register">("login");
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-4">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-r from-degen-purple to-degen-pink flex items-center justify-center">
-              <span className="text-white font-bold text-xl">D</span>
-            </div>
-            <span className="text-2xl font-bold gradient-text">DegenHub</span>
-          </Link>
-          <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
-          <p className="text-muted-foreground">
-            Choose your preferred sign-in method
-          </p>
-        </div>
+    <Layout user={null}>
+      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
+            <p className="text-muted-foreground">
+              Choose your preferred sign-in method
+            </p>
+          </div>
 
         {/* Auth Method Toggle */}
         <div className="flex bg-muted rounded-lg p-1 mb-6">
@@ -88,8 +83,9 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 
