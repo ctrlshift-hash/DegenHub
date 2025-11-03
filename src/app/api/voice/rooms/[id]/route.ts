@@ -128,6 +128,7 @@ export async function GET(
         name: room.name,
         description: room.description,
         isPublic: room.isPublic,
+        isClosed: room.isClosed,
         maxParticipants: room.maxParticipants,
         speakerMode: room.speakerMode,
         createdAt: room.createdAt,

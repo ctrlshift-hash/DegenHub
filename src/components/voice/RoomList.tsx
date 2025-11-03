@@ -33,8 +33,6 @@ export default function RoomList() {
     token: string | null;
     roomName: string;
     roomId?: string;
-    speakerMode?: "OPEN" | "NOMINATED";
-    isSpeaker?: boolean;
   } | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { data: session } = useSession();
@@ -91,8 +89,6 @@ export default function RoomList() {
           token: data.token || null,
           roomName: roomName,
           roomId: roomId, // Store room ID for leaving
-          speakerMode: data.room.speakerMode || "OPEN",
-          isSpeaker: data.participant?.isSpeaker || false,
         });
       } else {
         const error = await response.json();

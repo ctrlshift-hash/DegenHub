@@ -69,8 +69,6 @@ export default function VoiceChatRoom({
   onLeave,
   roomName,
   roomId,
-  speakerMode: initialSpeakerMode,
-  initialIsSpeaker,
 }: VoiceChatRoomProps) {
   const [callFrame, setCallFrame] = useState<DailyCall | null>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -81,7 +79,6 @@ export default function VoiceChatRoom({
   const [isHost, setIsHost] = useState(false);
   const [isCoHost, setIsCoHost] = useState(false);
   const [roomHostId, setRoomHostId] = useState<string | null>(null);
-  const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">(initialSpeakerMode || "OPEN");
   const [participantUserIds, setParticipantUserIds] = useState<Map<string, string>>(new Map()); // Map session_id to userId
   const [participantProfileImages, setParticipantProfileImages] = useState<Map<string, string>>(new Map()); // Map userId to profileImage
   const [isRoomClosed, setIsRoomClosed] = useState(false);
@@ -939,16 +936,22 @@ export default function VoiceChatRoom({
                   const participantsObj = callFrame.participants();
                   const localParticipant = Object.values(participantsObj).find((p: any) => p.local);
                   if (localParticipant) {
-                    localIsSpeaking = (localParticipant as any).tracks?.audio?.isSpeaking || 
-                                     (localParticipant as any).tracks?.audio?.state === "playing" ||
-                                     (!isMuted && (localParticipant as any).audioTrack?.enabled);
+                    const tracks = (localParticipant as any).tracks || {};
+                    const audioTrack = tracks.audio;
+                    // Check if speaking and not muted
+                    localIsSpeaking = (!isMuted && (
+                      audioTrack?.isSpeaking === true ||
+                      (audioTrack && audioTrack.state === "playing") ||
+                      ((localParticipant as any).audioTrack?.enabled && !(localParticipant as any).audioTrack?.muted)
+                    ));
                   }
                 } catch (e) {
-                  // Fallback to Set check
-                  localIsSpeaking = Array.from(participants.values()).some(p => p.local && speakingParticipants.has(p.session_id));
+                  // Fallback: check if not muted (simplified)
+                  localIsSpeaking = !isMuted;
                 }
               } else {
-                localIsSpeaking = Array.from(participants.values()).some(p => p.local && speakingParticipants.has(p.session_id));
+                // Fallback if no callFrame yet
+                localIsSpeaking = !isMuted;
               }
               
               // Get current user's profile image
