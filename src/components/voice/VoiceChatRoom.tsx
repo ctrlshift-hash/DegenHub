@@ -467,7 +467,7 @@ export default function VoiceChatRoom({
         });
       });
 
-      // Detect when participants are speaking - use participant-updated event
+      // Detect when participants are speaking - use participant-updated event (includes local user)
       daily.on("participant-updated", (event: any) => {
         if (!event.participant || !event.participant.session_id) return;
         
@@ -475,7 +475,7 @@ export default function VoiceChatRoom({
         const tracks = event.participant.tracks || {};
         const audioTrack = tracks.audio;
         
-        // Check if speaking
+        // Check if speaking (works for both local and remote)
         const isSpeaking = audioTrack?.isSpeaking === true ||
                           (audioTrack && audioTrack.state === "playing");
         
@@ -1044,7 +1044,27 @@ export default function VoiceChatRoom({
                 })
                 .map((participant) => {
                   const sessionId = participant.session_id || "";
-                  const isSpeaking = speakingParticipants.has(sessionId);
+                  // Check speaking state - use both Set and Daily.co participant state
+                  let isSpeaking = speakingParticipants.has(sessionId);
+                  
+                  // Also check Daily.co's participant state as backup
+                  if (callFrame) {
+                    try {
+                      const participantsObj = callFrame.participants();
+                      const dailyParticipant = Object.values(participantsObj).find((p: any) => p.session_id === sessionId);
+                      if (dailyParticipant) {
+                        const tracks = (dailyParticipant as any).tracks || {};
+                        const audioTrack = tracks.audio;
+                        const dailyIsSpeaking = audioTrack?.isSpeaking === true || (audioTrack && audioTrack.state === "playing");
+                        if (dailyIsSpeaking) {
+                          isSpeaking = true;
+                        }
+                      }
+                    } catch (e) {
+                      // Ignore errors
+                    }
+                  }
+                  
                   const displayName = (participant.user_name || participant.user_id || "Guest").trim();
                   const participantUserId = participantUserIds.get(sessionId) || participant.user_id;
                   
