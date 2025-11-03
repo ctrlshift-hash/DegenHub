@@ -157,13 +157,21 @@ export default function VoiceChatRoom({
             setIsRoomClosed(data.room.isClosed);
           }
           
-          // Store profile images for participants
+          // Store profile images for participants AND host
           const profileMap = new Map<string, string>();
+          
+          // Add host profile image (host is always in room response)
+          if (data.room.host?.id && data.room.host?.profileImage) {
+            profileMap.set(data.room.host.id, data.room.host.profileImage);
+          }
+          
+          // Add participant profile images
           data.room.participants.forEach((p: any) => {
             if (p.user?.id && p.user?.profileImage) {
               profileMap.set(p.user.id, p.user.profileImage);
             }
           });
+          
           setParticipantProfileImages(profileMap);
           
           // Fetch profile image for current user if not already loaded
@@ -1003,6 +1011,14 @@ export default function VoiceChatRoom({
                 // Use session username first, then userName prop, then fallback
                 displayUserName = session.user.username || userName || "Guest";
               } else if (publicKey) {
+                // For wallet users, try to use roomHostId if we're the host
+                if (roomHostId) {
+                  // Check if we're the host by comparing wallet address
+                  // We'll use the roomHostId to get profile image if we match
+                  const hostWallet = publicKey.toBase58();
+                  // We need to check if host's wallet matches - but we don't have that info here
+                  // So we'll rely on participantUserIds to map our session to userId
+                }
                 // For wallet users, try to find our userId from participantUserIds or room data
                 // Check if we're the host first
                 if (roomHostId && participantUserIds.has(roomHostId)) {
