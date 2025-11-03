@@ -152,29 +152,29 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Build room data object, only including fields that exist
-    const roomData: any = {
+    // Build room data object - always include all fields with defaults
+    const roomData = {
       name: name.trim(),
       description: description?.trim() || null,
+      category: category?.trim() || null,
       isPublic: isPublic !== false,
       maxParticipants: maxParticipants || 50,
+      speakerMode: (speakerMode || "OPEN") as "OPEN" | "NOMINATED",
+      voiceQuality: voiceQuality || "high",
       hostId: userId,
       dailyRoomUrl: dailyRoom.url,
+      isRecording: false,
     };
 
-    // Add optional fields if they're provided (for backward compatibility)
-    if (category !== undefined) {
-      roomData.category = category?.trim() || null;
-    }
-    if (speakerMode !== undefined) {
-      roomData.speakerMode = speakerMode || "OPEN";
-    }
-    if (voiceQuality !== undefined) {
-      roomData.voiceQuality = voiceQuality || "high";
-    }
+    console.log("📝 Creating room with data:", {
+      ...roomData,
+      dailyRoomUrl: roomData.dailyRoomUrl ? "SET" : "MISSING",
+    });
 
-    const room = await prisma.voiceRoom.create({
-      data: roomData,
+    let room;
+    try {
+      room = await prisma.voiceRoom.create({
+        data: roomData,
       include: {
         host: {
           select: {
@@ -186,7 +186,24 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-    });
+      });
+      console.log("✅ Room created successfully:", room.id);
+    } catch (dbError: any) {
+      console.error("❌ Database error creating room:", dbError);
+      console.error("Error code:", dbError.code);
+      console.error("Error message:", dbError.message);
+      console.error("Error meta:", dbError.meta);
+      return NextResponse.json(
+        { 
+          error: `Database error: ${dbError.message || "Failed to save room to database"}`,
+          details: process.env.NODE_ENV === "development" ? {
+            code: dbError.code,
+            meta: dbError.meta,
+          } : undefined
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       room: {
