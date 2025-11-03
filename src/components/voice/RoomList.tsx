@@ -209,6 +209,7 @@ export default function RoomList() {
       // Will use actual username from Daily.co token if available
       return `anon_${publicKey.toBase58().slice(0, 6)}`;
     }
+    // For guests, we'll use a generic name - the actual unique username comes from the backend
     return "Guest";
   };
 

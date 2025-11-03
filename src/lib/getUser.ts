@@ -49,13 +49,19 @@ export async function getUserFromRequest(request: NextRequest) {
     };
   }
   
-  // Guest user
-  let guestUser = await prisma.user.findFirst({ where: { username: "guest" } });
-  if (!guestUser) {
-    guestUser = await prisma.user.create({
-      data: { username: "guest", email: null, password: null, isVerified: false },
-    });
-  }
+  // Guest user - create a unique guest user for each session
+  // Use a unique identifier to ensure each guest gets their own account
+  // We'll use a combination of timestamp and random string for uniqueness
+  const guestId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const guestUser = await prisma.user.create({
+    data: { 
+      username: guestId, 
+      email: null, 
+      password: null, 
+      isVerified: false 
+    },
+  });
+  
   return {
     userId: guestUser.id,
     user: {
