@@ -325,37 +325,34 @@ export default function RoomList() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
             {rooms.map((room) => (
               <div
               key={room.id}
-              className="bg-card border border-gray-700 rounded-lg p-3 hover:border-degen-purple transition-colors flex flex-col"
+              className="bg-card border border-gray-700 rounded-lg p-2 hover:border-degen-purple transition-colors cursor-pointer group"
+              onClick={() => !(room.participantCount >= room.maxParticipants) && handleJoinRoom(room.id, room.name)}
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-white mb-0.5 truncate">
-                    {room.name}
-                  </h3>
-                  {room.description && (
-                    <p className="text-xs text-gray-400 mb-1 line-clamp-2">
-                      {room.description}
-                    </p>
-                  )}
-                </div>
+              <div className="flex items-start justify-between mb-1.5">
+                <h3 className="text-sm font-bold text-white truncate flex-1 min-w-0">
+                  {room.name}
+                </h3>
                 {isHost(room) && (
                   <button
-                    onClick={() => handleDeleteRoom(room.id, room.name)}
-                    className="ml-1 p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteRoom(room.id, room.name);
+                    }}
+                    className="ml-1 p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
                     title="Delete room (host only)"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3 w-3" />
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-gray-400 mb-2">
-                <div className="flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <div className="flex items-center gap-0.5">
+                  <Users className="h-3 w-3" />
                   <span>
                     {room.participantCount}/{room.maxParticipants}
                   </span>
@@ -363,17 +360,9 @@ export default function RoomList() {
                 <span className="truncate">@{room.host.username}</span>
               </div>
 
-              <div className="flex justify-end mt-auto">
-                <Button
-                  onClick={() => handleJoinRoom(room.id, room.name)}
-                  className="px-4 py-1.5 text-sm"
-                  disabled={room.participantCount >= room.maxParticipants}
-                >
-                  {room.participantCount >= room.maxParticipants
-                    ? "Full"
-                    : "Join"}
-                </Button>
-              </div>
+              {room.participantCount >= room.maxParticipants && (
+                <div className="mt-1.5 text-xs text-red-400 font-medium">Full</div>
+              )}
               </div>
             ))}
           </div>
