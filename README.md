@@ -190,8 +190,17 @@ degenhub/
 - [x] Post creation and interactions (likes, comments, reposts)
 - [x] User profiles with verified badges
 - [x] Dark mode UI
-- [x] Community channels
-- [x] Voice chat rooms with host controls
+- [x] Community channels (create, join, leave, channel posts)
+- [x] Voice chat (VC) - Create your own rooms
+- [x] Voice chat host controls (delete rooms, kick users, mute, co-host management)
+- [x] Voice chat room management (close/open, edit settings, speaker mode)
+- [x] Jeet Leaderboard
+- [x] Top Traders Leaderboard
+- [x] Trending hashtags
+- [x] Direct messaging system
+- [x] Notifications system
+- [x] Follow/unfollow users
+- [x] Search functionality
 - [x] Real-time user count display
 - [x] Username availability validation
 - [x] SOL tipping functionality
@@ -203,7 +212,7 @@ degenhub/
 - [ ] Top Traders Leaderboard with real-time updates
 - [ ] Advanced token tagging and discovery
 - [ ] Mobile app
-- [ ] Voice chat improvements (enhanced moderation, recording)
+- [ ] Voice chat improvements (enhanced moderation, recording playback)
 
 ### Phase 3 (Future)
 - [ ] NFT integration (display collections, PFP verification)
