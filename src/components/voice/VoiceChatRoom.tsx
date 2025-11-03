@@ -1233,8 +1233,8 @@ export default function VoiceChatRoom({
                     });
                   }
                   
-                  // Show buttons if host/co-host, even if participantUserId is missing (we'll use sessionId as fallback)
-                  const canShowButtons = (isHost || isCoHost) && (participantUserId || sessionId);
+                  // Show buttons if host/co-host - always show for hosts, use sessionId as fallback if needed
+                  const canShowButtons = (isHost || isCoHost);
                   
                   const handleKick = async () => {
                     // Use participantUserId if available, otherwise use sessionId as fallback
@@ -1376,8 +1376,7 @@ export default function VoiceChatRoom({
                                 : "Kick participant"
                             }
                             disabled={
-                              participantUserId === roomHostId || 
-                              (!participantUserId && !sessionId)
+                              participantUserId === roomHostId
                             }
                           >
                             <UserX className="h-3 w-3 text-white" />
