@@ -70,6 +70,15 @@ export default function VoiceChatRoom({
   roomName,
   roomId,
 }: VoiceChatRoomProps) {
+  // Debug: Log roomId on mount
+  useEffect(() => {
+    if (!roomId) {
+      console.warn("⚠️ VoiceChatRoom mounted without roomId:", { roomId, roomName, roomUrl });
+    } else {
+      console.log("✅ VoiceChatRoom mounted with roomId:", roomId);
+    }
+  }, [roomId, roomName, roomUrl]);
+  
   const [callFrame, setCallFrame] = useState<DailyCall | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
