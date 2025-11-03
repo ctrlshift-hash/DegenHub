@@ -153,7 +153,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const { content, imageUrl, imageUrls, walletAddress } = await request.json();
+    
+    // Parse body first to get walletAddress if provided
+    const body = await request.json();
+    const { content, imageUrl, imageUrls, walletAddress } = body;
+    
+    // Create a new request with walletAddress in headers if provided (for getUserFromRequest)
+    const requestWithWallet = walletAddress ? new NextRequest(request.url, {
+      method: request.method,
+      headers: { ...Object.fromEntries(request.headers.entries()), "x-wallet-address": walletAddress },
+      body: request.body,
+    }) : request;
+    
+    // Use getUserFromRequest for consistent user identification (supports email/wallet/unique guests)
+    const { userId, user } = await getUserFromRequest(requestWithWallet);
 
     // Support both single imageUrl (backwards compat) and array of imageUrls
     const images = imageUrls || (imageUrl ? [imageUrl] : []);
@@ -182,7 +195,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
+    
+    const userData = {
+      id: user.id,
+      username: user.username,
+      walletAddress: user.walletAddress ?? walletAddress ?? null,
+      isVerified: user.isVerified,
+      profileImage: user.profileImage ?? null,
+    };
 
     const post = await prisma.post.create({
       data: {

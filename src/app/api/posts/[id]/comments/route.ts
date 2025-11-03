@@ -36,56 +36,30 @@ export async function POST(
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
-    // Support both email and wallet authentication
-    let userId: string;
-    let actorId: string | null = null; // For notifications
-    let userData: any;
-
-    if (session?.user?.id) {
-      // Email authenticated user
-      userId = session.user.id;
-      actorId = session.user.id;
-      const dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
-      userData = {
-        id: session.user.id,
-        username: session.user.username || "user",
-        walletAddress: dbUser?.walletAddress ?? null,
-        isVerified: session.user.isVerified || false,
-        profileImage: dbUser?.profileImage ?? null,
-      };
-    } else {
-      // Check for wallet authentication
-      const walletHeader = request.headers.get("x-wallet-address") || request.headers.get("X-Wallet-Address");
-      const wallet = walletHeader || walletAddress;
-      
-      if (wallet) {
-        let walletUser = await prisma.user.findFirst({ where: { walletAddress: wallet } });
-        if (!walletUser) {
-          const anonName = `anon_${wallet.slice(0, 6)}`;
-          walletUser = await prisma.user.create({
-            data: { username: anonName, walletAddress: wallet, isVerified: true },
-          });
-        }
-        userId = walletUser.id;
-        actorId = walletUser.id;
-        userData = {
-          id: walletUser.id,
-          username: walletUser.username,
-          walletAddress: walletUser.walletAddress,
-          isVerified: walletUser.isVerified,
-          profileImage: walletUser.profileImage ?? null,
-        };
-      } else {
-        // Guest user (no notifications)
-        let guestUser = await prisma.user.findFirst({ where: { username: "guest" } });
-        if (!guestUser) {
-          guestUser = await prisma.user.create({ data: { username: "guest", email: null, password: null, isVerified: false } });
-        }
-        userId = guestUser.id;
-        // actorId stays null for guests
-        userData = { id: guestUser.id, username: "Anonymous", walletAddress: null, isVerified: false, profileImage: null };
-      }
+    // Use getUserFromRequest for consistent user identification (supports email/wallet/unique guests)
+    // If walletAddress is in body, add it to headers for getUserFromRequest
+    const requestWithWallet = walletAddress ? new NextRequest(request.url, {
+      method: request.method,
+      headers: { ...Object.fromEntries(request.headers.entries()), "x-wallet-address": walletAddress },
+      body: request.body,
+    }) : request;
+    
+    const { userId: resolvedUserId, user } = await getUserFromRequest(requestWithWallet);
+    const userId = resolvedUserId;
+    
+    // Only set actorId for authenticated users (email or wallet), not for guests (for notifications)
+    let actorId: string | null = null;
+    if (session?.user?.id || request.headers.get("x-wallet-address") || walletAddress) {
+      actorId = userId;
     }
+    
+    const userData = {
+      id: user.id,
+      username: user.username,
+      walletAddress: user.walletAddress ?? walletAddress ?? null,
+      isVerified: user.isVerified,
+      profileImage: user.profileImage ?? null,
+    };
 
     const comment = await prisma.comment.create({
       data: { content: content.trim(), postId, userId },
