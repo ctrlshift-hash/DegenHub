@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
-import { Mic, Users, Plus } from "lucide-react";
+import { Mic, Users, Plus, Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useWallet } from "@/contexts/WalletContext";
 import VoiceChatRoom from "./VoiceChatRoom";
@@ -128,6 +128,45 @@ export default function RoomList() {
     }, 500);
   };
 
+  const handleDeleteRoom = async (roomId: string, roomName: string) => {
+    if (!confirm(`Delete room "${roomName}"? This cannot be undone. The room must be empty.`)) {
+      return;
+    }
+
+    try {
+      const headers: Record<string, string> = {};
+      if (publicKey) {
+        headers["X-Wallet-Address"] = publicKey.toBase58();
+      }
+
+      const response = await fetch(`/api/voice/rooms/${roomId}`, {
+        method: "DELETE",
+        headers,
+      });
+
+      if (response.ok) {
+        fetchRooms(); // Refresh room list
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to delete room");
+      }
+    } catch (error) {
+      console.error("Error deleting room:", error);
+      alert("Failed to delete room");
+    }
+  };
+
+  // Check if current user is the host of a room
+  const isHost = (room: Room) => {
+    if (session?.user?.id) {
+      return room.host.id === session.user.id;
+    }
+    if (publicKey && room.host.walletAddress) {
+      return room.host.walletAddress === publicKey.toBase58();
+    }
+    return false;
+  };
+
   // Get current username for the room
   const getUserName = () => {
     if (session?.user?.username) {
@@ -207,6 +246,15 @@ export default function RoomList() {
                     </p>
                   )}
                 </div>
+                {isHost(room) && (
+                  <button
+                    onClick={() => handleDeleteRoom(room.id, room.name)}
+                    className="ml-2 p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+                    title="Delete room (host only)"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
               <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
