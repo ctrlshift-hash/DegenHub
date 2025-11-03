@@ -58,6 +58,29 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
   const sanitizedName = sanitizeRoomName(name);
   console.log(`✅ Creating Daily.co room: "${name}" -> "${sanitizedName}"`);
 
+  const requestBody = {
+    name: sanitizedName,
+    properties: {
+      max_participants: maxParticipants || 50,
+      enable_chat: true,
+      enable_prejoin_ui: false,
+      start_video_off: true,
+      enable_screenshare: false,
+      enable_echo_cancellation: true,
+      enable_noise_suppression: true,
+      enable_automatic_gain_control: true,
+    },
+  };
+
+  console.log("📤 Daily.co API Request:", {
+    url: `${DAILY_API_URL}/rooms`,
+    method: "POST",
+    roomName: sanitizedName,
+    originalName: name,
+    apiKeyPrefix: apiKey.substring(0, 10) + "...",
+    requestBody: JSON.stringify(requestBody),
+  });
+
   try {
     const response = await fetch(`${DAILY_API_URL}/rooms`, {
       method: "POST",
@@ -65,25 +88,14 @@ export async function createDailyRoom(name: string, maxParticipants: number = 50
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        name: sanitizedName,
-        properties: {
-          max_participants: maxParticipants || 50, // Use requested limit or default to 50
-          enable_chat: true,
-          enable_prejoin_ui: false, // Disable prejoin UI to avoid camera prompts
-          start_video_off: true,
-          enable_screenshare: false,
-          // Enable aggressive echo cancellation (like Discord)
-          enable_echo_cancellation: true,
-          enable_noise_suppression: true,
-          enable_automatic_gain_control: true,
-        },
-      }),
+      body: JSON.stringify(requestBody),
     });
 
+    console.log("📥 Daily.co API Response Status:", response.status, response.statusText);
+    console.log("📥 Daily.co API Response Headers:", Object.fromEntries(response.headers.entries()));
+
     const responseText = await response.text();
-    console.log("📥 Daily.co API Response Status:", response.status);
-    console.log("📥 Daily.co API Response Body (first 500 chars):", responseText.substring(0, 500));
+    console.log("📥 Daily.co API Response Body (full):", responseText);
 
     if (!response.ok) {
       let error: any;
