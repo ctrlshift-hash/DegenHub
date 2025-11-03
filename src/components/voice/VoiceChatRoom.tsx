@@ -952,12 +952,23 @@ export default function VoiceChatRoom({
           )}
           <button
             onClick={async () => {
+              if (!roomId) {
+                console.error("❌ roomId is undefined when trying to share:", {
+                  roomId,
+                  roomName,
+                  roomUrl,
+                });
+                alert("Room ID not available. Please refresh the page and try again.");
+                return;
+              }
               const roomLink = `${window.location.origin}/voice-rooms?join=${roomId}`;
+              console.log("📋 Sharing room link:", roomLink);
               await navigator.clipboard.writeText(roomLink);
-              alert("Room link copied to clipboard!");
+              alert(`Room link copied to clipboard!\n\n${roomLink}`);
             }}
             className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
-            title="Share room link"
+            title={`Share room link${roomId ? `: /voice-rooms?join=${roomId}` : " (Room ID not available)"}`}
+            disabled={!roomId}
           >
             <Share2 className="h-5 w-5" />
           </button>
