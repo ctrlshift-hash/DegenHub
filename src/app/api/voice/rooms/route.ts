@@ -63,8 +63,81 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error fetching rooms:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+      cause: error.cause,
+    });
+    
+    // If it's a column doesn't exist error, try to work around it
+    if (error.message?.includes("isClosed") || error.code === "P2021") {
+      // Try with explicit select to avoid the isClosed column
+      try {
+        const rooms = await prisma.$queryRaw`
+          SELECT 
+            id, name, description, "isPublic", "maxParticipants", "createdAt", "hostId",
+            "dailyRoomUrl", "dailyRoomToken", category, "speakerMode", "isRecording", 
+            "recordingUrl", "voiceQuality", "updatedAt"
+          FROM voice_rooms
+          WHERE "isPublic" = true
+          ORDER BY "createdAt" DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        ` as any[];
+        
+        // Fetch host and participants separately
+        const roomIds = rooms.map(r => r.id);
+        const hosts = await prisma.user.findMany({
+          where: { id: { in: rooms.map(r => r.hostId) } },
+          select: { id: true, username: true, profileImage: true, walletAddress: true, isVerified: true },
+        });
+        const participants = await prisma.roomParticipant.findMany({
+          where: { roomId: { in: roomIds }, leftAt: null },
+          include: {
+            user: {
+              select: { id: true, username: true, profileImage: true, walletAddress: true, isVerified: true },
+            },
+          },
+        });
+        
+        const hostMap = new Map(hosts.map(h => [h.id, h]));
+        const participantMap = new Map<string, any[]>();
+        participants.forEach(p => {
+          if (!participantMap.has(p.roomId)) {
+            participantMap.set(p.roomId, []);
+          }
+          participantMap.get(p.roomId)!.push(p);
+        });
+        
+        const formattedRooms = rooms.map((room) => ({
+          id: room.id,
+          name: room.name,
+          description: room.description,
+          isPublic: room.isPublic,
+          maxParticipants: room.maxParticipants,
+          createdAt: room.createdAt,
+          host: hostMap.get(room.hostId) || null,
+          participantCount: participantMap.get(room.id)?.length || 0,
+        }));
+        
+        return NextResponse.json({
+          rooms: formattedRooms,
+          pagination: {
+            limit,
+            offset,
+            total: await prisma.$queryRaw<[{ count: bigint }]>`
+              SELECT COUNT(*) as count FROM voice_rooms WHERE "isPublic" = true
+            `.then(r => Number(r[0].count)),
+          },
+        });
+      } catch (fallbackError: any) {
+        console.error("Fallback query also failed:", fallbackError);
+      }
+    }
+    
     return NextResponse.json(
-      { error: "Failed to fetch rooms" },
+      { error: "Failed to fetch rooms", details: error.message },
       { status: 500 }
     );
   }
