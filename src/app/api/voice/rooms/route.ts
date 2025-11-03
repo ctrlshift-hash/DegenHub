@@ -134,18 +134,29 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Build room data object, only including fields that exist
+    const roomData: any = {
+      name: name.trim(),
+      description: description?.trim() || null,
+      isPublic: isPublic !== false,
+      maxParticipants: maxParticipants || 50,
+      hostId: userId,
+      dailyRoomUrl: dailyRoom.url,
+    };
+
+    // Add optional fields if they're provided (for backward compatibility)
+    if (category !== undefined) {
+      roomData.category = category?.trim() || null;
+    }
+    if (speakerMode !== undefined) {
+      roomData.speakerMode = speakerMode || "OPEN";
+    }
+    if (voiceQuality !== undefined) {
+      roomData.voiceQuality = voiceQuality || "high";
+    }
+
     const room = await prisma.voiceRoom.create({
-      data: {
-        name: name.trim(),
-        description: description?.trim() || null,
-        category: category?.trim() || null,
-        isPublic: isPublic !== false,
-        maxParticipants: maxParticipants || 50,
-        speakerMode: speakerMode || "OPEN",
-        voiceQuality: voiceQuality || "high",
-        hostId: userId,
-        dailyRoomUrl: dailyRoom.url,
-      },
+      data: roomData,
       include: {
         host: {
           select: {
