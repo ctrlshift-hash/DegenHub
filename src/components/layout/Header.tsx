@@ -184,11 +184,13 @@ export default function Header({ user }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Left side - Logo */}
-          <div className="hidden md:flex items-center w-1/3">
-            <Link href="/" className="flex items-center">
-              <img src="/degenhub-logo.svg" alt="DegenHub" className="h-8 w-8" />
-            </Link>
-          </div>
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <img 
+              src="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png" 
+              alt="DegenHub" 
+              className="h-10 w-10 object-contain" 
+            />
+          </Link>
 
           {/* Center - All navigation items */}
           <nav className="hidden md:flex items-center justify-center space-x-8 flex-1">
@@ -244,7 +246,7 @@ export default function Header({ user }: HeaderProps) {
           </nav>
 
           {/* Right side - User Menu */}
-          <div className="flex items-center space-x-4 justify-end w-1/3">
+          <div className="flex items-center space-x-4 justify-end">
             {showUserMenu ? (
               <div className="flex items-center space-x-4">
                 {/* Wallet Connection Status */}
