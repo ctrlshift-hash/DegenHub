@@ -165,7 +165,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Build room data object - always include all fields with defaults
-    const roomData = {
+    // Note: isClosed may not exist in DB yet if migration hasn't run, so we'll omit it for now
+    const roomData: any = {
       name: name.trim(),
       description: description?.trim() || null,
       category: category?.trim() || null,
@@ -176,6 +177,8 @@ export async function POST(request: NextRequest) {
       hostId: userId,
       dailyRoomUrl: dailyRoom.url,
       isRecording: false,
+      // Only include isClosed if migration has been applied
+      // isClosed: false, // Will be added after migration
     };
 
     // Create room in database - don't wait for history
