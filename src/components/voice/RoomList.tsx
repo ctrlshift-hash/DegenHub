@@ -35,13 +35,16 @@ export default function RoomList() {
     roomId?: string;
   } | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { data: session } = useSession();
   const { publicKey } = useWallet();
 
   useEffect(() => {
-    fetchRooms();
+    fetchRooms(0, true); // Initial load
     // Refresh rooms every 10 seconds
-    const interval = setInterval(fetchRooms, 10000);
+    const interval = setInterval(() => fetchRooms(0, true), 10000);
     return () => clearInterval(interval);
   }, []);
   
@@ -61,17 +64,46 @@ export default function RoomList() {
     }
   }, [rooms]); // Run when rooms are loaded
 
-  const fetchRooms = async () => {
+  const fetchRooms = async (pageNum: number = 0, reset: boolean = false) => {
     try {
-      const response = await fetch("/api/voice/rooms");
+      if (reset) {
+        setIsLoading(pageNum === 0);
+        setPage(0);
+      } else {
+        setIsLoadingMore(true);
+      }
+      
+      const limit = 12; // 12 rooms per page (2 columns x 6 rows = good for most screens)
+      const offset = pageNum * limit;
+      
+      const response = await fetch(`/api/voice/rooms?limit=${limit}&offset=${offset}`);
       if (response.ok) {
         const data = await response.json();
-        setRooms(data.rooms || []);
+        const newRooms = data.rooms || [];
+        
+        if (reset) {
+          setRooms(newRooms);
+        } else {
+          setRooms(prev => [...prev, ...newRooms]);
+        }
+        
+        // Check if there are more rooms
+        const totalFetched = reset ? newRooms.length : rooms.length + newRooms.length;
+        setHasMore(totalFetched < (data.pagination?.total || 0));
       }
     } catch (error) {
       console.error("Failed to fetch rooms:", error);
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+  
+  const loadMoreRooms = () => {
+    if (!isLoadingMore && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchRooms(nextPage, false);
     }
   };
 
@@ -313,7 +345,35 @@ export default function RoomList() {
               </Button>
             </div>
           ))}
-        </div>
+          </div>
+          
+          {/* Load More / Pagination */}
+          {hasMore && (
+            <div className="mt-6 text-center">
+              <Button
+                onClick={loadMoreRooms}
+                disabled={isLoadingMore}
+                variant="outline"
+                className="min-w-[200px]"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                    Loading...
+                  </>
+                ) : (
+                  "Load More Rooms"
+                )}
+              </Button>
+            </div>
+          )}
+          
+          {!hasMore && rooms.length > 12 && (
+            <div className="mt-6 text-center text-gray-400 text-sm">
+              No more rooms to load
+            </div>
+          )}
+        </>
       )}
     </div>
   );
