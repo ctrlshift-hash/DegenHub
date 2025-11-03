@@ -962,11 +962,9 @@ export default function VoiceChatRoom({
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {/* Local User - Only show once */}
+            {/* Local User - Always show */}
             {(() => {
-              // Check if local user is already in participants (if so, skip this)
-              const localInParticipants = Array.from(participants.values()).some(p => p.local);
-              if (localInParticipants) return null;
+              // Always show local user card
               
               // Check if local user is speaking
               let localIsSpeaking = false;
@@ -1007,12 +1005,12 @@ export default function VoiceChatRoom({
                     {currentUserProfileImage ? (
                       <img 
                         src={currentUserProfileImage} 
-                        alt={userName}
+                        alt={displayUserName}
                         className="w-20 h-20 rounded-full object-cover"
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-degen-purple flex items-center justify-center text-white text-2xl font-bold">
-                        {userName.charAt(0).toUpperCase()}
+                        {displayUserName.charAt(0).toUpperCase()}
                       </div>
                     )}
                     {localIsSpeaking && (
@@ -1031,7 +1029,9 @@ export default function VoiceChatRoom({
                       </div>
                     )}
                   </div>
-                  <h3 className="text-white font-semibold text-sm truncate w-full text-center">{userName}</h3>
+                  <h3 className="text-white font-semibold text-sm truncate w-full text-center">
+                    {displayUserName}
+                  </h3>
                   <p className="text-xs text-gray-400 mt-1">You</p>
                   {isMuted && (
                     <div className="absolute top-2 right-2 bg-red-600 rounded-full p-1">
