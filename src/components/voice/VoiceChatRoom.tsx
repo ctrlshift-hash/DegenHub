@@ -455,6 +455,19 @@ export default function VoiceChatRoom({
         setSpeakingParticipants(new Set());
       });
 
+      // Listen for app messages (kick notifications)
+      daily.on("app-message", (event: any) => {
+        console.log("App message received:", event);
+        if (event.data?.event === "kick") {
+          const message = event.data?.message || "You have been kicked from the room";
+          alert(message);
+          // Auto-leave when kicked
+          setTimeout(() => {
+            handleLeave();
+          }, 1000);
+        }
+      });
+
       // Join the room (audio-only)
       // Note: Daily.co will still request camera permission even with videoSource: false
       // This is a Daily.co quirk - ignore camera permission if denied
