@@ -194,11 +194,13 @@ degenhub/
 - [x] Voice chat rooms with host controls
 - [x] Real-time user count display
 - [x] Username availability validation
+- [x] SOL tipping functionality
+- [x] Real-time updates with Socket.io
 
 ### Phase 2 (Coming Soon)
-- [ ] Real-time updates with Socket.io
 - [ ] Token-gated channel access (exclusive channels requiring token holdings)
-- [ ] SOL tipping functionality
+- [ ] Top Jeet Leaderboard with real-time updates
+- [ ] Top Traders Leaderboard with real-time updates
 - [ ] Advanced token tagging and discovery
 - [ ] Mobile app
 - [ ] Voice chat improvements (enhanced moderation, recording)
