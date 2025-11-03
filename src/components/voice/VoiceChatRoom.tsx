@@ -1335,8 +1335,9 @@ export default function VoiceChatRoom({
                         isSpeaking ? "border-green-500 shadow-lg shadow-green-500/30" : "border-gray-700"
                       }`}
                     >
-                      {canShowButtons && (
-                        <div className="absolute top-2 right-2 flex gap-1 z-10">
+                      {/* Host/Co-host controls - always show for hosts/co-hosts */}
+                      {(isHost || isCoHost) && (
+                        <div className="absolute top-2 right-2 flex gap-1 z-20">
                           {isHost && participantUserId && (
                             <button
                               onClick={async () => {
@@ -1361,25 +1362,25 @@ export default function VoiceChatRoom({
                                   console.error("Error adding co-host:", error);
                                 }
                               }}
-                              className="p-1.5 bg-yellow-600/80 hover:bg-yellow-600 rounded-full transition-colors"
+                              className="p-1.5 bg-yellow-600/90 hover:bg-yellow-600 rounded-full transition-colors shadow-lg"
                               title="Make co-host"
                             >
-                              <Crown className="h-3 w-3 text-white" />
+                              <Crown className="h-3.5 w-3.5 text-white" />
                             </button>
                           )}
                           <button
                             onClick={handleKick}
-                            className="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-1.5 bg-red-600/90 hover:bg-red-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                             title={
                               participantUserId === roomHostId 
                                 ? "Cannot kick the host" 
-                                : "Kick participant"
+                                : `Kick ${displayName}`
                             }
                             disabled={
                               participantUserId === roomHostId
                             }
                           >
-                            <UserX className="h-3 w-3 text-white" />
+                            <UserX className="h-3.5 w-3.5 text-white" />
                           </button>
                         </div>
                       )}
