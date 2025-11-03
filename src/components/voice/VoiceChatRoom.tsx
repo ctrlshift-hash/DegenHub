@@ -551,7 +551,7 @@ export default function VoiceChatRoom({
         setSpeakingParticipants(new Set());
       });
 
-      // Listen for app messages (kick notifications)
+      // Listen for app messages (kick notifications, speak requests)
       daily.on("app-message", (event: any) => {
         console.log("App message received:", event);
         if (event.data?.event === "kick") {
@@ -561,6 +561,10 @@ export default function VoiceChatRoom({
           setTimeout(() => {
             handleLeave();
           }, 1000);
+        } else if (event.data?.event === "request_to_speak" && (isHost || isCoHost)) {
+          // Show notification to host/co-host
+          const username = event.data?.username || "Someone";
+          alert(`${username} wants to speak!`);
         }
       });
 
@@ -580,11 +584,35 @@ export default function VoiceChatRoom({
           // Disable video tracks
           daily!.setLocalVideo(false);
           
+          // Wait a bit for participant status to be checked
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           // Check if user should be muted (NOMINATED mode and not a speaker)
-          if (speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost) {
+          // Double-check speaker status from the actual state
+          const shouldBeMuted = speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost;
+          
+          if (shouldBeMuted) {
             // User is not a speaker in NOMINATED mode - mute them
+            console.log("Muting user - not a speaker in NOMINATED mode");
             daily!.setLocalAudio(false);
             setIsMuted(true);
+            
+            // Continuously enforce muting (in case they try to unmute)
+            const muteEnforcer = setInterval(() => {
+              if (callFrame && speakerMode === "NOMINATED" && !isSpeaker && !isHost && !isCoHost) {
+                const currentAudio = daily!.localAudio();
+                if (currentAudio) {
+                  console.log("Enforcing mute - user tried to unmute");
+                  daily!.setLocalAudio(false);
+                  setIsMuted(true);
+                }
+              } else {
+                clearInterval(muteEnforcer);
+              }
+            }, 1000);
+            
+            // Store interval for cleanup
+            (daily as any)._muteEnforcerInterval = muteEnforcer;
           } else {
             // Enable audio
             daily!.setLocalAudio(true);
@@ -947,7 +975,24 @@ export default function VoiceChatRoom({
               const localInParticipants = Array.from(participants.values()).some(p => p.local);
               if (localInParticipants) return null;
               
-              const localIsSpeaking = Array.from(participants.values()).some(p => p.local && speakingParticipants.has(p.session_id));
+              // Check if local user is speaking
+              let localIsSpeaking = false;
+              if (callFrame) {
+                try {
+                  const participantsObj = callFrame.participants();
+                  const localParticipant = Object.values(participantsObj).find((p: any) => p.local);
+                  if (localParticipant) {
+                    localIsSpeaking = (localParticipant as any).tracks?.audio?.isSpeaking || 
+                                     (localParticipant as any).tracks?.audio?.state === "playing" ||
+                                     (!isMuted && (localParticipant as any).audioTrack?.enabled);
+                  }
+                } catch (e) {
+                  // Fallback to Set check
+                  localIsSpeaking = Array.from(participants.values()).some(p => p.local && speakingParticipants.has(p.session_id));
+                }
+              } else {
+                localIsSpeaking = Array.from(participants.values()).some(p => p.local && speakingParticipants.has(p.session_id));
+              }
               
               // Get current user's profile image
               let currentUserProfileImage: string | null = null;
@@ -1250,8 +1295,23 @@ export default function VoiceChatRoom({
                   headers,
                 });
                 if (response.ok) {
+                  const data = await response.json();
                   setRequestedToSpeak(true);
                   alert("Request to speak sent to room hosts!");
+                  
+                  // Send app message to all hosts/co-hosts in the room
+                  if (callFrame) {
+                    const participantsObj = callFrame.participants();
+                    Object.values(participantsObj).forEach((p: any) => {
+                      if (!p.local && (p.user_id === roomHostId || /* check if co-host */)) {
+                        callFrame.sendAppMessage({
+                          event: "request_to_speak",
+                          username: data.requestingUser?.username || userName,
+                          userId: data.requestingUser?.userId,
+                        }, p.session_id).catch(err => console.error("Error sending speak request:", err));
+                      }
+                    });
+                  }
                 } else {
                   const error = await response.json();
                   alert(error.error || "Failed to request to speak");

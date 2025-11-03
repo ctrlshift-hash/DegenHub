@@ -9,7 +9,17 @@ export async function GET(
 ) {
   try {
     const { id: roomId } = await params;
-    const { userId } = await getUserFromRequest(request);
+    const { searchParams } = new URL(request.url);
+    const queryUserId = searchParams.get("userId");
+    
+    // If userId is provided in query, use it; otherwise get from request
+    let userId: string;
+    if (queryUserId) {
+      userId = queryUserId;
+    } else {
+      const userData = await getUserFromRequest(request);
+      userId = userData.userId;
+    }
 
     const participant = await prisma.roomParticipant.findUnique({
       where: {

@@ -56,6 +56,12 @@ export async function POST(
       });
     }
 
+    // Get requesting user info
+    const requestingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true },
+    });
+
     // Log request to speak
     await prisma.roomHistory.create({
       data: {
@@ -65,10 +71,14 @@ export async function POST(
       },
     });
 
-    // Notify host/co-hosts (they can check history or we could add notifications)
+    // Return user info so client can send app message to hosts/co-hosts
     return NextResponse.json({
       success: true,
       message: "Request to speak sent to room hosts",
+      requestingUser: {
+        userId,
+        username: requestingUser?.username || "Guest",
+      },
     });
   } catch (error: any) {
     console.error("Error requesting to speak:", error);
