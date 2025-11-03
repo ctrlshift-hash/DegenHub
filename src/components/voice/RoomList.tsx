@@ -43,8 +43,24 @@ export default function RoomList() {
 
   useEffect(() => {
     fetchRooms(0, true); // Initial load
-    // Refresh rooms every 10 seconds
-    const interval = setInterval(() => fetchRooms(0, true), 10000);
+    // Silently update participant counts every 30 seconds (less frequent, no full refresh)
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/voice/rooms?limit=100&offset=0`);
+        if (response.ok) {
+          const data = await response.json();
+          const updatedRooms = data.rooms || [];
+          // Only update participant counts, don't reset the entire list
+          setRooms(prev => prev.map(prevRoom => {
+            const updated = updatedRooms.find((r: Room) => r.id === prevRoom.id);
+            return updated ? { ...prevRoom, participantCount: updated.participantCount } : prevRoom;
+          }));
+        }
+      } catch (error) {
+        // Silent fail - don't disturb the user
+        console.error("Background update failed:", error);
+      }
+    }, 30000); // 30 seconds instead of 10
     return () => clearInterval(interval);
   }, []);
   
@@ -184,8 +200,21 @@ export default function RoomList() {
       }
     }
     setSelectedRoom(null);
-    // Refresh immediately (leave is already processed)
-    fetchRooms();
+    // Silently update participant counts only (no full refresh)
+    try {
+      const response = await fetch(`/api/voice/rooms?limit=100&offset=0`);
+      if (response.ok) {
+        const data = await response.json();
+        const updatedRooms = data.rooms || [];
+        setRooms(prev => prev.map(prevRoom => {
+          const updated = updatedRooms.find((r: Room) => r.id === prevRoom.id);
+          return updated ? { ...prevRoom, participantCount: updated.participantCount } : prevRoom;
+        }));
+      }
+    } catch (error) {
+      // Silent fail
+      console.error("Background update failed:", error);
+    }
   };
 
   const handleDeleteRoom = async (roomId: string, roomName: string) => {
@@ -207,14 +236,12 @@ export default function RoomList() {
         headers,
       });
 
-      if (response.ok) {
-        // Room already removed from UI, just fetch to ensure sync
-        fetchRooms(0, true);
-      } else {
+      if (!response.ok) {
         // Revert optimistic update on error
         const error = await response.json();
         alert(error.error || "Failed to delete room");
-        fetchRooms(0, true); // Refresh to show correct state
+        // Re-fetch only if deletion failed
+        await fetchRooms(0, true);
       }
     } catch (error) {
       console.error("Error deleting room:", error);
@@ -298,11 +325,11 @@ export default function RoomList() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {rooms.map((room) => (
               <div
               key={room.id}
-              className="bg-card border border-gray-700 rounded-lg p-4 hover:border-degen-purple transition-colors"
+              className="bg-card border border-gray-700 rounded-lg p-4 hover:border-degen-purple transition-colors flex flex-col"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
@@ -326,25 +353,29 @@ export default function RoomList() {
                 )}
               </div>
 
-              <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>
-                    {room.participantCount}/{room.maxParticipants}
-                  </span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>
+                      {room.participantCount}/{room.maxParticipants}
+                    </span>
+                  </div>
+                  <span>Host: @{room.host.username}</span>
                 </div>
-                <span>Host: @{room.host.username}</span>
               </div>
 
-              <Button
-                onClick={() => handleJoinRoom(room.id, room.name)}
-                className="w-full"
-                disabled={room.participantCount >= room.maxParticipants}
-              >
-                {room.participantCount >= room.maxParticipants
-                  ? "Room Full"
-                  : "Join Room"}
-              </Button>
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => handleJoinRoom(room.id, room.name)}
+                  className="px-6"
+                  disabled={room.participantCount >= room.maxParticipants}
+                >
+                  {room.participantCount >= room.maxParticipants
+                    ? "Room Full"
+                    : "Join Room"}
+                </Button>
+              </div>
               </div>
             ))}
           </div>
