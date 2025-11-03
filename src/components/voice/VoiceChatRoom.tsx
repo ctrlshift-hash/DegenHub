@@ -994,15 +994,59 @@ export default function VoiceChatRoom({
               // Get current user's profile image and username
               let currentUserProfileImage: string | null = null;
               let displayUserName = userName || "Guest";
+              let currentUserId: string | null = null;
               
               if (session?.user?.id) {
                 // Email-authenticated user
+                currentUserId = session.user.id;
                 currentUserProfileImage = participantProfileImages.get(session.user.id) || null;
                 // Use session username first, then userName prop, then fallback
                 displayUserName = session.user.username || userName || "Guest";
               } else if (publicKey) {
-                // For wallet users, userName prop should have the correct username
+                // For wallet users, try to find our userId from participantUserIds or room data
+                // Check if we're the host first
+                if (roomHostId && participantUserIds.has(roomHostId)) {
+                  // Actually, let's find our userId from the participants map
+                  // We'll look for a participant with our wallet address or session
+                }
                 displayUserName = userName || `anon_${publicKey.toBase58().slice(0, 6)}`;
+                
+                // Try to get userId from participantUserIds if available
+                // Find our session ID first
+                if (callFrame) {
+                  try {
+                    const participantsObj = callFrame.participants();
+                    const localParticipant = Object.values(participantsObj).find((p: any) => p.local);
+                    if (localParticipant) {
+                      const localSessionId = (localParticipant as any).session_id;
+                      if (localSessionId) {
+                        currentUserId = participantUserIds.get(localSessionId) || null;
+                        if (currentUserId) {
+                          currentUserProfileImage = participantProfileImages.get(currentUserId) || null;
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    // Ignore
+                  }
+                }
+              }
+              
+              // If still no profile image, try fetching it
+              if (!currentUserProfileImage && currentUserId && roomId) {
+                // Fetch profile image asynchronously (will update on next render)
+                fetch(`/api/users/${currentUserId}`)
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.user?.profileImage) {
+                      setParticipantProfileImages((prev) => {
+                        const updated = new Map(prev);
+                        updated.set(currentUserId!, data.user.profileImage);
+                        return updated;
+                      });
+                    }
+                  })
+                  .catch(() => {}); // Silent fail
               }
               
               return (
