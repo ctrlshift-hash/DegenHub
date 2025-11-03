@@ -261,7 +261,7 @@ export default function RoomList() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Voice Rooms</h1>
@@ -278,7 +278,7 @@ export default function RoomList() {
           onClose={() => setShowCreateModal(false)}
           onRoomCreated={async () => {
             setShowCreateModal(false);
-            await fetchRooms(); // Refresh immediately
+            await fetchRooms(0, true); // Refresh from beginning
           }}
         />
       )}
@@ -297,9 +297,10 @@ export default function RoomList() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {rooms.map((room) => (
-            <div
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {rooms.map((room) => (
+              <div
               key={room.id}
               className="bg-card border border-gray-700 rounded-lg p-4 hover:border-degen-purple transition-colors"
             >
@@ -344,8 +345,8 @@ export default function RoomList() {
                   ? "Room Full"
                   : "Join Room"}
               </Button>
-            </div>
-          ))}
+              </div>
+            ))}
           </div>
           
           {/* Load More / Pagination */}
