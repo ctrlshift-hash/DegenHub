@@ -75,6 +75,8 @@ export default function VoiceChatRoom({
   const [participants, setParticipants] = useState<Map<string, Participant>>(new Map());
   const [speakingParticipants, setSpeakingParticipants] = useState<Set<string>>(new Set());
   const [isHost, setIsHost] = useState(false);
+  const [isCoHost, setIsCoHost] = useState(false);
+  const [speakerMode, setSpeakerMode] = useState<"OPEN" | "NOMINATED">("OPEN");
   const [participantUserIds, setParticipantUserIds] = useState<Map<string, string>>(new Map()); // Map session_id to userId
   const iframeRef = useRef<HTMLDivElement>(null);
   const dailyInstanceRef = useRef<DailyCall | null>(null);
