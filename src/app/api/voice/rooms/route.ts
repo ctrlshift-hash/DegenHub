@@ -270,6 +270,7 @@ export async function POST(request: NextRequest) {
       console.log("⚠️ Using raw SQL to create room (isClosed column migration pending)");
       
       // Use raw SQL to insert without isClosed
+      // Cast speakerMode to the enum type
       const result = await prisma.$queryRaw<Array<{ id: string }>>`
         INSERT INTO voice_rooms (
           id, name, description, category, "isPublic", "maxParticipants", 
@@ -279,7 +280,7 @@ export async function POST(request: NextRequest) {
         VALUES (
           gen_random_uuid()::text, ${roomData.name}, ${roomData.description || null}, 
           ${roomData.category || null}, ${roomData.isPublic}, ${roomData.maxParticipants},
-          ${roomData.speakerMode}, ${roomData.voiceQuality}, ${roomData.hostId},
+          ${roomData.speakerMode}::"SpeakerMode", ${roomData.voiceQuality}, ${roomData.hostId},
           ${roomData.dailyRoomUrl}, ${roomData.isRecording}, NOW(), NOW()
         )
         RETURNING id
