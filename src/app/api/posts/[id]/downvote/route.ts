@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUserFromRequest } from "@/lib/getUser";
 
 export async function POST(
   request: NextRequest,
@@ -11,26 +12,9 @@ export async function POST(
     const session = await getServerSession(authOptions);
     const { id: postId } = await params;
 
-    // Support both email and wallet authentication
-    let userId: string | null = null;
-    if (session?.user?.id) {
-      userId = session.user.id;
-    } else {
-      const walletHeader = request.headers.get("x-wallet-address") || request.headers.get("X-Wallet-Address");
-      if (walletHeader) {
-        let walletUser = await prisma.user.findFirst({ where: { walletAddress: walletHeader } });
-        if (!walletUser) {
-          walletUser = await prisma.user.create({ data: { username: `anon_${walletHeader.slice(0,6)}`, walletAddress: walletHeader, isVerified: true } });
-        }
-        userId = walletUser.id;
-      } else {
-        let guestUser = await prisma.user.findFirst({ where: { username: "guest" } });
-        if (!guestUser) {
-          guestUser = await prisma.user.create({ data: { username: "guest" } });
-        }
-        userId = guestUser.id;
-      }
-    }
+    // Use getUserFromRequest for consistent user identification (supports email/wallet/unique guests)
+    const { userId: resolvedUserId } = await getUserFromRequest(request);
+    const userId = resolvedUserId;
 
     const post = await prisma.post.findUnique({ where: { id: postId } });
     if (!post) return NextResponse.json({ error: "Post not found" }, { status: 404 });

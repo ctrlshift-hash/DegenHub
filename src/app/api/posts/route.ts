@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUserFromRequest } from "@/lib/getUser";
 
 function extractHashtags(text: string): string[] {
   const hashtagRegex = /#[\w]+/g;
@@ -182,56 +183,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let userId: string;
-    let userData: any;
-
-    if (session?.user?.id) {
-      // Authenticated user
-      const dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
-      userId = session.user.id;
-      userData = {
-        id: session.user.id,
-        username: session.user.username || "user",
-        walletAddress: dbUser?.walletAddress ?? null,
-        isVerified: session.user.isVerified || false,
-        profileImage: dbUser?.profileImage ?? null,
-      };
-    } else if (walletAddress) {
-      // Wallet-only guest: find or create a pseudo user tied to wallet
-      let walletUser = await prisma.user.findFirst({ where: { walletAddress } });
-      if (!walletUser) {
-        const anonName = `anon_${walletAddress.slice(0, 6)}`;
-        walletUser = await prisma.user.create({
-          data: { username: anonName, walletAddress, email: null, password: null, isVerified: true },
-        });
-      }
-      userId = walletUser.id;
-      userData = {
-        id: walletUser.id,
-        username: walletUser.username,
-        walletAddress: walletUser.walletAddress,
-        isVerified: walletUser.isVerified,
-        profileImage: walletUser.profileImage ?? null,
-      };
-    } else {
-      // Guest user - create or find a guest user
-      let guestUser = await prisma.user.findFirst({
-        where: { username: "guest" },
-      });
-      if (!guestUser) {
-        guestUser = await prisma.user.create({
-          data: { username: "guest", email: null, password: null, isVerified: false },
-        });
-      }
-      userId = guestUser.id;
-      userData = {
-        id: guestUser.id,
-        username: "Anonymous",
-        walletAddress: null,
-        isVerified: false,
-        profileImage: null,
-      };
-    }
 
     const post = await prisma.post.create({
       data: {
