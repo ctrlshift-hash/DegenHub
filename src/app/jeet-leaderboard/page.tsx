@@ -12,6 +12,8 @@ type Profile = {
   jeetScore?: number;
   badges?: string[];
   roastTopQuote?: string;
+  roasts?: string[];
+  predictions?: string[];
   mostJeeted?: Array<{ name: string; url: string } | string>; // Support both old (string[]) and new ({name, url}[]) formats
   pnlSol: number;
   pnlUsd: number;
@@ -48,7 +50,7 @@ export default function JeetLeaderboardPage() {
   const [sort, setSort] = useState<"usd" | "sol">("usd");
   const [onlyWatchlist, setOnlyWatchlist] = useState(false);
   const [watchlist, setWatchlist] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<"trades" | "mostJeeted" | "roasts" | "predictions">("trades");
+  const [activeTab, setActiveTab] = useState<"mostJeeted" | "roasts" | "predictions">("mostJeeted");
   const [voteTally, setVoteTally] = useState<Record<string, number>>({});
   const [myCard, setMyCard] = useState({ name: "", wallet: "", coin: "", note: "", bgUrl: "", bgDataUrl: "" });
   const [generated, setGenerated] = useState<{ dataUrl: string; previewUrl: string; shareUrl?: string } | null>(null);
@@ -357,7 +359,7 @@ export default function JeetLeaderboardPage() {
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (selected) {
-      setActiveTab("trades");
+      setActiveTab("mostJeeted");
     }
   }, [selected]);
 
@@ -650,16 +652,6 @@ export default function JeetLeaderboardPage() {
             <div className="flex gap-2 mb-3 text-sm border-b border-gray-800">
               <button 
                 className={`px-4 py-2 rounded-t-lg transition-colors ${
-                  activeTab === "trades" 
-                    ? "bg-degen-purple/20 text-degen-purple border-b-2 border-degen-purple" 
-                    : "hover:bg-gray-800 text-gray-400"
-                }`}
-                onClick={() => setActiveTab("trades")}
-              >
-                Trades
-              </button>
-              <button 
-                className={`px-4 py-2 rounded-t-lg transition-colors ${
                   activeTab === "mostJeeted" 
                     ? "bg-degen-purple/20 text-degen-purple border-b-2 border-degen-purple" 
                     : "hover:bg-gray-800 text-gray-400"
@@ -692,41 +684,6 @@ export default function JeetLeaderboardPage() {
 
             {/* Tab Content */}
             <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-gray-800">
-              {activeTab === "trades" && (
-                <>
-                  {selected.worstTrades.length === 0 ? (
-                    <div className="text-sm text-gray-400 p-3">No trades found.</div>
-                  ) : (
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-800 sticky top-0">
-                        <tr>
-                          <th className="text-left p-3">Token</th>
-                          <th className="text-left p-3">Side</th>
-                          <th className="text-right p-3">Qty</th>
-                          <th className="text-right p-3">Price (USD)</th>
-                          <th className="text-right p-3">Value (USD)</th>
-                          <th className="text-left p-3">When</th>
-                          <th className="text-left p-3">Note</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selected.worstTrades.map((t, i) => (
-                          <tr key={i} className={`border-t border-gray-800 ${i % 2 ? "bg-gray-900" : "bg-gray-950"}`}>
-                            <td className="p-3">{t.tokenSymbol || t.tokenMint.slice(0, 6)}</td>
-                            <td className="p-3 capitalize">{t.side}</td>
-                            <td className="p-3 text-right">{t.qty.toLocaleString()}</td>
-                            <td className="p-3 text-right">{t.priceUsd.toLocaleString(undefined, { maximumFractionDigits: 6 })}</td>
-                            <td className="p-3 text-right">{t.valueUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                            <td className="p-3">{new Date(t.timestamp).toLocaleString()}</td>
-                            <td className="p-3 text-gray-400">{t.note || ""}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </>
-              )}
-
               {activeTab === "mostJeeted" && (
                 <div className="p-4">
                   {(() => {
@@ -765,7 +722,15 @@ export default function JeetLeaderboardPage() {
 
               {activeTab === "roasts" && (
                 <div className="p-4">
-                  {selected.roastTopQuote ? (
+                  {selected.roasts && selected.roasts.length > 0 ? (
+                    <div className="space-y-3">
+                      {selected.roasts.map((roast, i) => (
+                        <div key={i} className="p-3 rounded-lg bg-red-900/20 border border-red-800/40">
+                          <div className="text-sm text-gray-300 italic">"{roast}"</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : selected.roastTopQuote ? (
                     <div className="p-3 rounded-lg bg-red-900/20 border border-red-800/40">
                       <div className="text-sm text-gray-300 italic">"{selected.roastTopQuote}"</div>
                     </div>
@@ -777,7 +742,17 @@ export default function JeetLeaderboardPage() {
 
               {activeTab === "predictions" && (
                 <div className="p-4">
-                  <div className="text-sm text-gray-400 p-3">No predictions available yet. Add them in the profile data.</div>
+                  {selected.predictions && selected.predictions.length > 0 ? (
+                    <div className="space-y-3">
+                      {selected.predictions.map((prediction, i) => (
+                        <div key={i} className="p-3 rounded-lg bg-blue-900/20 border border-blue-800/40">
+                          <div className="text-sm text-gray-300">"{prediction}"</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-400 p-3">No predictions available yet.</div>
+                  )}
                 </div>
               )}
             </div>
