@@ -729,33 +729,37 @@ export default function JeetLeaderboardPage() {
 
               {activeTab === "mostJeeted" && (
                 <div className="p-4">
-                  {selected.mostJeeted && selected.mostJeeted.length > 0 ? (
-                    <div className="space-y-2">
-                      {selected.mostJeeted.map((coin, i) => (
-                        <div key={i} className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
-                          {typeof coin === "string" ? (
-                            <div className="font-semibold text-gray-200">{coin}</div>
-                          ) : (
-                            <div className="flex items-center justify-between">
-                              <div className="font-semibold text-gray-200">{coin.name}</div>
-                              {coin.url && (
-                                <a 
-                                  href={coin.url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-degen-purple hover:underline"
-                                >
-                                  View Trade →
-                                </a>
-                              )}
+                  {(() => {
+                    console.log("Most jeeted data:", selected.mostJeeted);
+                    if (!selected.mostJeeted || selected.mostJeeted.length === 0) {
+                      return <div className="text-sm text-gray-400 p-3">No most jeeted coins data available yet.</div>;
+                    }
+                    return (
+                      <div className="space-y-2">
+                        {selected.mostJeeted.map((coin, i) => {
+                          const coinName = typeof coin === "string" ? coin : coin.name;
+                          const coinUrl = typeof coin === "string" ? null : coin.url;
+                          return (
+                            <div key={i} className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                              <div className="flex items-center justify-between">
+                                <div className="font-semibold text-gray-200">{coinName}</div>
+                                {coinUrl && (
+                                  <a 
+                                    href={coinUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-degen-purple hover:underline"
+                                  >
+                                    View Trade →
+                                  </a>
+                                )}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-400 p-3">No most jeeted coins data available yet.</div>
-                  )}
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
