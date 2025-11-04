@@ -313,7 +313,11 @@ export const JEET_PROFILES: JeetProfile[] = [
     "Next trade will prove infinite conviction is not enough",
     "Will have infinite belief in finite outcomes",
     "Will continue the infinite cycle of losses"
-  ], mostJeeted: [], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
+  ], mostJeeted: [
+    { name: "Firo", url: "https://axiom.trade/meme/Hhh9AFW8WBvXxXQzVLdojgdikr2sUZHNYp7cKexgTYYD?chain=sol" },
+    { name: "ZKS", url: "https://axiom.trade/meme/3WvfiTitT5Ra3MnvF4JwM7DuiiLcm9qn1MNLVRnhogyM?chain=sol" },
+    { name: "jellyjelly", url: "https://axiom.trade/meme/3bC2e2RxcfvF9oP22LvbaNsVwoS2T98q6ErCRoayQYdq?chain=sol" }
+  ], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
   { wallet: "", name: "Professor Crypto", pfpUrl: "https://pbs.twimg.com/profile_images/1976071073863962624/5l8trevT_400x400.jpg", description: "Tenure in TA, minor in coping.", jeetScore: 81, badges: [], roastTopQuote: "Professor Crypto has tenure in TA, minor in coping.", roasts: [
     "Professor Crypto has tenure in TA, minor in coping.",
     "His technical analysis is so advanced, it's wrong.",
