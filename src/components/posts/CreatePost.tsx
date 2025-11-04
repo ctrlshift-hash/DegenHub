@@ -326,8 +326,15 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
         isOpen={showGifPicker}
         onClose={() => setShowGifPicker(false)}
         onSelect={(gifUrl) => {
+          console.log("GifPicker onSelect called with URL:", gifUrl);
+          console.log("Current imageUrls:", imageUrls);
+          console.log("imageUrls.length:", imageUrls.length);
           if (imageUrls.length < 4) {
-            setImageUrls([...imageUrls, gifUrl]);
+            const newImageUrls = [...imageUrls, gifUrl];
+            console.log("Setting new imageUrls:", newImageUrls);
+            setImageUrls(newImageUrls);
+          } else {
+            console.log("Max images reached (4), not adding GIF");
           }
         }}
       />
@@ -471,8 +478,15 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
         isOpen={showGifPicker}
         onClose={() => setShowGifPicker(false)}
         onSelect={(gifUrl) => {
+          console.log("GifPicker onSelect called with URL:", gifUrl);
+          console.log("Current imageUrls:", imageUrls);
+          console.log("imageUrls.length:", imageUrls.length);
           if (imageUrls.length < 4) {
-            setImageUrls([...imageUrls, gifUrl]);
+            const newImageUrls = [...imageUrls, gifUrl];
+            console.log("Setting new imageUrls:", newImageUrls);
+            setImageUrls(newImageUrls);
+          } else {
+            console.log("Max images reached (4), not adding GIF");
           }
         }}
       />
