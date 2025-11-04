@@ -56,8 +56,8 @@ export default function Sidebar() {
     };
 
     fetchUserCount();
-    // Refresh every 30 seconds to keep it live
-    const interval = setInterval(fetchUserCount, 30000);
+    // Refresh every 10 seconds to keep it live
+    const interval = setInterval(fetchUserCount, 10000);
     return () => clearInterval(interval);
   }, []);
 

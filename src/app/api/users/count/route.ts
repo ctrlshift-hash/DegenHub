@@ -5,16 +5,15 @@ import { prisma } from "@/lib/prisma";
 // This endpoint works on Vercel production - it uses your production DATABASE_URL
 export async function GET(request: NextRequest) {
   try {
-    // Count only real registered users - exclude guest and anon users
+    // Count all registered users - include wallet users (anon_*), exclude only guest users
     const count = await prisma.user.count({
       where: {
         AND: [
           // Exclude guest users (created for anonymous sessions)
           { username: { not: { startsWith: "guest_" } } },
-          // Exclude anon users (temporary wallet users without accounts)
-          { username: { not: { startsWith: "anon_" } } },
           // Exclude users named exactly "guest"
           { username: { not: "guest" } },
+          // Include anon_* users (wallet-only users) - they are real members
         ],
       },
     });
@@ -24,9 +23,9 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
 
-    // Cache for 30 seconds to reduce database load while keeping it relatively fresh
+    // Cache for 10 seconds to reduce database load while keeping it relatively fresh
     // Vercel will cache this at the edge
-    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+    response.headers.set('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=30');
     
     return response;
   } catch (error: any) {
