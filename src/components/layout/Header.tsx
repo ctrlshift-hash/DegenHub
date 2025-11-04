@@ -288,25 +288,36 @@ export default function Header({ user }: HeaderProps) {
 
                   {/* Dropdown Menu */}
                   {isMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg py-2 z-50">
-                      <button
-                        onClick={handleProfileClick}
-                        className="flex items-center space-x-2 px-4 py-2 hover:bg-accent transition-colors w-full text-left"
-                      >
-                        <User className="h-4 w-4" />
-                        <span>Profile</span>
-                      </button>
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                      {user?.id ? (
+                        <Link
+                          href={`/profile/${user.id}`}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left text-white"
+                        >
+                          <User className="h-4 w-4" />
+                          <span>Profile</span>
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={handleProfileClick}
+                          className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left text-white"
+                        >
+                          <User className="h-4 w-4" />
+                          <span>Profile</span>
+                        </button>
+                      )}
                       {user?.id && (
                         <Link
                           href="/settings"
-                          className="flex items-center space-x-2 px-4 py-2 hover:bg-accent transition-colors"
+                          className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-800 transition-colors text-white"
                           onClick={() => setIsMenuOpen(false)}
                         >
                           <Settings className="h-4 w-4" />
                           <span>Settings</span>
                         </Link>
                       )}
-                      <hr className="my-2 border-border" />
+                      <hr className="my-2 border-gray-700" />
                       <button
                         onClick={handleLogout}
                         className="flex items-center space-x-2 px-4 py-2 text-red-500 hover:bg-red-500/10 transition-colors w-full text-left"
