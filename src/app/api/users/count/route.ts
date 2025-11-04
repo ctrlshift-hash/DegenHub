@@ -5,13 +5,16 @@ import { prisma } from "@/lib/prisma";
 // This endpoint works on Vercel production - it uses your production DATABASE_URL
 export async function GET(request: NextRequest) {
   try {
-    // Count users: include wallet users (anon_*) and email users, exclude guest users
+    // Count users: ONLY wallet users (anon_*) and email users, exclude guest users
+    // Guests don't count as users - that's what website visitors is for
     const count = await prisma.user.count({
       where: {
-        // Exclude guest users (created for anonymous sessions without wallets)
-        username: { not: { startsWith: "guest_" } },
-        username: { not: "guest" },
-        // Include anon_* (wallet users) and all email users
+        AND: [
+          // Exclude guest users (created for anonymous sessions without wallets)
+          { username: { not: { startsWith: "guest_" } } },
+          { username: { not: "guest" } },
+          // Include anon_* (wallet users) and all email users
+        ],
       },
     });
     
