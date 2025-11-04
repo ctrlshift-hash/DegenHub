@@ -388,24 +388,6 @@ export default function JeetLeaderboardPage() {
           biggest fumbles and rank them by USD size.
         </p>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2 gap-y-2 mb-4 flex-wrap">
-          <div className="inline-flex rounded-lg border border-border overflow-hidden">
-            {(["daily","weekly","monthly"] as const).map(tf => (
-              <button key={tf} className={`px-3 py-1 text-sm ${timeframe===tf?"bg-degen-purple/20 text-degen-purple":"hover:bg-accent"}`} onClick={() => setTimeframe(tf)}>
-                {tf.charAt(0).toUpperCase()+tf.slice(1)}
-              </button>
-            ))}
-          </div>
-          <select value={sort} onChange={e=>setSort(e.target.value as any)} className="input text-sm h-10 py-2 leading-normal w-full md:w-64 pr-8 appearance-none">
-            <option value="usd">Sort: USD loss</option>
-            <option value="sol">Sort: SOL loss</option>
-          </select>
-          <label className="ml-auto flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={onlyWatchlist} onChange={e=>setOnlyWatchlist(e.target.checked)} />
-            Only watchlist
-          </label>
-        </div>
 
         {/* Leaderboard and Testimonials Grid */}
         <div className="grid lg:grid-cols-[1fr_300px] gap-6">
