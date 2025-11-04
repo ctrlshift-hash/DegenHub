@@ -161,6 +161,7 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
   // Show optional login prompt if not authenticated
   if (!session?.user) {
     return (
+      <>
       <div className="card">
         <div className="text-center py-4 mb-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
           {connected ? (
@@ -330,7 +331,7 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
           }
         }}
       />
-    </div>
+      </>
     );
   }
 
