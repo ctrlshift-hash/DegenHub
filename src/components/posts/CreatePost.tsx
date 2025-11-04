@@ -283,7 +283,7 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
                       <img 
                         src={url} 
                         alt={`Preview ${index + 1}`} 
-                        className="max-h-32 w-full rounded-lg object-cover"
+                        className="max-h-32 w-full rounded-lg object-contain bg-gray-800/50"
                       />
                       <button
                         type="button"
