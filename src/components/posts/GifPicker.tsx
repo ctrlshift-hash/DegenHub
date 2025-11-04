@@ -15,6 +15,8 @@ interface GifPickerProps {
 const GIPHY_API_KEY = process.env.NEXT_PUBLIC_GIPHY_API_KEY || "YOUR_GIPHY_API_KEY";
 
 export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps) {
+  console.log("GifPicker component render called. isOpen:", isOpen);
+  
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [gifs, setGifs] = useState<any[]>([]);
@@ -86,21 +88,31 @@ export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps)
     if (isOpen && mounted) {
       console.log("GifPicker opened, loading trending GIFs. isOpen:", isOpen, "mounted:", mounted);
       loadTrending();
-      searchInputRef.current?.focus();
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
     }
   }, [isOpen, mounted]);
 
-  if (!isOpen || !mounted) {
-    console.log("GifPicker not rendering. isOpen:", isOpen, "mounted:", mounted);
+  // Early return check with logging
+  if (!isOpen) {
+    console.log("GifPicker not rendering - isOpen is false");
+    return null;
+  }
+
+  if (!mounted) {
+    console.log("GifPicker not rendering - not mounted yet");
+    return null;
+  }
+
+  // Check for document.body after mount check
+  if (typeof window === 'undefined' || !document.body) {
+    console.error("document.body not available for portal");
     return null;
   }
 
   console.log("GifPicker rendering modal. API Key present:", !!GIPHY_API_KEY && GIPHY_API_KEY !== "YOUR_GIPHY_API_KEY");
-
-  if (!document.body) {
-    console.error("document.body not available for portal");
-    return null;
-  }
+  console.log("About to create portal with document.body:", !!document.body);
 
   const modalContent = (
     <div 
