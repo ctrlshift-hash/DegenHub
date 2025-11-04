@@ -180,8 +180,8 @@ export default function Header({ user }: HeaderProps) {
   const showUserMenu = !!(user || (connected && publicKey));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 relative">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative">
+      <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Left side - Logo at far left */}
           <Link href="/" className="flex items-center flex-shrink-0 absolute left-4">
