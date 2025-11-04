@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
     // Get suggested users:
     // 1. Users not followed by current user
     // 2. Exclude current user and guest/anonymous users
-    // 3. Order by activity (most posts) and recent activity
+    // 3. ONLY VERIFIED USERS (isVerified = true)
+    // 4. Order by activity (most posts) and recent activity
     // LIMIT: Only fetch 30 candidates (enough for random selection of 3)
     const candidateSuggestions = await prisma.user.findMany({
       where: {
@@ -43,22 +44,25 @@ export async function GET(request: NextRequest) {
           { username: { not: { startsWith: "anon_" } } }, // Exclude anonymous users
           { username: { not: "guest" } }, // Exclude guest user
           { username: { not: { startsWith: "anon" } } }, // Exclude anon users
-          { profileImage: { not: null } }, // Require profile picture
+          { isVerified: true }, // ONLY VERIFIED USERS
           // Only show verified (wallet OR email present)
           { OR: [ { walletAddress: { not: null } }, { email: { not: null } } ] },
         ],
       },
-      include: {
+      select: {
+        id: true,
+        username: true,
+        bio: true,
+        profileImage: true,
+        isVerified: true,
+        email: true,
+        walletAddress: true,
+        createdAt: true,
         _count: {
           select: {
             posts: true,
             followers: true,
           },
-        },
-        posts: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          select: { createdAt: true },
         },
       },
       orderBy: [
@@ -98,8 +102,8 @@ export async function GET(request: NextRequest) {
         isVerified: user.isVerified,
         email: user.email,
         walletAddress: user.walletAddress,
-        followersCount: user._count.followers,
-        postsCount: user._count.posts,
+        followersCount: user._count?.followers || 0,
+        postsCount: user._count?.posts || 0,
         isFollowing,
       };
     });
@@ -127,7 +131,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ suggestions: suggestionsWithFollowStatus });
+    const response = NextResponse.json({ suggestions: suggestionsWithFollowStatus });
+    
+    // Cache for 30 seconds to reduce database load (who to follow doesn't need to be super fresh)
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+    
+    return response;
   } catch (error: any) {
     console.error("Suggestions error:", error);
     return NextResponse.json(

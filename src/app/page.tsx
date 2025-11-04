@@ -139,8 +139,7 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    // Seed users on initial load (only once)
-    fetch("/api/seed/users", { method: "POST" }).catch(() => {});
+    // Remove seed call - it's slowing down the page
     fetchPosts();
   }, []);
 

@@ -59,7 +59,11 @@ export async function GET(request: NextRequest) {
       take: fetchLimit,
       orderBy: { createdAt: "desc" },
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        content: true,
+        imageUrls: true,
+        createdAt: true,
         user: {
           select: {
             id: true,

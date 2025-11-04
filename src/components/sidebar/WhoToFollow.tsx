@@ -28,24 +28,22 @@ export default function WhoToFollow() {
   const [loading, setLoading] = useState(true);
   const [followingStates, setFollowingStates] = useState<Record<string, boolean>>({});
 
-  // Load cached suggestions on mount
+  // Load cached suggestions on mount (faster initial load)
   useEffect(() => {
     try {
       const cached = localStorage.getItem("whoToFollow_suggestions");
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed.timestamp && Date.now() - parsed.timestamp < 30 * 60 * 1000) {
+        // Cache for 5 minutes (longer cache = faster load)
+        if (parsed.timestamp && Date.now() - parsed.timestamp < 5 * 60 * 1000) {
           setSuggestions(parsed.data || []);
           setLoading(false);
-        } else {
-          setLoading(false);
+          return; // Don't fetch if we have valid cache
         }
-      } else {
-        setLoading(false);
       }
-    } catch {
-      setLoading(false);
-    }
+    } catch {}
+    // Only set loading false if no cache, then fetch
+    setLoading(true);
   }, []);
 
   const loadSuggestions = async () => {
@@ -64,7 +62,7 @@ export default function WhoToFollow() {
         const newSuggestions = data.suggestions || [];
         if (Array.isArray(newSuggestions)) {
           setSuggestions(newSuggestions);
-          // Cache suggestions
+          // Cache suggestions for 5 minutes
           try {
             localStorage.setItem("whoToFollow_suggestions", JSON.stringify({
               data: newSuggestions,
