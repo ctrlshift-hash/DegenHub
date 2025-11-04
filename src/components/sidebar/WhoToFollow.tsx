@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { UserPlus, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import UserHoverCard from "@/components/users/UserHoverCard";
+import { isGoldVerified } from "@/lib/gold-verified";
 
 interface SuggestedUser {
   id: string;
@@ -200,7 +201,7 @@ export default function WhoToFollow() {
                 <Link href={`/profile/${user.id}`} className="block hover:underline">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className="font-semibold text-sm truncate">{user.username}</span>
-                    {(user as any).isGoldVerified ? (
+                    {isGoldVerified(user) ? (
                       <span className="inline-flex items-center gap-1">
                         <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-yellow-400 text-black">
                           <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.004 7.004a1 1 0 01-1.414 0L3.293 9.714a1 1 0 111.414-1.414l3.004 3.004 6.297-6.297a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
