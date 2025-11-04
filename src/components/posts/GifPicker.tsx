@@ -74,12 +74,17 @@ export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps)
   };
 
   const handleSelect = (gif: any) => {
+    console.log("GIF selected:", gif);
     // Use the original size or downsized medium for better quality
     const gifUrl = gif.images?.original?.url || gif.images?.downsized_medium?.url || gif.images?.fixed_height?.url;
+    console.log("Extracted GIF URL:", gifUrl);
     if (gifUrl) {
+      console.log("Calling onSelect with URL:", gifUrl);
       onSelect(gifUrl);
       onClose();
       setSearchQuery("");
+    } else {
+      console.error("No GIF URL found in gif object:", gif);
     }
   };
 
