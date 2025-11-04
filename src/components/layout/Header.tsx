@@ -183,8 +183,8 @@ export default function Header({ user }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Left side - Logo */}
-          <Link href="/" className="flex items-center flex-shrink-0 -ml-4">
+          {/* Left side - Logo aligned with sidebar */}
+          <Link href="/" className="flex items-center flex-shrink-0 md:ml-[calc(256px-1rem)] -ml-4">
             <img 
               src="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png" 
               alt="DegenHub" 
