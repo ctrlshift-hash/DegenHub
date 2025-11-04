@@ -294,8 +294,46 @@ export const JEET_PROFILES: JeetProfile[] = [
     { name: "Bitcoin", url: "" },
     { name: "Moonpig", url: "https://axiom.trade/meme/F8R9okKt8PvygkZ6bCimxELYb2kUn9E3FDdugfeRUYJw?chain=sol" }
   ], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
-  { wallet: "", name: "Infinity Gainz", pfpUrl: "https://pbs.twimg.com/profile_images/1981112565905207296/Jxzfw9Xj_400x400.jpg", description: "Infinite conviction, finite balance.", jeetScore: 0, badges: [], roastTopQuote: "", mostJeeted: [], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
-  { wallet: "", name: "Professor Crypto", pfpUrl: "https://pbs.twimg.com/profile_images/1976071073863962624/5l8trevT_400x400.jpg", description: "Tenure in TA, minor in coping.", jeetScore: 0, badges: [], roastTopQuote: "", mostJeeted: [], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
+  { wallet: "", name: "Infinity Gainz", pfpUrl: "https://pbs.twimg.com/profile_images/1981112565905207296/Jxzfw9Xj_400x400.jpg", description: "Infinite conviction, finite balance.", jeetScore: 94, badges: [], roastTopQuote: "Infinity Gainz has infinite conviction and finite balance.", roasts: [
+    "Infinity Gainz has infinite conviction and finite balance.",
+    "His gains are infinite in theory, finite in reality.",
+    "Infinity Gainz: where infinity meets zero balance.",
+    "His conviction is infinite, his wallet is empty.",
+    "Infinity Gainz believes in infinite gains... just not for himself.",
+    "His balance is so finite, it's almost zero.",
+    "Infinity Gainz: infinite hopium, finite results.",
+    "His conviction is boundless, his profits are not.",
+    "Infinity Gainz has infinite confidence in infinite losses."
+  ], predictions: [
+    "Will maintain infinite conviction with finite balance",
+    "Will continue to have infinite hopium and zero gains",
+    "Next trade will be infinite conviction, finite results",
+    "Will believe in infinite gains while losing infinitely",
+    "Will keep infinite confidence despite zero balance",
+    "Next trade will prove infinite conviction is not enough",
+    "Will have infinite belief in finite outcomes",
+    "Will continue the infinite cycle of losses"
+  ], mostJeeted: [], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
+  { wallet: "", name: "Professor Crypto", pfpUrl: "https://pbs.twimg.com/profile_images/1976071073863962624/5l8trevT_400x400.jpg", description: "Tenure in TA, minor in coping.", jeetScore: 81, badges: [], roastTopQuote: "Professor Crypto has tenure in TA, minor in coping.", roasts: [
+    "Professor Crypto has tenure in TA, minor in coping.",
+    "His technical analysis is so advanced, it's wrong.",
+    "Professor Crypto teaches trading, but can't trade.",
+    "His TA is so good, it's always wrong.",
+    "Professor Crypto has a PhD in losing money.",
+    "His technical analysis is legendary... for being wrong.",
+    "Professor Crypto's TA is so precise, it predicts the opposite.",
+    "He teaches others to trade, but can't trade himself.",
+    "Professor Crypto's tenure is in TA, his losses are in reality."
+  ], predictions: [
+    "Will use advanced TA and still lose",
+    "Next trade will be a perfect example of bad TA",
+    "Will teach TA while losing money",
+    "Will analyze the chart perfectly and trade it wrong",
+    "Next trade will prove his TA is backwards",
+    "Will use textbook TA and get textbook losses",
+    "Will analyze everything correctly and trade incorrectly",
+    "Will continue to teach TA while demonstrating bad trades"
+  ], mostJeeted: [], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
   { wallet: "4hHDEvTuhFRBebxYsDvmQXgRjHnp4Yk4pwSmmo1aU3PP", name: "ThreadGuy", pfpUrl: "https://pbs.twimg.com/profile_images/1920651894982066176/ssOaEU8k_400x400.jpg", description: "Writes 20 tweets, buys 20% higher.", jeetScore: 86, badges: [], roastTopQuote: "Writes 20 tweets, buys 20% higher.", roasts: [
     "Writes 20 tweets, buys 20% higher.",
     "ThreadGuy's threads are longer than his holding periods.",

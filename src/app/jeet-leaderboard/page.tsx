@@ -422,7 +422,7 @@ export default function JeetLeaderboardPage() {
                       {watchlist.includes(p.wallet)?"★ Watched":"☆ Watch"}
                     </button>
                     <div className="ml-auto font-semibold text-red-400">
-                      {p.pnlSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL ({p.pnlUsd.toLocaleString(undefined, { style: "currency", currency: "USD", currencyDisplay: "symbol" }).replace("US$", "$")})
+                      {p.pnlUsd.toLocaleString(undefined, { style: "currency", currency: "USD", currencyDisplay: "symbol" }).replace("US$", "$")}
                     </div>
                   </div>
                 ))}
