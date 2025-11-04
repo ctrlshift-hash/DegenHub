@@ -121,38 +121,6 @@ export const NEWS_ARTICLES: NewsArticle[] = [
     ],
   },
   {
-    slug: "raydium-v4-liquidity-innovation",
-    title: "Raydium V4 Introduces Concentrated Liquidity Pools for Solana DeFi",
-    summary:
-      "Major DEX upgrade brings Uniswap V3-style concentrated liquidity to Solana, enabling more capital-efficient trading pairs and potentially higher yields for liquidity providers.",
-    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(),
-    source: "DegenHub DeFi Watch",
-    content: [
-      "Raydium, one of Solana's largest decentralized exchanges, launched V4 this week with concentrated liquidity pools that allow liquidity providers to focus capital within specific price ranges. The upgrade promises significant improvements in capital efficiency and trading depth.",
-      "Early data shows that concentrated pools can generate 2-3x higher fee income for LPs compared to traditional uniform liquidity distributions, though this comes with added complexity and risk. LPs must actively manage their positions as prices move outside their ranges, requiring more sophisticated strategies.",
-      "The upgrade addresses a long-standing limitation on Solana, where liquidity was often spread inefficiently across wide price ranges. Concentrated liquidity should reduce slippage for traders while enabling better price discovery, especially for volatile assets like meme coins.",
-      "Developers have integrated automated position management tools to help LPs optimize their ranges, though manual management remains possible for advanced users. Some third-party protocols already offer yield-optimization services that automatically rebalance LP positions based on market conditions.",
-      "Initial adoption has been strong, with over $50M migrated to V4 pools within the first 48 hours. However, some users report a steeper learning curve compared to the simpler V2 interface, suggesting that educational resources and better UX could accelerate broader adoption.",
-      "Competing DEXs are monitoring V4's performance closely, with several announcing plans for similar upgrades. The innovation could reshape liquidity dynamics across Solana's DeFi ecosystem, potentially concentrating trading activity on platforms that offer the best capital efficiency.",
-    ],
-  },
-  {
-    slug: "crypto-regulatory-clarity-2025",
-    title: "New Regulatory Guidelines Provide Clarity for Solana DeFi Protocols",
-    summary:
-      "Regulatory bodies issue updated guidance on DeFi compliance, with implications for token issuers, DEX operators, and users across decentralized ecosystems.",
-    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 42).toISOString(),
-    source: "DegenHub Regulatory Update",
-    content: [
-      "Financial regulatory authorities released updated guidelines this week addressing decentralized finance protocols, providing long-awaited clarity on compliance requirements for DEX operators, token issuers, and liquidity providers.",
-      "The guidance distinguishes between fully decentralized protocols with no controlling entity and those with centralized components, applying different regulatory frameworks accordingly. Fully decentralized systems face fewer compliance obligations, while protocols with governance tokens or development teams may need to register or comply with securities laws.",
-      "Token issuers launching on platforms like pump.fun receive clearer guidance on disclosure requirements and marketing restrictions. The rules emphasize that developers cannot make unsubstantiated claims about token utility or expected returns, with penalties for misleading promotional activities.",
-      "DEX aggregators and trading platforms must implement enhanced KYC/AML procedures for certain transaction sizes, though thresholds remain high enough that most retail activity is unaffected. The requirements focus on institutional flows and large transactions that could involve money laundering risks.",
-      "Legal experts note that the guidelines represent progress but leave room for interpretation. Many edge cases around governance token distribution, automated market makers, and cross-border operations remain ambiguous. Regulatory clarity is likely to evolve through enforcement actions and court precedents over coming months.",
-      "For builders and users, the guidance provides some certainty for planning, though compliance costs may rise for projects with centralized components. Some protocols are exploring governance changes to increase decentralization and reduce regulatory exposure, while others are preparing to meet new requirements head-on.",
-    ],
-  },
-  {
     slug: "solana-mobile-saga-resurgence",
     title: "Solana Mobile Saga Sees Resurgence as Web3 Phone Adoption Grows",
     summary:
