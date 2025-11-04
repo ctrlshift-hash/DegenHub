@@ -3,10 +3,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
-import { ImageIcon, Hash, Send, Skull } from "lucide-react";
+import { ImageIcon, Hash, Send, Skull, Gif } from "lucide-react";
 import { extractTokenMentions } from "@/lib/utils";
 import Link from "next/link";
 import { useWallet } from "@/contexts/WalletContext";
+import GifPicker from "./GifPicker";
 
 interface CreatePostProps {
   onSubmit: (content: string, imageUrls?: string[]) => Promise<void>;
@@ -19,6 +20,7 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
   const [content, setContent] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [showImageInput, setShowImageInput] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -285,6 +287,15 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
                   <button type="button" onClick={() => setShowImageInput(!showImageInput)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                     <ImageIcon className="h-5 w-5" />
                   </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowGifPicker(true)} 
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={imageUrls.length >= 4}
+                    title="Add GIF"
+                  >
+                    <Gif className="h-5 w-5" />
+                  </button>
                   <button type="button" onClick={handleHashtagClick} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                     <Hash className="h-5 w-5" />
                   </button>
@@ -405,6 +416,15 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
                 <button type="button" onClick={() => setShowImageInput(!showImageInput)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <ImageIcon className="h-5 w-5" />
                 </button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowGifPicker(true)} 
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={imageUrls.length >= 4}
+                  title="Add GIF"
+                >
+                  <Gif className="h-5 w-5" />
+                </button>
                 <button type="button" onClick={handleHashtagClick} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <Hash className="h-5 w-5" />
                 </button>
@@ -422,6 +442,17 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
           </div>
         </div>
       </form>
+      
+      {/* GIF Picker Modal */}
+      <GifPicker
+        isOpen={showGifPicker}
+        onClose={() => setShowGifPicker(false)}
+        onSelect={(gifUrl) => {
+          if (imageUrls.length < 4) {
+            setImageUrls([...imageUrls, gifUrl]);
+          }
+        }}
+      />
     </div>
   );
 }
