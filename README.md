@@ -34,10 +34,12 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
 - **Verified Badges**: Both wallet and email users receive verified status
 
 ### Social Feed
-- Create posts with text and images
+- Create posts with text, images, and GIFs
+- **GIF Integration**: Search and add GIFs from Giphy directly in posts
 - Like, comment, and repost functionality
 - Real-time feed updates
 - Token tagging system ($SOL, $BONK style)
+- Hashtag support with quick insert button
 - Mobile-responsive design
 
 ### User Profiles
@@ -56,6 +58,11 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
 - Wallet users only
 - Transaction signature tracking
 - Tip leaderboards
+
+### Analytics & Statistics
+- Real-time user count display (wallet and email users only)
+- Website visitor tracking (unique IP addresses)
+- Live member counts updated every 10 seconds
 
 ## Tech Stack
 
@@ -102,7 +109,10 @@ A crypto degen social media platform built with Next.js 14, featuring dual authe
    NEXTAUTH_SECRET="your-secret-key"
    NEXT_PUBLIC_SOLANA_NETWORK="devnet"
    NEXT_PUBLIC_SOLANA_RPC_URL="https://api.devnet.solana.com"
+   NEXT_PUBLIC_GIPHY_API_KEY="your-giphy-api-key"
    ```
+   
+   **Note**: Get a free Giphy API key from [developers.giphy.com](https://developers.giphy.com/) for GIF functionality.
 
 4. **Set up the database**
    ```bash
@@ -202,8 +212,11 @@ degenhub/
 - [x] Follow/unfollow users
 - [x] Search functionality
 - [x] Real-time user count display
+- [x] Website visitor tracking
 - [x] Username availability validation
 - [x] SOL tipping functionality
+- [x] GIF picker with Giphy API integration
+- [x] Hashtag button for quick hashtag insertion
 - [x] Real-time updates with Socket.io
 
 ### Phase 2 (Coming Soon)
