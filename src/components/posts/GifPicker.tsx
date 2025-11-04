@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X, Search, Loader2 } from "lucide-react";
 
 interface GifPickerProps {
@@ -14,15 +15,21 @@ interface GifPickerProps {
 const GIPHY_API_KEY = process.env.NEXT_PUBLIC_GIPHY_API_KEY || "YOUR_GIPHY_API_KEY";
 
 export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps) {
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [gifs, setGifs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [trending, setTrending] = useState(true);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Load trending GIFs on mount
   useEffect(() => {
     if (isOpen) {
+      console.log("GifPicker opened, loading trending GIFs");
       loadTrending();
       searchInputRef.current?.focus();
     }
@@ -83,9 +90,9 @@ export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps)
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
         {/* Header */}
@@ -168,5 +175,7 @@ export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps)
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
