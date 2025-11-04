@@ -184,12 +184,13 @@ export default function Header({ user }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Left side - Logo at far left */}
-          <Link href="/" className="flex items-center flex-shrink-0 absolute left-0 pl-4">
+          <Link href="/" className="flex items-center flex-shrink-0 absolute left-0 pl-4 space-x-2">
             <img 
               src="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png" 
               alt="DegenHub" 
               className="h-10 w-10 object-contain" 
             />
+            <span className="text-xl font-bold text-white hidden sm:inline">DegenHub</span>
           </Link>
 
           {/* Center - All navigation items */}
