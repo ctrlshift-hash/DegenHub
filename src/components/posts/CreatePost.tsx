@@ -319,6 +319,18 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
           </div>
         </form>
       </div>
+      
+      {/* GIF Picker Modal */}
+      <GifPicker
+        isOpen={showGifPicker}
+        onClose={() => setShowGifPicker(false)}
+        onSelect={(gifUrl) => {
+          if (imageUrls.length < 4) {
+            setImageUrls([...imageUrls, gifUrl]);
+          }
+        }}
+      />
+    </div>
     );
   }
 
