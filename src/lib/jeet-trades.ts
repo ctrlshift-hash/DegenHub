@@ -337,7 +337,10 @@ export const JEET_PROFILES: JeetProfile[] = [
     "Will use textbook TA and get textbook losses",
     "Will analyze everything correctly and trade incorrectly",
     "Will continue to teach TA while demonstrating bad trades"
-  ], mostJeeted: [], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
+  ], mostJeeted: [
+    { name: "PEPEGOGH", url: "https://dexscreener.com/solana/bsqw6r9p41mrnaesgrzmd1esmgkxj2b36uh1u6zkxxfp" },
+    { name: "MCDULL", url: "https://dexscreener.com/solana/cdpkqzok4is6tvysm2nbyb6tzc1pijhkflcwkwcgyx9l" }
+  ], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
   { wallet: "4hHDEvTuhFRBebxYsDvmQXgRjHnp4Yk4pwSmmo1aU3PP", name: "ThreadGuy", pfpUrl: "https://pbs.twimg.com/profile_images/1920651894982066176/ssOaEU8k_400x400.jpg", description: "Writes 20 tweets, buys 20% higher.", jeetScore: 86, badges: [], roastTopQuote: "Writes 20 tweets, buys 20% higher.", roasts: [
     "Writes 20 tweets, buys 20% higher.",
     "ThreadGuy's threads are longer than his holding periods.",
