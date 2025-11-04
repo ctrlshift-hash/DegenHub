@@ -104,7 +104,7 @@ export default function TopTradersPage() {
                     </span>
                     <span className="hidden sm:inline text-[11px] text-muted-foreground">• {p.worstTrades?.length || 0} trades</span>
                   </div>
-                  <div className="text-xs text-muted-foreground font-mono truncate">
+                  <div className="text-xs text-muted-foreground font-mono truncate flex items-center gap-2">
                     <button
                       onClick={() => copyToClipboard(p.wallet)}
                       className="hover:underline decoration-dotted"
@@ -112,7 +112,12 @@ export default function TopTradersPage() {
                     >
                       {p.wallet}
                     </button>
-                    {copied === p.wallet && <span className="ml-2 text-[11px] text-green-400">Copied</span>}
+                    {copied === p.wallet && <span className="text-[11px] text-green-400">Copied</span>}
+                    {balances[p.wallet] !== undefined && (
+                      <span className="text-[11px] text-green-400 font-semibold">
+                        • {balances[p.wallet].toFixed(3)} SOL
+                      </span>
+                    )}
                   </div>
                   {/* Mini recent tokens */}
                   {p.worstTrades && p.worstTrades.length > 0 && (
@@ -174,7 +179,7 @@ export default function TopTradersPage() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-lg leading-tight">{selected.name}</div>
-                  <div className="text-xs text-gray-400 font-mono truncate">
+                  <div className="text-xs text-gray-400 font-mono truncate flex items-center gap-2">
                     <button
                       onClick={() => copyToClipboard(selected.wallet)}
                       className="hover:underline decoration-dotted"
@@ -182,7 +187,12 @@ export default function TopTradersPage() {
                     >
                       {selected.wallet}
                     </button>
-                    {copied === selected.wallet && <span className="ml-2 text-[11px] text-green-400">Copied</span>}
+                    {copied === selected.wallet && <span className="text-[11px] text-green-400">Copied</span>}
+                    {balances[selected.wallet] !== undefined && (
+                      <span className="text-[11px] text-green-400 font-semibold">
+                        • {balances[selected.wallet].toFixed(3)} SOL
+                      </span>
+                    )}
                   </div>
                 </div>
                 <button className="ml-auto text-sm px-3 py-1.5 rounded-full bg-gray-800 hover:bg-gray-700" onClick={() => setSelected(null)}>Close</button>
