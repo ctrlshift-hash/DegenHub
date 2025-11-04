@@ -29,10 +29,23 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get IP address from request headers
+    // Try multiple headers to get real IP (Vercel/Next.js passes these)
     const forwarded = request.headers.get("x-forwarded-for");
     const realIp = request.headers.get("x-real-ip");
     const cfConnectingIp = request.headers.get("cf-connecting-ip"); // Cloudflare
-    const ipAddress = forwarded?.split(",")[0]?.trim() || realIp || cfConnectingIp || "unknown";
+    const vercelIp = request.headers.get("x-vercel-forwarded-for");
+    
+    // Get the first IP from forwarded-for (may contain multiple IPs)
+    const ipAddress = forwarded?.split(",")[0]?.trim() || 
+                      vercelIp?.split(",")[0]?.trim() ||
+                      realIp || 
+                      cfConnectingIp || 
+                      "unknown";
+    
+    // Skip tracking if IP is unknown (likely means we can't get real IP)
+    if (ipAddress === "unknown") {
+      return NextResponse.json({ success: false, reason: "IP not available" });
+    }
     
     // Get user agent
     const userAgent = request.headers.get("user-agent") || "unknown";

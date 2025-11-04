@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/users/count - Get total user count (all users regardless of username)
+// GET /api/users/count - Get total user count (wallet or email users, exclude guest users)
 // This endpoint works on Vercel production - it uses your production DATABASE_URL
 export async function GET(request: NextRequest) {
   try {
-    // Count ALL users - wallet or email, doesn't matter the username
+    // Count users: include wallet users (anon_*) and email users, exclude guest users
     const count = await prisma.user.count({
-      // No exclusions - all users count
+      where: {
+        // Exclude guest users (created for anonymous sessions without wallets)
+        username: { not: { startsWith: "guest_" } },
+        username: { not: "guest" },
+        // Include anon_* (wallet users) and all email users
+      },
     });
     
     const response = NextResponse.json({
