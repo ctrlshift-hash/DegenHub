@@ -101,12 +101,17 @@ export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps)
   }
 
   if (!mounted) {
-    console.log("GifPicker not rendering - not mounted yet");
+    console.log("GifPicker not rendering - not mounted yet. isOpen:", isOpen);
     return null;
   }
 
   // Check for document.body after mount check
-  if (typeof window === 'undefined' || !document.body) {
+  if (typeof window === 'undefined') {
+    console.error("window is undefined - SSR");
+    return null;
+  }
+
+  if (!document.body) {
     console.error("document.body not available for portal");
     return null;
   }
