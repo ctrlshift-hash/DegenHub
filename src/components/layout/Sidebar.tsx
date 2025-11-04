@@ -40,24 +40,46 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
   const [userCount, setUserCount] = useState<number | null>(null);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
-  // Fetch live user count
+  // Track visitor on mount
   useEffect(() => {
-    const fetchUserCount = async () => {
+    const trackVisitor = async () => {
       try {
-        const response = await fetch("/api/users/count");
-        if (response.ok) {
-          const data = await response.json();
-          setUserCount(data.count);
+        await fetch("/api/visitors", { method: "POST" });
+      } catch (error) {
+        console.error("Failed to track visitor:", error);
+      }
+    };
+    trackVisitor();
+  }, []);
+
+  // Fetch live user count and visitor count
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [userResponse, visitorResponse] = await Promise.all([
+          fetch("/api/users/count"),
+          fetch("/api/visitors"),
+        ]);
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUserCount(userData.count);
+        }
+        
+        if (visitorResponse.ok) {
+          const visitorData = await visitorResponse.json();
+          setVisitorCount(visitorData.count);
         }
       } catch (error) {
-        console.error("Failed to fetch user count:", error);
+        console.error("Failed to fetch counts:", error);
       }
     };
 
-    fetchUserCount();
+    fetchCounts();
     // Refresh every 10 seconds to keep it live
-    const interval = setInterval(fetchUserCount, 10000);
+    const interval = setInterval(fetchCounts, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -74,13 +96,21 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:block w-64 h-screen border-r border-border bg-card">
       <div className="p-6">
-        {/* User Count */}
-        <div className="flex items-center justify-end mb-6">
+        {/* User Count and Visitor Count */}
+        <div className="flex items-center justify-end gap-2 mb-6">
           {userCount !== null && (
             <div className="flex items-center gap-1.5 px-2 py-1 bg-degen-purple/10 rounded-lg border border-degen-purple/20">
               <Users className="h-3.5 w-3.5 text-degen-purple" />
               <span className="text-xs font-semibold text-degen-purple">
                 {userCount.toLocaleString()}
+              </span>
+            </div>
+          )}
+          {visitorCount !== null && (
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20">
+              <Users className="h-3.5 w-3.5 text-blue-500" />
+              <span className="text-xs font-semibold text-blue-500">
+                {visitorCount.toLocaleString()} visitors
               </span>
             </div>
           )}

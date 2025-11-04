@@ -28,22 +28,22 @@ model User {
   likes                 Like[]
   reposts               Repost[]
   downvotes             Downvote[]
-  tipsGiven             Tip[]          @relation("TipsGiven")
-  tipsReceived          Tip[]          @relation("TipsReceived")
-  followers             Follow[]       @relation("Followers")
-  following             Follow[]       @relation("Following")
-  channels              Channel[]      @relation("ChannelMembers")
-  ownedChannels         Channel[]      @relation("ChannelOwner")
+  tipsGiven             Tip[]             @relation("TipsGiven")
+  tipsReceived          Tip[]             @relation("TipsReceived")
+  followers             Follow[]          @relation("Followers")
+  following             Follow[]          @relation("Following")
+  channels              Channel[]         @relation("ChannelMembers")
+  ownedChannels         Channel[]         @relation("ChannelOwner")
   accounts              Account[]
   sessions              Session[]
-  conversationsA        Conversation[] @relation("ConversationA")
-  conversationsB        Conversation[] @relation("ConversationB")
-  messagesSent          Message[]      @relation("MessageSender")
-  messagesReceived      Message[]      @relation("MessageRecipient")
-  notificationsReceived Notification[] @relation("NotificationRecipient")
-  notificationsSent     Notification[] @relation("NotificationActor")
+  conversationsA        Conversation[]    @relation("ConversationA")
+  conversationsB        Conversation[]    @relation("ConversationB")
+  messagesSent          Message[]         @relation("MessageSender")
+  messagesReceived      Message[]         @relation("MessageRecipient")
+  notificationsReceived Notification[]    @relation("NotificationRecipient")
+  notificationsSent     Notification[]    @relation("NotificationActor")
   channelPosts          ChannelPost[]
-  ownedVoiceRooms      VoiceRoom[]       @relation("RoomHost")
+  ownedVoiceRooms       VoiceRoom[]       @relation("RoomHost")
   roomParticipants      RoomParticipant[]
   roomCoHosts           RoomCoHost[]
   roomBannedUsers       RoomBannedUser[]
@@ -314,41 +314,41 @@ model Notification {
 
 model JeetCard {
   id        String   @id @default(cuid())
-  imageUrl  String   // base64 or URL
+  imageUrl  String // base64 or URL
   createdAt DateTime @default(now())
 
   @@map("jeet_cards")
 }
 
 enum SpeakerMode {
-  OPEN      // Everyone can speak
+  OPEN // Everyone can speak
   NOMINATED // Only nominated speakers can speak
 }
 
 model VoiceRoom {
-      id              String      @id @default(cuid())
-      name            String
-      description     String?
-      category        String?     // Gaming, Trading, General, etc.
-      dailyRoomUrl    String?     // Daily.co room URL/token
-      dailyRoomToken  String?     // Daily.co meeting token
-      isPublic        Boolean     @default(true)
-      isClosed        Boolean     @default(false) // If true, no new participants can join
-      maxParticipants Int         @default(50)
-      speakerMode     SpeakerMode @default(OPEN) // Open mic or nominated speakers
-      isRecording     Boolean     @default(false)
-      recordingUrl    String?     // URL to recording if available
-      voiceQuality    String      @default("high") // low, medium, high
-      createdAt       DateTime    @default(now())
-      updatedAt       DateTime    @updatedAt
-      hostId          String
+  id              String      @id @default(cuid())
+  name            String
+  description     String?
+  category        String? // Gaming, Trading, General, etc.
+  dailyRoomUrl    String? // Daily.co room URL/token
+  dailyRoomToken  String? // Daily.co meeting token
+  isPublic        Boolean     @default(true)
+  isClosed        Boolean     @default(false) // If true, no new participants can join
+  maxParticipants Int         @default(50)
+  speakerMode     SpeakerMode @default(OPEN) // Open mic or nominated speakers
+  isRecording     Boolean     @default(false)
+  recordingUrl    String? // URL to recording if available
+  voiceQuality    String      @default("high") // low, medium, high
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  hostId          String
 
   // Relations
-  host        User              @relation("RoomHost", fields: [hostId], references: [id], onDelete: Cascade)
+  host         User              @relation("RoomHost", fields: [hostId], references: [id], onDelete: Cascade)
   participants RoomParticipant[]
-  coHosts     RoomCoHost[]
-  bannedUsers RoomBannedUser[]
-  history     RoomHistory[]
+  coHosts      RoomCoHost[]
+  bannedUsers  RoomBannedUser[]
+  history      RoomHistory[]
 
   @@index([hostId])
   @@index([isPublic, createdAt])
@@ -357,12 +357,12 @@ model VoiceRoom {
 }
 
 model RoomParticipant {
-  id          String   @id @default(cuid())
-  joinedAt    DateTime @default(now())
-  leftAt      DateTime?
-  isSpeaker   Boolean  @default(true) // Only matters if room is in NOMINATED mode
-  roomId      String
-  userId      String
+  id        String    @id @default(cuid())
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
+  isSpeaker Boolean   @default(true) // Only matters if room is in NOMINATED mode
+  roomId    String
+  userId    String
 
   // Relations
   room VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -375,10 +375,10 @@ model RoomParticipant {
 }
 
 model RoomCoHost {
-  id        String   @id @default(cuid())
-  addedAt   DateTime @default(now())
-  roomId    String
-  userId    String
+  id      String   @id @default(cuid())
+  addedAt DateTime @default(now())
+  roomId  String
+  userId  String
 
   // Relations
   room VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -391,11 +391,11 @@ model RoomCoHost {
 }
 
 model RoomBannedUser {
-  id        String   @id @default(cuid())
-  bannedAt  DateTime @default(now())
-  reason    String?
-  roomId    String
-  userId    String
+  id       String   @id @default(cuid())
+  bannedAt DateTime @default(now())
+  reason   String?
+  roomId   String
+  userId   String
 
   // Relations
   room VoiceRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -409,9 +409,9 @@ model RoomBannedUser {
 
 model RoomHistory {
   id        String   @id @default(cuid())
-  action    String   // "joined", "left", "kicked", "muted", "unmuted", "co_host_added", etc.
+  action    String // "joined", "left", "kicked", "muted", "unmuted", "co_host_added", etc.
   userId    String?
-  details   String?  // JSON or text details
+  details   String? // JSON or text details
   createdAt DateTime @default(now())
   roomId    String
 
@@ -421,4 +421,15 @@ model RoomHistory {
 
   @@index([roomId, createdAt])
   @@map("room_history")
+}
+
+model Visitor {
+  id        String   @id @default(cuid())
+  ipAddress String
+  userAgent String?
+  visitedAt DateTime @default(now())
+
+  @@unique([ipAddress])
+  @@index([visitedAt])
+  @@map("visitors")
 }
