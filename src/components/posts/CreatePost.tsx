@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
-import { ImageIcon, Hash, Send, Skull, Gif } from "lucide-react";
+import { ImageIcon, Hash, Send, Skull, Zap } from "lucide-react";
 import { extractTokenMentions } from "@/lib/utils";
 import Link from "next/link";
 import { useWallet } from "@/contexts/WalletContext";
@@ -294,7 +294,7 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
                     disabled={imageUrls.length >= 4}
                     title="Add GIF"
                   >
-                    <Gif className="h-5 w-5" />
+                    <Zap className="h-5 w-5" />
                   </button>
                   <button type="button" onClick={handleHashtagClick} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                     <Hash className="h-5 w-5" />
