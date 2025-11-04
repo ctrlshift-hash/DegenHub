@@ -276,6 +276,28 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
                   )}
                 </div>
               )}
+              {imageUrls.length > 0 && (
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {imageUrls.map((url, index) => (
+                    <div key={index} className="relative">
+                      <img 
+                        src={url} 
+                        alt={`Preview ${index + 1}`} 
+                        className="max-h-32 w-full rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageUrls(imageUrls.filter((_, i) => i !== index));
+                        }}
+                        className="absolute top-1 right-1 bg-black/70 hover:bg-black/90 text-white rounded-full p-1 text-xs"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               {tokenMentions.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {tokenMentions.map((token, index) => (
