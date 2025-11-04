@@ -13,6 +13,7 @@ export default function TopTradersPage() {
   const [sortBy, setSortBy] = useState<"sol" | "name">("sol");
   const [balances, setBalances] = useState<Record<string, number>>({});
   const [copied, setCopied] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"trades" | "roasts" | "predictions" | "mostJeeted">("trades");
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -46,6 +47,14 @@ export default function TopTradersPage() {
     const id = setInterval(load, 15 * 60 * 1000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
+
+  // Reset tab when modal opens/closes
+  useEffect(() => {
+    if (selected) {
+      // Reset to trades tab when opening modal
+      setActiveTab("trades");
+    }
+  }, [selected]);
 
   // Importer disabled (manual-only mode)
 
@@ -188,9 +197,53 @@ export default function TopTradersPage() {
 
               {/* Summary cards (SOL / USDT / Total) removed */}
 
-              <div className="text-sm text-gray-300 mb-2">Trades</div>
+              {/* Tabs */}
+              <div className="flex gap-2 mb-3 text-sm border-b border-gray-800">
+                <button 
+                  className={`px-4 py-2 rounded-t-lg transition-colors ${
+                    activeTab === "trades" 
+                      ? "bg-degen-purple/20 text-degen-purple border-b-2 border-degen-purple" 
+                      : "hover:bg-gray-800 text-gray-400"
+                  }`}
+                  onClick={() => setActiveTab("trades")}
+                >
+                  Trades
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded-t-lg transition-colors ${
+                    activeTab === "mostJeeted" 
+                      ? "bg-degen-purple/20 text-degen-purple border-b-2 border-degen-purple" 
+                      : "hover:bg-gray-800 text-gray-400"
+                  }`}
+                  onClick={() => setActiveTab("mostJeeted")}
+                >
+                  Most Jeeted Coins
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded-t-lg transition-colors ${
+                    activeTab === "roasts" 
+                      ? "bg-degen-purple/20 text-degen-purple border-b-2 border-degen-purple" 
+                      : "hover:bg-gray-800 text-gray-400"
+                  }`}
+                  onClick={() => setActiveTab("roasts")}
+                >
+                  Roasts
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded-t-lg transition-colors ${
+                    activeTab === "predictions" 
+                      ? "bg-degen-purple/20 text-degen-purple border-b-2 border-degen-purple" 
+                      : "hover:bg-gray-800 text-gray-400"
+                  }`}
+                  onClick={() => setActiveTab("predictions")}
+                >
+                  Predictions
+                </button>
+              </div>
+
+              {/* Tab Content */}
               <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-gray-800">
-                {(() => {
+                {activeTab === "trades" && (() => {
                   const manualTrades = selected.worstTrades || [];
                   if (manualTrades.length === 0) return <div className="text-sm text-gray-400 p-3">No trades found.</div>;
                   return (
@@ -242,6 +295,54 @@ export default function TopTradersPage() {
                   </table>
                   );
                 })()}
+
+                {activeTab === "mostJeeted" && (
+                  <div className="p-4">
+                    {selected.mostJeeted && selected.mostJeeted.length > 0 ? (
+                      <div className="space-y-2">
+                        {selected.mostJeeted.map((coin, i) => (
+                          <div key={i} className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+                            <div className="font-semibold text-gray-200">{coin}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-400 p-3">No most jeeted coins data available yet.</div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "roasts" && (
+                  <div className="p-4">
+                    {selected.roasts && selected.roasts.length > 0 ? (
+                      <div className="space-y-3">
+                        {selected.roasts.map((roast, i) => (
+                          <div key={i} className="p-3 rounded-lg bg-red-900/20 border border-red-800/40">
+                            <div className="text-sm text-gray-300 italic">"{roast}"</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-400 p-3">No roasts available yet. Add them in the profile data.</div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "predictions" && (
+                  <div className="p-4">
+                    {selected.predictions && selected.predictions.length > 0 ? (
+                      <div className="space-y-3">
+                        {selected.predictions.map((prediction, i) => (
+                          <div key={i} className="p-3 rounded-lg bg-blue-900/20 border border-blue-800/40">
+                            <div className="text-sm text-gray-300">"{prediction}"</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-400 p-3">No predictions available yet. Add them in the profile data.</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -9,6 +9,9 @@ export type TopTraderProfile = {
   totalUsd?: number;
   totals?: { dailyUsd?: number; weeklyUsd?: number; monthlyUsd?: number };
   worstTrades: ManualTrade[];
+  roasts?: string[]; // Array of roast strings
+  predictions?: string[]; // Array of prediction strings
+  mostJeeted?: string[]; // Array of coin symbols/names that this trader jeeted
 };
 
 export const TOP_TRADER_PROFILES: TopTraderProfile[] = [
