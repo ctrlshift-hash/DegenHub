@@ -30,11 +30,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png" />
-        <link rel="shortcut icon" type="image/png" href="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png" />
-        <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/e2da02_db7d238a37e64190be1d31aecc96f1e5~mv2.png" />
-      </head>
       <body className={inter.className}>
         <SessionProvider>
           <WalletContextProvider>
