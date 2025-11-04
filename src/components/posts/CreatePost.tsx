@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
-import { ImageIcon, Hash, Send } from "lucide-react";
+import { ImageIcon, Hash, Send, Skull } from "lucide-react";
 import { extractTokenMentions } from "@/lib/utils";
 import Link from "next/link";
 import { useWallet } from "@/contexts/WalletContext";
@@ -21,6 +21,8 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
   const [showImageInput, setShowImageInput] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRefGuest = useRef<HTMLTextAreaElement>(null);
 
   // Load latest profile image for authenticated user
   useEffect(() => {
@@ -122,6 +124,38 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
 
   const tokenMentions = extractTokenMentions(content);
 
+  const handleHashtagClick = () => {
+    const textarea = textareaRef.current || textareaRefGuest.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newContent = content.slice(0, start) + "#" + content.slice(end);
+      setContent(newContent);
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + 1, start + 1);
+      }, 0);
+    } else {
+      setContent(content + "#");
+    }
+  };
+
+  const handleCoalStationClick = () => {
+    const textarea = textareaRef.current || textareaRefGuest.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newContent = content.slice(0, start) + "coal station" + content.slice(end);
+      setContent(newContent);
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + 12, start + 12);
+      }, 0);
+    } else {
+      setContent(content + "coal station");
+    }
+  };
+
   // Show optional login prompt if not authenticated
   if (!session?.user) {
     return (
@@ -164,14 +198,15 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
               )}
             </div>
             <div className="flex-1 space-y-3">
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-                placeholder="What's happening in the degen world? (Posting as guest)"
-                className="w-full min-h-[100px] resize-none bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
-                maxLength={500}
-              />
+            <textarea
+              ref={textareaRefGuest}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+              placeholder="What's happening in the degen world? (Posting as guest)"
+              className="w-full min-h-[100px] resize-none bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
+              maxLength={500}
+            />
               {showImageInput && (
                 <div className="space-y-2">
                   <input 
@@ -250,8 +285,11 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
                   <button type="button" onClick={() => setShowImageInput(!showImageInput)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                     <ImageIcon className="h-5 w-5" />
                   </button>
-                  <button type="button" className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                  <button type="button" onClick={handleHashtagClick} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                     <Hash className="h-5 w-5" />
+                  </button>
+                  <button type="button" onClick={handleCoalStationClick} className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="Insert 'coal station'">
+                    <Skull className="h-5 w-5" />
                   </button>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -281,6 +319,7 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
           </div>
           <div className="flex-1 space-y-3">
             <textarea
+              ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
@@ -366,8 +405,11 @@ export default function CreatePost({ onSubmit, isSubmitting = false }: CreatePos
                 <button type="button" onClick={() => setShowImageInput(!showImageInput)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <ImageIcon className="h-5 w-5" />
                 </button>
-                <button type="button" className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                <button type="button" onClick={handleHashtagClick} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <Hash className="h-5 w-5" />
+                </button>
+                <button type="button" onClick={handleCoalStationClick} className="p-2 text-muted-foreground hover:text-foreground transition-colors" title="Insert 'coal station'">
+                  <Skull className="h-5 w-5" />
                 </button>
               </div>
               <div className="flex items-center space-x-3">
