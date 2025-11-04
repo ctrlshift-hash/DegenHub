@@ -28,10 +28,11 @@ export async function GET(request: NextRequest) {
 // POST /api/visitors - Track a visitor
 export async function POST(request: NextRequest) {
   try {
-    // Get IP address from request
+    // Get IP address from request headers
     const forwarded = request.headers.get("x-forwarded-for");
     const realIp = request.headers.get("x-real-ip");
-    const ipAddress = forwarded?.split(",")[0]?.trim() || realIp || request.ip || "unknown";
+    const cfConnectingIp = request.headers.get("cf-connecting-ip"); // Cloudflare
+    const ipAddress = forwarded?.split(",")[0]?.trim() || realIp || cfConnectingIp || "unknown";
     
     // Get user agent
     const userAgent = request.headers.get("user-agent") || "unknown";
