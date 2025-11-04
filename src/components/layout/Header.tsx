@@ -289,9 +289,9 @@ export default function Header({ user }: HeaderProps) {
                   {/* Dropdown Menu */}
                   {isMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-lg shadow-xl py-2 z-50">
-                      {user?.id ? (
+                      {(user?.id || walletUserId) ? (
                         <Link
-                          href={`/profile/${user.id}`}
+                          href={`/profile/${user?.id || walletUserId}`}
                           onClick={() => setIsMenuOpen(false)}
                           className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left text-white"
                         >
