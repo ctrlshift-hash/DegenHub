@@ -9,35 +9,83 @@ export type NewsArticle = {
 
 export const NEWS_ARTICLES: NewsArticle[] = [
   {
-    slug: "solana-meme-coin-pvp-pumpfun",
-    title: "Solana Meme Coin Traders Protest Rising PvP Tactics on Pump.fun",
+    slug: "solana-meme-coin-explosion-roundtable",
+    title: "Solana Meme Coin Market Explodes: Record-Breaking Trading Volume on Pump.fun",
     summary:
-      "Community debates fair launches as sniping tools and copycat tokens intensify competition across Solana memecoins.",
+      "Meme coin frenzy reaches new heights as Solana ecosystem sees unprecedented token launches and trading activity across decentralized platforms.",
     publishedAt: new Date().toISOString(),
-    source: "DegenHub Newsdesk",
+    source: "Roundtable Space",
     content: [
-      "Traders on X criticized the increasing player‑versus‑player dynamics in Solana's meme coin ecosystem, where sniping bots and rapid copycat launches make it harder for retail participants to compete.",
-      "A post by uxento co‑founder Nuotrix warning about tools that may advantage larger players sparked backlash, with critics arguing that such tooling is already shaping launch meta across platforms like pump.fun.",
-      "The KitKat token frenzy became a flashpoint as multiple copycats launched within minutes of each other. Order‑flow bots and pre‑liquidity routing briefly overwhelmed manual traders, widening spreads and increasing failed transactions.",
-      "Developers and creators debated potential mitigations: time‑boxed warm‑ups before bonding curves open, randomized listing windows, and better disclosure of holder concentration at launch. Advocates say these guardrails could reduce extractive behavior without limiting permissionless access.",
-      "On‑chain data over the past week shows shorter median token lifetimes and higher first‑hour volatility compared with earlier months, suggesting tighter competitive windows as automation intensifies.",
-      "For retail participants, veteran builders recommend conservative sizing during first minutes, verifying mint authorities and freeze permissions, and waiting for early liquidity stabilization before chasing breakouts.",
+      "Solana's meme coin ecosystem is experiencing an unprecedented surge in activity, with trading volume reaching all-time highs across platforms like pump.fun and Raydium. Community discussions on X (formerly Twitter) highlight both the excitement and concerns surrounding the rapid growth.",
+      "Analysts tracking on-chain data report that daily trading volume for meme tokens on Solana has exceeded $500 million, driven by retail participation and sophisticated trading bots. The surge coincides with renewed interest in degens and small-cap opportunities across the crypto space.",
+      "Prominent voices in the Solana community have been actively discussing the implications of this meme coin boom, with some warning about the risks while others celebrate the democratization of token launches. The Roundtable Space community has been particularly vocal about market dynamics and opportunities.",
+      "Technical infrastructure has held up remarkably well during the surge, with Solana maintaining fast transaction finality despite the increased load. However, some users report occasional congestion during peak trading hours, particularly when major meme coins experience sudden price movements.",
+      "The meme coin trend shows no signs of slowing, with new tokens launching every few minutes on pump.fun. Community members are emphasizing the importance of due diligence and risk management, as volatility remains extreme and rug pulls continue to occur.",
+      "For traders and investors, experts recommend staying informed about market trends, understanding token mechanics before investing, and only allocating capital that can be lost. The current environment rewards those who can navigate the rapid pace of launches while avoiding obvious scams.",
     ],
   },
   {
-    slug: "rug-pulls-surge-2025",
-    title: "Rug Pulls Surge to Multi‑Year Highs; Calls Grow for Better Safeguards",
+    slug: "pumpfun-dominance-solana-meme-coins",
+    title: "Pump.fun Dominates Solana Meme Coin Launches: 1000+ New Tokens Daily",
     summary:
-      "On‑chain analytics show an uptick in liquidity‑removal scams across small‑cap tokens, prompting renewed focus on due diligence and tooling.",
-    publishedAt: new Date().toISOString(),
-    source: "DegenHub Research",
+      "Platform becomes the go-to destination for meme coin creators as bonding curve mechanism and low barriers to entry attract massive participation.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    source: "Roundtable Space",
     content: [
-      "Rug‑pull incidents have climbed to their highest levels in recent cycles, according to multiple community dashboards tracking token lifecycles and liquidity events.",
-      "Analysts cite a mix of rapid token‑factory tooling, low launch costs, and aggressive social amplification as drivers behind the increase. Many tokens exhibit similar patterns: concentrated ownership at launch, opaque team wallets, and permissions allowing liquidity withdrawal or trading halts.",
-      "Independent reviewers recommend practical safeguards: time‑locked liquidity, multi‑sig treasury controls, and where appropriate, renounced authorities on upgradeable contracts. Bonding‑curve projects benefit from transparent fee schedules and immutable parameters disclosed at launch.",
-      "For everyday traders, due‑diligence steps include verifying creator history, checking mint and freeze authorities, confirming liquidity lock duration, and monitoring holder concentration and top‑10 wallet behavior during first hours.",
-      "Tooling is improving as well: scanners flag repeat deployers, while wallet overlays highlight risky permissions before swaps finalize. Education remains the final mile—new entrants continue to over‑index on social buzz over verifiable token mechanics.",
-      "Community‑run lists and reporting channels have helped surface repeat patterns quickly, but users are urged to rely on on‑chain facts rather than screenshots or unverifiable claims before allocating capital.",
+      "Pump.fun has emerged as the dominant platform for launching meme coins on Solana, with over 1,000 new tokens created daily. The platform's bonding curve mechanism and permissionless launch model have revolutionized how meme coins are created and traded.",
+      "The platform's success has drawn attention from across the crypto ecosystem, with discussions on X highlighting both the opportunities and challenges. Community members from Roundtable Space and other crypto forums are actively analyzing trends and sharing insights about successful launches.",
+      "Key features driving adoption include the bonding curve mechanism that automatically provides liquidity, eliminating the need for manual liquidity pool creation. This has lowered barriers to entry significantly, allowing anyone with a few SOL to launch a token.",
+      "However, the ease of creation has also led to concerns about token quality and rug pull risks. Analysts note that the vast majority of tokens fail quickly, with only a small percentage achieving meaningful market capitalization or community growth.",
+      "Trading activity on pump.fun tokens has surged, with some tokens experiencing 100x+ gains within hours of launch. This volatility attracts both sophisticated traders and retail participants, though the high risk profile means most traders experience losses.",
+      "Looking ahead, the platform's growth shows no signs of slowing. Community discussions suggest that pump.fun's model could influence how meme coins are launched on other blockchains, though Solana's low fees and fast transactions give it a significant advantage.",
+    ],
+  },
+  {
+    slug: "solana-meme-coin-trends-2025",
+    title: "Top Meme Coin Trends on Solana: What's Trending Now",
+    summary:
+      "Community identifies hottest meme coin trends as Solana ecosystem sees explosive growth in speculative trading and token launches.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+    source: "X Trending",
+    content: [
+      "Solana's meme coin landscape is constantly evolving, with new trends emerging daily as traders seek the next viral token. Current trending topics on X reveal several key themes driving activity across the ecosystem.",
+      "Animal-themed tokens continue to dominate, with dog, cat, and other animal memes maintaining popularity. However, food-themed tokens and abstract concepts are also gaining traction, showing the diversity of meme coin creativity on Solana.",
+      "Community sentiment analysis from trending discussions shows that traders are increasingly focused on early entry opportunities, with many emphasizing the importance of getting in before tokens gain traction on social media platforms.",
+      "Technical analysis communities are sharing strategies for identifying potential winners, though many acknowledge that meme coin success is often unpredictable and heavily influenced by social media virality rather than fundamental metrics.",
+      "Risk management remains a critical topic, with experienced traders warning newcomers about the dangers of FOMO (fear of missing out) and the importance of setting stop-losses. The extreme volatility means that positions can be wiped out quickly if market sentiment shifts.",
+      "Despite the risks, the meme coin sector on Solana continues to attract significant capital and attention. The low barrier to entry, fast transaction times, and active community make it an attractive environment for both creators and traders seeking high-risk, high-reward opportunities.",
+    ],
+  },
+  {
+    slug: "solana-ecosystem-growth-meme-coins",
+    title: "Meme Coins Drive Solana Ecosystem Growth: Network Activity Reaches All-Time High",
+    summary:
+      "Solana network sees record activity as meme coin trading and token launches drive unprecedented on-chain volume and user engagement.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+    source: "Roundtable Space",
+    content: [
+      "Solana's network activity has reached new heights, largely driven by the explosive growth in meme coin trading and token launches. On-chain metrics show daily transaction counts exceeding previous records, with meme coin activity accounting for a significant portion of network usage.",
+      "The surge in activity has positive implications for Solana's ecosystem health, with increased fee revenue for validators and greater adoption of Solana-based wallets and tools. However, it also highlights the network's ability to handle high throughput without significant congestion.",
+      "Community discussions on platforms like X emphasize the role of meme coins in onboarding new users to Solana. Many traders first experience Solana through meme coin trading, then explore other ecosystem opportunities like DeFi, NFTs, and gaming.",
+      "Infrastructure providers have benefited from the increased activity, with RPC providers and wallet developers reporting record usage. The demand has led to improvements in service quality and new features designed to support high-frequency trading.",
+      "Some analysts express concerns about over-reliance on speculative meme coin activity, warning that a downturn could impact network metrics. However, others point to the diverse ecosystem of protocols and applications that provide stability beyond meme coins.",
+      "Looking forward, the meme coin sector on Solana appears to be a key driver of ecosystem growth, attracting both retail and institutional interest. The combination of low fees, fast transactions, and active communities creates a unique environment that other blockchains struggle to replicate.",
+    ],
+  },
+  {
+    slug: "meme-coin-trading-strategies-solana",
+    title: "Meme Coin Trading Strategies: Experts Share Insights on Solana Opportunities",
+    summary:
+      "Trading community discusses strategies for navigating Solana's meme coin market as volatility and opportunity reach new levels.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+    source: "X Trending",
+    content: [
+      "As meme coin activity on Solana reaches unprecedented levels, trading communities are sharing strategies and insights for navigating the volatile market. Discussions on X and other platforms reveal diverse approaches to meme coin trading.",
+      "Many successful traders emphasize the importance of early entry, recommending tools and strategies for identifying promising tokens before they gain mainstream attention. However, they also stress the need for strict risk management and position sizing.",
+      "Technical analysis plays a role for some traders, who use chart patterns and volume indicators to make trading decisions. However, most acknowledge that meme coin success is heavily influenced by social media virality and community engagement rather than traditional metrics.",
+      "Community sentiment analysis has become increasingly important, with traders monitoring X, Discord, and Telegram for early signals of token momentum. Some traders use automated tools to track social media mentions and engagement metrics.",
+      "Risk management remains the most critical factor, with experienced traders recommending that newcomers never invest more than they can afford to lose. The extreme volatility means that even successful traders experience significant losses alongside their wins.",
+      "Despite the challenges, many traders find the meme coin sector on Solana to be an exciting and potentially profitable environment. The combination of low barriers to entry, fast transactions, and active communities creates opportunities that don't exist in traditional markets.",
     ],
   },
   {
@@ -45,7 +93,7 @@ export const NEWS_ARTICLES: NewsArticle[] = [
     title: "Solana Shatters Transaction Records: 10,000+ TPS Sustained During Meme Coin Frenzy",
     summary:
       "Network handles unprecedented volume as validator upgrades and Firedancer integration show promising results during latest ecosystem surge.",
-    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
     source: "DegenHub Network Analysis",
     content: [
       "Solana processed over 10,000 transactions per second during yesterday's peak trading hours, marking one of its highest sustained throughput periods to date. The surge coincided with renewed interest in meme tokens and several high-profile launches on pump.fun.",
@@ -54,54 +102,6 @@ export const NEWS_ARTICLES: NewsArticle[] = [
       "Infrastructure providers noted increased demand for dedicated RPC endpoints, with premium services maintaining sub-200ms latencies even during peak loads. The ecosystem's resilience during stress tests has drawn attention from institutional observers previously skeptical of blockchain scalability claims.",
       "Looking ahead, the Firedancer client's gradual rollout promises further gains, with testnet benchmarks suggesting potential for 20,000+ TPS under ideal conditions. However, engineers caution that real-world performance depends on validator adoption rates and continued network decentralization.",
       "For traders and builders, the enhanced throughput means more opportunities to participate in rapid-fire token launches without facing the transaction failures that plagued earlier cycles. The improvement in reliability has already attracted new protocol developers considering Solana for high-frequency DeFi applications.",
-    ],
-  },
-  {
-    slug: "jupiter-a6-aggregator-upgrade",
-    title: "Jupiter A6 Upgrade Goes Live: Enhanced Routing and Lower Gas Fees",
-    summary:
-      "Major DEX aggregator rolls out latest iteration with improved cross-DEX routing, MEV protection, and optimized gas calculations for Solana traders.",
-    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    source: "DegenHub DeFi Watch",
-    content: [
-      "Jupiter, Solana's leading decentralized exchange aggregator, launched its A6 upgrade yesterday, bringing significant improvements to routing efficiency and user experience. The update includes enhanced pathfinding algorithms that can split large orders across multiple DEXs for better pricing.",
-      "Early users report average savings of 2-5% on swap costs compared to direct DEX interactions, with the improvements most noticeable on larger trades exceeding $10,000. The new routing engine considers real-time liquidity, MEV protection mechanisms, and estimated transaction fees to optimize execution.",
-      "Notable features include advanced limit order functionality, improved slippage protection, and integration with newer Solana DEX protocols that gained traction over recent months. The upgrade also introduces better error handling and transaction simulation to reduce failed swaps.",
-      "Developer documentation has been expanded to support more complex routing scenarios, enabling advanced traders and bots to leverage Jupiter's infrastructure for sophisticated strategies. The aggregator now supports over 15 different DEX protocols on Solana, including Orca, Raydium, and emerging players.",
-      "Community feedback has been largely positive, with some power users noting minor interface changes that may require brief adjustment periods. The Jupiter team has committed to maintaining backward compatibility for existing integrations while encouraging migration to new API endpoints.",
-      "Analysts predict the upgrade could capture additional market share from direct DEX interactions, especially as users become more cost-conscious in volatile market conditions. The improved routing may also reduce overall MEV extraction across Solana's DeFi ecosystem.",
-    ],
-  },
-  {
-    slug: "phantom-wallet-new-features-2025",
-    title: "Phantom Wallet Unveils Social Recovery and Enhanced Security Features",
-    summary:
-      "Popular Solana wallet adds multi-sig support, social recovery options, and hardware wallet integrations to improve user safety and accessibility.",
-    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(),
-    source: "DegenHub Product Updates",
-    content: [
-      "Phantom, Solana's most widely used browser and mobile wallet, announced a major security update today introducing social recovery mechanisms, multi-signature wallet support, and expanded hardware wallet compatibility.",
-      "The social recovery feature allows users to designate trusted contacts who can help restore access to a wallet if the seed phrase is lost. Security experts emphasize that this requires careful trust relationships, as recovery contacts gain significant power over funds. Phantom has implemented a 7-day time-lock delay and multiple verification steps to mitigate risks.",
-      "Multi-signature support enables users to require approvals from multiple devices or accounts before executing large transactions, a feature long requested by power users and institutional clients. The implementation supports flexible configurations, allowing users to set threshold requirements like '3 of 5 signatures' for different transaction types.",
-      "Hardware wallet integrations now include Ledger and Trezor support with streamlined pairing processes. Users report significantly faster setup times compared to previous implementations, though some note minor compatibility issues with older hardware models that should be addressed in coming patches.",
-      "Privacy-focused users have raised questions about social recovery's trust model, but Phantom emphasizes that all recovery operations occur on-chain with full transparency. The team has also published detailed documentation explaining security assumptions and best practices for configuring recovery options.",
-      "The update positions Phantom more competitively against enterprise wallet solutions while maintaining its reputation for user-friendly design. Early adoption metrics show strong interest in multi-sig features, particularly among users managing larger portfolios or sharing wallets with teams.",
-    ],
-  },
-  {
-    slug: "bonk-surge-community-growth",
-    title: "BONK Token Surges 40% as Community Engagement Hits All-Time High",
-    summary:
-      "Meme coin sees renewed momentum driven by ecosystem integrations, increased utility, and viral social media campaigns boosting adoption.",
-    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    source: "DegenHub Market Watch",
-    content: [
-      "BONK, Solana's community-driven meme token, experienced a dramatic 40% price surge over the past 24 hours as trading volume spiked to levels not seen since its initial viral moment. The rally coincides with several positive ecosystem developments and renewed community enthusiasm.",
-      "Major exchanges have expanded BONK trading pairs and staking opportunities, while payment processors and gaming platforms have integrated the token for in-app purchases. The increased utility has attracted both retail traders and speculative capital seeking exposure to Solana's meme coin sector.",
-      "Community-driven initiatives have gained traction, with BONK holders organizing governance proposals and funding development projects. Several DeFi protocols now accept BONK for fees and rewards, creating additional demand sinks beyond pure speculation.",
-      "Social media analytics show engagement metrics at record highs, with mentions and discussion volume exceeding previous peaks. The meme coin's community has developed a distinct culture that resonates with younger crypto adopters, driving organic growth through user-generated content.",
-      "However, volatility remains extreme—traders should expect sharp reversals and high risk. Technical analysis suggests potential resistance levels ahead, while on-chain metrics indicate some profit-taking by early holders. The token's long-term sustainability will depend on continued ecosystem integration and community maintenance.",
-      "Regulatory observers note that meme coins continue operating in a gray area, with unclear guidance on token classification and trading rules. Participants should exercise caution and only allocate capital they can afford to lose, as the asset class remains highly speculative.",
     ],
   },
   {
