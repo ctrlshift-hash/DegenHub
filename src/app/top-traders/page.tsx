@@ -59,18 +59,6 @@ export default function TopTradersPage() {
         <h1 className="text-2xl font-bold mb-4">Top Traders</h1>
         <p className="text-sm text-muted-foreground mb-6">Manual list (like Jeet Leaderboard). Edit <code className="font-mono">src/lib/top-trader-profiles.ts</code> to add or update wallets and trades.</p>
 
-        {/* Controls (timeframe removed, sort retained) */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="input text-sm h-10 py-2 leading-normal w-full md:w-64 pr-8 appearance-none"
-          >
-            <option value="sol">Sort: SOL balance</option>
-            <option value="name">Sort: Name</option>
-          </select>
-        </div>
-
         {TOP_TRADER_PROFILES.length === 0 ? (
           <div className="card p-8 text-center text-muted-foreground">No traders yet. Add entries to the manual list.</div>
         ) : (
