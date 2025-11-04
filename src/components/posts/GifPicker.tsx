@@ -26,15 +26,6 @@ export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps)
     setMounted(true);
   }, []);
 
-  // Load trending GIFs on mount
-  useEffect(() => {
-    if (isOpen) {
-      console.log("GifPicker opened, loading trending GIFs");
-      loadTrending();
-      searchInputRef.current?.focus();
-    }
-  }, [isOpen]);
-
   const loadTrending = async () => {
     setLoading(true);
     setTrending(true);
@@ -90,10 +81,36 @@ export default function GifPicker({ isOpen, onClose, onSelect }: GifPickerProps)
     }
   };
 
-  if (!isOpen || !mounted) return null;
+  // Load trending GIFs when modal opens
+  useEffect(() => {
+    if (isOpen && mounted) {
+      console.log("GifPicker opened, loading trending GIFs. isOpen:", isOpen, "mounted:", mounted);
+      loadTrending();
+      searchInputRef.current?.focus();
+    }
+  }, [isOpen, mounted]);
+
+  if (!isOpen || !mounted) {
+    console.log("GifPicker not rendering. isOpen:", isOpen, "mounted:", mounted);
+    return null;
+  }
+
+  console.log("GifPicker rendering modal. API Key present:", !!GIPHY_API_KEY && GIPHY_API_KEY !== "YOUR_GIPHY_API_KEY");
+
+  if (!document.body) {
+    console.error("document.body not available for portal");
+    return null;
+  }
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
