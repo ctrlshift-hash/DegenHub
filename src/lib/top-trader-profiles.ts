@@ -3321,6 +3321,84 @@ export const TOP_TRADER_PROFILES: TopTraderProfile[] = [
     ],
   },
   { wallet: "9yYya3F5EJoLnBNKW6z4bZvyQytMXzDcpU5D6yYr4jqL", name: "Loopier", pfpUrl: "/vercel.svg", sol: 0, usdt: 0, totalUsd: 0, worstTrades: [] },
+  {
+    wallet: "",
+    name: "Lynx",
+    worstTrades: [],
+    mostJeeted: ["Tepe", "hitcoin", "metoo"],
+  },
+  {
+    wallet: "",
+    name: "Bastill",
+    worstTrades: [],
+    mostJeeted: ["Spotlight", "Fepe", "Sorcerer", "Penguin"],
+  },
+  {
+    wallet: "",
+    name: "Otta",
+    worstTrades: [],
+    mostJeeted: ["froge", "XP", "MODRIC", "FAFO"],
+  },
+  {
+    wallet: "",
+    name: "xunle",
+    worstTrades: [],
+    mostJeeted: ["Unfazed", "SACRED", "SORACLE", "REFOREST"],
+  },
+  {
+    wallet: "",
+    name: "DIOR",
+    worstTrades: [],
+    mostJeeted: ["TBC", "OUTAGE", "Goblin", "Bonded"],
+  },
+  {
+    wallet: "",
+    name: "Casino",
+    worstTrades: [],
+    mostJeeted: ["Penny", "PAYPER", "SIAMESE", "ALEX"],
+  },
+  {
+    wallet: "",
+    name: "Ansem",
+    worstTrades: [],
+    mostJeeted: ["Gropper", "SACHO", "X402"],
+  },
+  {
+    wallet: "",
+    name: "Beaver",
+    worstTrades: [],
+    mostJeeted: ["SKINS", "SPAWN", "CLUELY", "POLYBADDIE"],
+  },
+  {
+    wallet: "",
+    name: "James Wynn",
+    worstTrades: [],
+    mostJeeted: ["Bitcoin", "Moonpig"],
+  },
+  {
+    wallet: "",
+    name: "Frank",
+    worstTrades: [],
+    mostJeeted: ["MLG", "hMUSTSTOPM", "VINE"],
+  },
+  {
+    wallet: "",
+    name: "Threadguy",
+    worstTrades: [],
+    mostJeeted: ["Frank"],
+  },
+  {
+    wallet: "",
+    name: "Bolivian",
+    worstTrades: [],
+    mostJeeted: ["Fortnoy", "RUNNER", "DSTH"],
+  },
+  {
+    wallet: "",
+    name: "Prada",
+    worstTrades: [],
+    mostJeeted: ["$michi", "SIGMA", "YETI"],
+  },
 ];
 
 
