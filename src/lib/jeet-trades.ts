@@ -39,11 +39,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "CkPFGv2Wv1vwdWjtXioEgb8jhZQfs3eVZez3QCetu7xD", name: "Lynk", pfpUrl: "https://pbs.twimg.com/profile_images/1848910264051052546/Mu18BSYv_400x400.jpg", description: "Buys tops so often he's on first-name basis with resistance.", jeetScore: 95, badges: [], roastTopQuote: "Lynk bought the top so fast, I think he was aiming for it.", roasts: [
     "Lynk bought the top so fast, I think he was aiming for it.",
     "This guy's stop-loss is actually a 'continue losing' button.",
-    "Lynk's entries are so precise, they should be in a museum... of bad trades."
+    "Lynk's entries are so precise, they should be in a museum... of bad trades.",
+    "Lynk has a VIP pass to every resistance level.",
+    "If buying tops was a sport, Lynk would be the undisputed champion.",
+    "Lynk's trading strategy: 'Buy high, sell low' - he's perfected it.",
+    "Resistance levels throw parties when they see Lynk coming.",
+    "Lynk's portfolio is a collection of 'buy the top' moments.",
+    "His entries are so consistently bad, it's almost impressive."
   ], predictions: [
     "Will buy the next pump.fun scam within 5 minutes of launch",
     "Guaranteed to exit at the worst possible time",
-    "Will catch every red wick like it's a Pokemon"
+    "Will catch every red wick like it's a Pokemon",
+    "Will FOMO into the next top and immediately regret it",
+    "Next entry will be at the exact peak of the chart",
+    "Will buy resistance like it's going out of style",
+    "Will time the market perfectly... backwards",
+    "Will catch the falling knife and lose his hand"
   ], mostJeeted: [
     { name: "Tepe", url: "https://trade.padre.gg/trade/solana/75xa1Y3YnqdTezziJ4aG3op2d75HP2GYioMH3Y84pump" },
     { name: "hitcoin", url: "https://trade.padre.gg/trade/solana/G7wXMPRMzKTyzVJxtbvpma1sGukhjNZxHYcnDscqpump" },
@@ -52,11 +63,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "CRVidEDtEUTYZisCxBZkpELzhQc9eauMLR3FWg74tReL", name: "Frankdegods", pfpUrl: "https://pbs.twimg.com/profile_images/1875856094003712000/uPMXWOrl_400x400.jpg", description: "Turned \"community call\" into \"community exit liquidity\" in 12 minutes.", jeetScore: 88, badges: [], roastTopQuote: "Frankdegods said 'trust me bro' right before the dump. I trusted.", roasts: [
     "Frankdegods said 'trust me bro' right before the dump. I trusted.",
     "Turned 'community call' into 'community exit liquidity' in 12 minutes.",
-    "Frank's alpha calls are so strong, they fade themselves."
+    "Frank's alpha calls are so strong, they fade themselves.",
+    "Frank's community calls are actually exit liquidity seminars.",
+    "If 'trust me bro' was a currency, Frank would be broke.",
+    "Frank's alpha is so strong it creates its own gravitational pull... downward.",
+    "His 'trust me bro' has a 0% success rate but 100% conviction.",
+    "Frank turned community building into community liquidation.",
+    "His calls are so bad, even the rug pullers are impressed."
   ], predictions: [
     "Will dump on his community within 15 minutes of calling",
     "Next alpha call will be a rug pull",
-    "Will ask for money and block followers"
+    "Will ask for money and block followers",
+    "Will host another 'community call' that's actually an exit strategy",
+    "Next 'trust me bro' will be followed by immediate dump",
+    "Will call alpha and be the first to sell",
+    "Will turn the next community into exit liquidity",
+    "Will ask for donations and then disappear"
   ], mostJeeted: [
     { name: "MLG", url: "https://axiom.trade/meme/F4HDXnULqjSbWcL5VwEUcpjueQop3gDteusSqaXBEyW4?chain=sol" },
     { name: "hMUSTSTOPM", url: "https://axiom.trade/meme/Hy6qZy6JKogFLecDLtQFZphkt9UaM4jNG7h9GC2SqZaT?chain=sol" },
@@ -65,11 +87,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "3kebnKw7cPdSkLRfiMEALyZJGZ4wdiSRvmoN4rD1yPzV", name: "Bastille", pfpUrl: "https://pbs.twimg.com/profile_images/1984890156629868544/oTSGjVuN_400x400.jpg", description: "Stormed the charts, forgot the stop-loss.", jeetScore: 82, badges: [], roastTopQuote: "Stormed the charts, forgot the stop-loss.", roasts: [
     "Stormed the charts, forgot the stop-loss.",
     "Bastille's revolution was successful... in losing money.",
-    "Took 'liberté, égalité, fraternité' to mean 'liberty to lose, equality in losses, brotherhood of bagholders'."
+    "Took 'liberté, égalité, fraternité' to mean 'liberty to lose, equality in losses, brotherhood of bagholders'.",
+    "Bastille stormed the charts but forgot to bring a stop-loss... or a strategy.",
+    "His trading revolution ended faster than the French Revolution.",
+    "Bastille's portfolio: 'Let them eat cake'... and losses.",
+    "Stormed into trades, got stormed out by red candles.",
+    "His 'off with their heads' strategy applies to his own profits.",
+    "Bastille's stop-loss is in the guillotine."
   ], predictions: [
     "Will launch a token and forget to set stop-loss",
     "Next trade will be a historical loss",
-    "Will storm another chart and get rekt"
+    "Will storm another chart and get rekt",
+    "Will storm the charts and forget basic risk management again",
+    "Next revolution will be a portfolio revolution... downward",
+    "Will make another historical mistake in trading",
+    "Will forget stop-loss on the next trade too",
+    "Will storm into a trade and get executed... by the market"
   ], mostJeeted: [
     { name: "Spotlight", url: "https://trade.padre.gg/trade/solana/HfPXryJcby5h6uxGVs6vVFJTcmGpPTnRRdMGManUpump" },
     { name: "Fepe", url: "https://trade.padre.gg/trade/solana/EMQqGrUpaF1yK821BEoeGsUZwAPTT1NgJz5d1yFspump" },
@@ -79,11 +112,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "As7HjL7dzzvbRbaD3WCun47robib2kmAKRXMvjHkSMB5", name: "Otta", pfpUrl: "https://pbs.twimg.com/profile_images/1970659942404104192/jtl76tJU_400x400.jpg", description: "Always early… to the dump party.", jeetScore: 90, badges: [], roastTopQuote: "Otta was early to the party... the going away party.", roasts: [
     "Otta was early to the party... the going away party.",
     "Always early to the dump, never early to the pump.",
-    "Otta's timing is so bad, he bought Bitcoin at $69k... twice."
+    "Otta's timing is so bad, he bought Bitcoin at $69k... twice.",
+    "Otta's early entry strategy: enter before the dump, exit after the dump.",
+    "If being early was a skill, Otta would be a master... at being early to losses.",
+    "Otta's timing makes broken clocks look accurate.",
+    "He's always fashionably early to the dump party.",
+    "Otta's entries are so early, they're actually from the previous cycle.",
+    "His 'early bird' strategy only catches worms... of losses."
   ], predictions: [
     "Will be early to the next dump",
     "Will buy before the pump, sell after the dump",
-    "Next jeet will be legendary"
+    "Next jeet will be legendary",
+    "Will time the next dump perfectly by buying early",
+    "Will arrive fashionably early to the next rug pull",
+    "Will buy the top and then be early to the bottom",
+    "Will be early to the next pump.fun rug",
+    "Will catch the dump before anyone else sees it coming"
   ], mostJeeted: [
     { name: "froge", url: "https://trade.padre.gg/trade/solana/GVFJbBNZubBv1XqsBmakWKkCZsMEDnRZ55vXQSgMRCpd" },
     { name: "XP", url: "https://trade.padre.gg/trade/solana/AmrBEwh3kjB12sth73k549qkJ4AGtbPebf3v7Tsvpump" },
@@ -106,11 +150,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "4YzpSZpxDdjNf3unjkCtdWEsz2FL5mok7e5XQaDNqry8", name: "Xunle", pfpUrl: "https://pbs.twimg.com/profile_images/1968676518835695616/vJgbiLIi_400x400.png", description: "Catches every wick. Unfortunately, the down ones.", jeetScore: 93, badges: [], roastTopQuote: "Xunle catches wicks. All of them. Especially the red ones.", roasts: [
     "Xunle catches wicks. All of them. Especially the red ones.",
     "Catches every wick. Unfortunately, the down ones.",
-    "Xunle's trading strategy: catch falling knives... with his face."
+    "Xunle's trading strategy: catch falling knives... with his face.",
+    "Xunle's wick-catching skills are legendary... for catching the wrong ones.",
+    "If wick-catching was an Olympic sport, Xunle would win gold... for catching red wicks.",
+    "Xunle catches wicks like a professional... professional bagholder.",
+    "His wick-catching accuracy is 100%... for catching losses.",
+    "Xunle's specialty: catching every red wick with precision.",
+    "He catches wicks so well, he should open a wick-catching school... for losses."
   ], predictions: [
     "Will catch the next red wick perfectly",
     "Will buy every dip... until it keeps dipping",
-    "Next trade will be a wick catch masterpiece"
+    "Next trade will be a wick catch masterpiece",
+    "Will catch the next falling knife with his face again",
+    "Will buy the dip, then buy the deeper dip, then buy the even deeper dip",
+    "Will catch every red wick in the next chart",
+    "Will perfect the art of catching falling wicks",
+    "Will buy the wick and sell the body... at a loss"
   ], mostJeeted: [
     { name: "Unfazed", url: "https://trade.padre.gg/trade/solana/EE2KUa4ALGKHsZR13VGu1dy6QeQbTSNQbmiSEfMYpump" },
     { name: "SACRED", url: "https://trade.padre.gg/trade/solana/7BR6YQupV2STMYpVwCmSpxCfgEfvJvACj1QXUrNYRAUD" },
@@ -120,11 +175,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "87rRdssFiTJKY4MGARa4G5vQ31hmR7MxSmhzeaJ5AAxJ", name: "Dior", pfpUrl: "https://pbs.twimg.com/profile_images/1949585515969200128/7YriU7Jw_400x400.jpg", description: "Luxury entries, thrift-store exits.", jeetScore: 85, badges: [], roastTopQuote: "Dior's entries are designer, exits are from Wish.com.", roasts: [
     "Dior's entries are designer, exits are from Wish.com.",
     "Luxury entries, thrift-store exits.",
-    "Spends like Dior, trades like a thrift store."
+    "Spends like Dior, trades like a thrift store.",
+    "Dior enters with Gucci, exits with Goodwill.",
+    "His entries are runway-ready, exits are garage sale-ready.",
+    "Dior's trading style: haute couture entry, fast fashion exit.",
+    "Enters like a luxury brand, exits like a clearance sale.",
+    "Dior's portfolio: designer bags filled with losses.",
+    "His trading is so expensive, even his losses are designer."
   ], predictions: [
     "Will enter with style, exit with losses",
     "Next trade will be designer quality entry, dollar store exit",
-    "Will buy the top with luxury, sell the bottom for pennies"
+    "Will buy the top with luxury, sell the bottom for pennies",
+    "Will make another expensive entry and cheap exit",
+    "Next trade will be runway-quality entry, thrift shop exit",
+    "Will buy designer, sell at a discount",
+    "Will enter high fashion, exit fast fashion",
+    "Will spend luxury money for budget results"
   ], mostJeeted: [
     { name: "TBC", url: "https://trade.padre.gg/trade/solana/8yScHH9ViYzfB2rXj7VpEAKHp1GZVu1YKYsK9P6epump" },
     { name: "OUTAGE", url: "https://trade.padre.gg/trade/solana/7q6zpR136947HVwNFwwWwy2nUT8qXPwbVAUENjiQpump" },
@@ -134,11 +200,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "8rvAsDKeAcEjEkiZMug9k8v1y8mW6gQQiMobd89Uy7qR", name: "Casino", pfpUrl: "https://pbs.twimg.com/profile_images/1938817754917679104/ysUWGQMM_400x400.jpg", description: "All-in on red; chart printed green. Again.", jeetScore: 91, badges: [], roastTopQuote: "Casino went all-in and the house always wins. He IS the house.", roasts: [
     "Casino went all-in and the house always wins. He IS the house.",
     "All-in on red; chart printed green. Again.",
-    "Casino's strategy: all-in, all-out, all-lost."
+    "Casino's strategy: all-in, all-out, all-lost.",
+    "Casino bets like he owns the casino... he just doesn't own the wins.",
+    "His all-in strategy is so consistent, it's almost impressive.",
+    "Casino's portfolio: 'All-in' and 'All-out' in the same trade.",
+    "He bets like a high roller, wins like a broke gambler.",
+    "Casino's trading: all the risk, none of the reward.",
+    "His all-in moments are legendary... for losing everything."
   ], predictions: [
     "Will go all-in on the wrong color again",
     "Next bet will be the house's favorite",
-    "Will double down and lose double"
+    "Will double down and lose double",
+    "Will make another all-in bet on the wrong outcome",
+    "Will bet everything on red, chart will print green",
+    "Will double down and lose everything again",
+    "Will go all-in and become the house's favorite customer",
+    "Will make another legendary all-in loss"
   ], mostJeeted: [
     { name: "Penny", url: "https://trade.padre.gg/trade/solana/BTjuy5LGNoayKbby7zAFSmJqaPYf2queWrhQ9n9mpump" },
     { name: "PAYPER", url: "https://trade.padre.gg/trade/solana/4BwTM7JvCXnMHPoxfPBoNjxYSbQpVQUMPtK5KNGppump" },
@@ -148,11 +225,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "AVAZvHLR2PcWpDf8BXY4rVxNHYRBytycHkcB5z5QNXYm", name: "Ansem", pfpUrl: "https://pbs.twimg.com/profile_images/1961642107187109888/o0B468ZS_400x400.jpg", description: "Alpha so strong he fades himself.", jeetScore: 87, badges: [], roastTopQuote: "Ansem asked me for money and blocked me.", roasts: [
     "Ansem asked me for money and blocked me.",
     "Alpha so strong he fades himself.",
-    "Ansem's alpha calls are so powerful, they reverse the entire market."
+    "Ansem's alpha calls are so powerful, they reverse the entire market.",
+    "Ansem's alpha is so strong, even he can't handle it.",
+    "His alpha calls are legendary... for causing immediate dumps.",
+    "Ansem's alpha is so powerful, it creates its own bear market.",
+    "If alpha was a currency, Ansem would be bankrupt.",
+    "His 'alpha' calls are actually exit signals for everyone else.",
+    "Ansem's alpha is so strong, it fades the entire Solana ecosystem."
   ], predictions: [
     "Will call alpha and fade himself",
     "Next alpha will be so strong it dumps",
-    "Will ask for money and block followers"
+    "Will ask for money and block followers",
+    "Will make another alpha call that immediately dumps",
+    "Will fade himself harder than he fades the market",
+    "Will ask for donations and block everyone who doesn't pay",
+    "Next alpha call will reverse the entire market",
+    "Will call alpha and be the first to sell"
   ], mostJeeted: [
     { name: "Gropper", url: "https://trade.padre.gg/trade/solana/G6ZmHLZpLQAJRXK1kkJYhqasHH8mzbyfVEfWLjWypump" },
     { name: "SACHO", url: "https://trade.padre.gg/trade/solana/91act8ejuXSvR1qEahRjziCPyupDMnUqcm5NL3NDpump" },
@@ -161,11 +249,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "GM7Hrz2bDq33ezMtL6KGidSWZXMWgZ6qBuugkb5H8NvN", name: "Beaver", pfpUrl: "https://pbs.twimg.com/profile_images/1975840318403555328/54Si5vCU_400x400.jpg", description: "Builds dams. Can't dam the sell button.", jeetScore: 89, badges: [], roastTopQuote: "Beaver's stop-loss is actually a 'continue losing' button.", roasts: [
     "Beaver's stop-loss is actually a 'continue losing' button.",
     "Builds dams. Can't dam the sell button.",
-    "Beaver builds dams to hold water, but can't hold his bags."
+    "Beaver builds dams to hold water, but can't hold his bags.",
+    "Beaver's dams are solid, his portfolio management is not.",
+    "He can build dams but can't build a winning trade.",
+    "Beaver's stop-loss is like a dam with holes... everywhere.",
+    "His trading strategy: build dams, watch them break.",
+    "Beaver builds infrastructure, but can't build profits.",
+    "His dams hold water better than he holds bags."
   ], predictions: [
     "Will build a dam but can't stop the sell pressure",
     "Next trade will be a dam failure",
-    "Will try to hold but the sell button calls"
+    "Will try to hold but the sell button calls",
+    "Will build another dam that fails to hold losses",
+    "Will try to dam the sell button and fail again",
+    "Next trade will be a structural failure",
+    "Will build infrastructure but can't build profits",
+    "Will construct a dam and then watch it break"
   ], mostJeeted: [
     { name: "SKINS", url: "https://trade.padre.gg/trade/solana/FzfV7kjzMg8eNMnMWF5RVXQRLHeww6dZoG5Ehsuipump" },
     { name: "SPAWN", url: "https://trade.padre.gg/trade/solana/kNesN31SJqvyryfoUdUiwmPiPMwjB8ssarREpw1pump" },
@@ -175,11 +274,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "55v67959rYazE8cTef9Vrfi1tN4fKiK37TVVzxzYDcfd", name: "James Wynn", pfpUrl: "https://pbs.twimg.com/profile_images/1982272016615981056/tZAJ2f8i_400x400.jpg", description: "Last name lies.", jeetScore: 84, badges: [], roastTopQuote: "James Wynn's name is ironic. Very ironic.", roasts: [
     "James Wynn's name is ironic. Very ironic.",
     "Last name lies.",
-    "James Wynn's trading makes his last name a joke."
+    "James Wynn's trading makes his last name a joke.",
+    "James Wynn's name is the biggest lie in crypto.",
+    "His last name is so ironic, it's almost poetic.",
+    "James Wynn: where 'Wynn' means 'Lose'.",
+    "His name is the perfect example of false advertising.",
+    "James Wynn's trading: the opposite of his name.",
+    "If irony was a currency, James Wynn would be rich... but he's not."
   ], predictions: [
     "Will keep losing despite his name",
     "Next trade will be another ironic loss",
-    "Will prove his name wrong again"
+    "Will prove his name wrong again",
+    "Will continue to make his name ironic",
+    "Next trade will be another 'Wynn' that's actually a loss",
+    "Will live up to the irony of his name",
+    "Will prove that names don't determine trading success",
+    "Will make another trade that contradicts his name"
   ], mostJeeted: [
     { name: "Bitcoin", url: "" },
     { name: "Moonpig", url: "https://axiom.trade/meme/F8R9okKt8PvygkZ6bCimxELYb2kUn9E3FDdugfeRUYJw?chain=sol" }
@@ -189,22 +299,44 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "4hHDEvTuhFRBebxYsDvmQXgRjHnp4Yk4pwSmmo1aU3PP", name: "ThreadGuy", pfpUrl: "https://pbs.twimg.com/profile_images/1920651894982066176/ssOaEU8k_400x400.jpg", description: "Writes 20 tweets, buys 20% higher.", jeetScore: 86, badges: [], roastTopQuote: "Writes 20 tweets, buys 20% higher.", roasts: [
     "Writes 20 tweets, buys 20% higher.",
     "ThreadGuy's threads are longer than his holding periods.",
-    "Writes essays about crypto, buys at the top."
+    "Writes essays about crypto, buys at the top.",
+    "ThreadGuy's threads are so good, they make him buy at the top.",
+    "His threads are longer than his profit margins.",
+    "ThreadGuy writes novels, trades like a short story... of losses.",
+    "His threads are so detailed, they make him miss the entry.",
+    "ThreadGuy's threads are legendary... for making him buy late.",
+    "He writes threads faster than he exits trades... which is never."
   ], predictions: [
     "Will write a thread and buy 20% higher",
     "Next thread will be about a coin he buys at the top",
-    "Will tweet about it, then buy it at the worst time"
+    "Will tweet about it, then buy it at the worst time",
+    "Will write another essay and buy at the peak",
+    "Next thread will make him FOMO at the top",
+    "Will tweet a thread, then buy 20% higher than needed",
+    "Will write a masterpiece and buy a disaster",
+    "Will create content and then create losses"
   ], mostJeeted: [
     { name: "Frank", url: "" }
   ], pnlSol: 0, pnlUsd: 0, worstTrades: [] },
   { wallet: "5AyJw1VNDgTho2chipbVmuGqTuX1fCvVkLneChQkQrw8", name: "Bolivian", pfpUrl: "https://pbs.twimg.com/profile_images/1978186925354692608/rf7VRfFn_400x400.jpg", description: "HODLer until the first 2% candle.", jeetScore: 92, badges: [], roastTopQuote: "HODLer until the first 2% candle.", roasts: [
     "HODLer until the first 2% candle.",
     "Bolivian's HODL strategy: hold until the first red candle.",
-    "Claims to HODL, sells at the first dip."
+    "Claims to HODL, sells at the first dip.",
+    "Bolivian's HODL is so short, it's basically a swing trade.",
+    "His HODL strategy: 'Hold On, Don't Lose'... but he loses anyway.",
+    "Bolivian HODLs like he's allergic to profits.",
+    "His HODL period is shorter than a pump.fun token's lifespan.",
+    "Bolivian's version of HODL: 'Hold On, Dip Losing'.",
+    "He HODLs until the first red candle, then panics."
   ], predictions: [
     "Will HODL until the first 2% red candle",
     "Next trade will be a HODL that lasts 5 minutes",
-    "Will sell at the first sign of trouble"
+    "Will sell at the first sign of trouble",
+    "Will claim to HODL and sell at the first dip",
+    "Next HODL will be shorter than his last one",
+    "Will hold until the first red candle and panic sell",
+    "Will try to HODL but can't handle the first 2%",
+    "Will make another 'HODL' that lasts minutes"
   ], mostJeeted: [
     { name: "Fortnoy", url: "https://axiom.trade/meme/9oti45bUgYz1S8QPnYmyzE1H2kHQWepMVxnmeMSCUn2o?chain=sol" },
     { name: "RUNNER", url: "https://axiom.trade/meme/6XXEYtP1DMvGrpjbpRBnQuNYYsyiJY2E5WfckzL5iLmk?chain=sol" },
@@ -213,11 +345,22 @@ export const JEET_PROFILES: JeetProfile[] = [
   { wallet: "gkNNf4NwkR61B1QKBFtELe6TVZFhYRaC2LbVkoNyCkB", name: "Prada", pfpUrl: "https://pbs.twimg.com/profile_images/1886923196319817728/IEwxPWpI_400x400.jpg", description: "Designer bags, rugged straps.", jeetScore: 83, badges: [], roastTopQuote: "Designer bags, rugged straps.", roasts: [
     "Designer bags, rugged straps.",
     "Prada's trading style: luxury entry, rugged exit.",
-    "Spends like Prada, trades like a thrift store."
+    "Spends like Prada, trades like a thrift store.",
+    "Prada enters with Gucci money, exits with Goodwill prices.",
+    "His entries are runway-ready, exits are garage sale-ready.",
+    "Prada trades like he's wearing designer clothes but living in a tent.",
+    "His portfolio is designer bags full of losses.",
+    "Prada's trading: haute couture entries, fast fashion exits.",
+    "He spends like luxury, trades like budget."
   ], predictions: [
     "Will enter with style, exit like a rug pull",
     "Next trade will be designer quality, rugged results",
-    "Will buy expensive, sell cheap"
+    "Will buy expensive, sell cheap",
+    "Will make another luxury entry and budget exit",
+    "Next trade will be high fashion entry, low fashion exit",
+    "Will buy designer, sell at a discount",
+    "Will enter premium, exit clearance",
+    "Will spend luxury money for bargain results"
   ], mostJeeted: [
     { name: "$michi", url: "https://axiom.trade/meme/GH8Ers4yzKR3UKDvgVu8cqJfGzU4cU62mTeg9bcJ7ug6?chain=sol" },
     { name: "SIGMA", url: "https://axiom.trade/meme/424kbbJyt6VkSn7GeKT9Vh5yetuTR1sbeyoya2nmBJpw?chain=sol" },
